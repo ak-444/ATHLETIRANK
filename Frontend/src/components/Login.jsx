@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import '../style/RegisterAndLogin.css'
+import universityLogo from '../assets/Arellano_University_logo.png';
 
-const Login = () => {
+const Login = ({ setCurrentView }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -35,45 +37,80 @@ const Login = () => {
     };
 
     return (
-        <div>
-            <h2>Login to ATHLETIRANK</h2>
-            
-            {error && (
-                <div>
-                    {error}
-                </div>
-            )}
+        <div className="auth-container">
+            <div className="auth-card">
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
+                <div className="auth-header">
+                    
+                    <div className="logo">
+                        <img 
+                            src={universityLogo} 
+                            alt="Arellano University Logo" 
+                            className="logo-image"
+                        />
+                    </div>
+
+                    <h1 className="brand-name">Arellano University</h1>
+                    <p className="brand-subtitle">ATHLETIRANK</p>
                 </div>
 
-                <div>
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
+                <div className="auth-tabs">
+
+                    <button className="tab-btn active" onClick={() => setCurrentView('login')}>
+                        Login
+                    </button>
+
+                    <button className="tab-btn" onClick={() => setCurrentView('register')}>
+                        Register
+                    </button>
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                >
-                    {loading ? 'Logging in...' : 'Login'}
-                </button>
-            </form>
+                <div className="auth-form-container">
+                    <h2 className="form-title">Welcome Back</h2>
+                    
+                    {error && (
+                        <div className="error-message">
+                            {error}
+                        </div>
+                    )}
+                    
+                    <form className="auth-form" onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className="form-label">Email:</label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                className="form-input"
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder="Enter your email"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">Password:</label>
+
+                            <input
+                                type="password"
+                                name="password"
+                                className="form-input"
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="Enter your password"
+                                required
+                            />
+                        </div>
+
+                        <button type="submit" className="submit-btn" disabled={loading}>
+                            {loading ? 'Logging in...' : 'Login'}
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
         </div>
     );
 };
