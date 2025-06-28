@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import athletirank_Logo from '../assets/Athletirank_Logo.png';
 import university_Logo from '../assets/Arellano_University_logo.png'
+import { ImStatsBars } from "react-icons/im";
 import '../style/Homepage.css';
 
 const Homepage = () => {
@@ -14,6 +15,7 @@ const Homepage = () => {
                         alt="AthletiRank Logo" 
                         className="nav-logo"
                     />
+                   
                     <span className="nav-title">ATHLETIRANK</span>
                 </div>
 
@@ -106,7 +108,7 @@ const Homepage = () => {
 
                             <div className='about-stats'>
                                 <div className='about-stat'>
-                                    <h4>Real-time</h4>
+                                    <h4>Real-time <ImStatsBars /></h4>
                                     <p>Statistics</p>
                                 </div>
                             </div>
