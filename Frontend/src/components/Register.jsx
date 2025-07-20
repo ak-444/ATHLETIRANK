@@ -10,7 +10,7 @@ const Register = ({ setCurrentView }) => {
         password: '',
         confirmPassword: '',
         role: 'staff',
-        universityId: null // Add this field for the ID image
+        universityId: null 
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');

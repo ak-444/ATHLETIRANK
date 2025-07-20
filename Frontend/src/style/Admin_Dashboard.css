@@ -1,0 +1,67 @@
+/* AdminDashboard.css */
+.admin-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: var(--background-primary);
+  color: var(--text-primary);
+}
+
+.dashboard-content {
+  flex: 1;
+  margin-left: 70px; 
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-content.sidebar-open {
+  margin-left: 280px;
+}
+
+.dashboard-header {
+  padding: 80px 40px 40px 40px; /* Top padding accounts for toggle button */
+  background: var(--background-secondary);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-light);
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.dashboard-header p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 40px;
+  background: var(--background-primary);
+}
+
+.content-placeholder {
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 40px;
+  text-align: center;
+  box-shadow: var(--shadow-light);
+}
+
+.content-placeholder h2 {
+  font-size: 2rem;
+  margin: 0 0 16px 0;
+  color: var(--text-primary);
+}
+
+.content-placeholder p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+

@@ -1,0 +1,253 @@
+
+
+:root {
+  --primary-color: #3b82f6; 
+  --primary-hover: #2563eb; 
+  --primary-dark: #1d4ed8; 
+  --secondary-color: #60a5fa; 
+  --background-primary: #0a0f1c; 
+  --background-secondary: #1a2332; 
+  --background-card: #0f172a; 
+  --text-primary: #e2e8f0; 
+  --text-secondary: #94a3b8; 
+  --text-muted: #64748b; 
+  --border-color: #2d3748; 
+  --border-focus: #3b82f6; 
+  --error-color: #ea4335; 
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1000;
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 20px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  background: var(--primary-color);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: var(--transition);
+  z-index: 1001;
+  box-shadow: var(--shadow-medium);
+}
+
+.sidebar-toggle:hover {
+  background: var(--primary-hover);
+  transform: scale(1.05);
+}
+
+.sidebar-content {
+  width: 280px;
+  height: 100vh;
+  background: var(--primary-dark);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+  box-shadow: var(--shadow-heavy);
+  position: relative;
+}
+
+.sidebar-closed {
+  width: 70px;
+}
+
+.sidebar-open {
+  width: 280px;
+}
+
+.sidebar-header {
+  padding: 80px 20px 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-user-profile {
+   margin-left: 5px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-user-avatar {
+ display: flex;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  
+}
+
+.sidebar-user-info {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 1;
+  transition: var(--transition);
+}
+
+.sidebar-closed .sidebar-user-info {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.sidebar-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav-item {
+  margin-bottom: 8px;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: var(--transition);
+  position: relative;
+  gap: 16px;
+}
+
+.sidebar-nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  padding-left: 24px;
+}
+
+.sidebar-nav-icon {
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-nav-label {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 1;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.sidebar-closed .sidebar-nav-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.sidebar-footer {
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout-link {
+  background: none;
+  border: none;
+}
+
+.logout-link:hover {
+  color: var(--error-color);
+  width: 100%;
+  background: rgba(234, 67, 53, 0.1);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    top: 15px;
+    left: 15px;
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+
+  .sidebar-content {
+    width: 280px;
+    transform: translateX(-100%);
+  }
+
+  .sidebar-closed {
+    width: 280px;
+    transform: translateX(-100%);
+  }
+
+  .sidebar-open {
+    width: 280px;
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+}
+
+/* Active state for navigation items */
+.sidebar-nav-link.active {
+  background: rgba(255, 255, 255, 0.15);
+  border-right: 3px solid var(--text-primary);
+}
+
+/* Smooth animations */
+.sidebar-content * {
+  transition: var(--transition);
+}
+
+/* Custom scrollbar for navigation */
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+

@@ -1,0 +1,35 @@
+.admin-schedule {
+  display: flex;
+  min-height: 100vh;
+  background: var(--background-primary);
+  color: var(--text-primary);
+}
+
+.schedule-content {
+  flex: 1;
+  margin-left: 70px; /* Space for closed sidebar */
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-header {
+  padding: 80px 40px 40px 40px; /* Top padding accounts for toggle button */
+  background: var(--background-secondary);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-light);
+}
+
+.schedule-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.schedule-header p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+

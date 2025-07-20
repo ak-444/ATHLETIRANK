@@ -1,0 +1,160 @@
+/* Bracket Page Styles with Dark Theme */
+.bracket-content {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+.bracket-create-section {
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-color);
+}
+
+.bracket-form-container {
+  padding: 40px;
+}
+
+.bracket-form-container h2 {
+  margin-bottom: 30px;
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.bracket-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bracket-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.bracket-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.bracket-form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.bracket-form-group input,
+.bracket-form-group select,
+.bracket-form-group textarea {
+  padding: 14px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+.bracket-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.bracket-form-group input:focus,
+.bracket-form-group select:focus,
+.bracket-form-group textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.bracket-form-group input::placeholder,
+.bracket-form-group textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.bracket-form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  justify-content: flex-end;
+}
+
+.bracket-submit-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-submit-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.bracket-download-btn {
+  background: var(--success-color);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-download-btn:hover {
+  background: #2e8b57;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.bracket-cancel-btn {
+  background: var(--text-muted);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-cancel-btn:hover {
+  background: #475569;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bracket-form-container {
+    padding: 24px;
+  }
+
+  .bracket-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bracket-form-actions {
+    flex-direction: column;
+  }
+
+  .bracket-submit-btn,
+  .bracket-download-btn,
+  .bracket-cancel-btn {
+    width: 100%;
+  }
+}

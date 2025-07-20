@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../style/RegisterAndLogin.css'
 import universityLogo from '../assets/Arellano_University_logo.png';
@@ -103,9 +104,11 @@ const Login = ({ setCurrentView }) => {
                             />
                         </div>
 
-                        <button type="submit" className="submit-btn" disabled={loading}>
-                            {loading ? 'Logging in...' : 'Login'}
-                        </button>
+                        
+                            <Link to="/AdminDashboard" className="submit-btn">Login</Link>
+                       
+
+
 
                     </form>
 

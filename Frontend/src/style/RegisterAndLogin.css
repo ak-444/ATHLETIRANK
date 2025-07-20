@@ -297,6 +297,8 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  text-align: center;
+  text-decoration: none;
 }
 
 .submit-btn::before {
@@ -470,4 +472,39 @@
   .auth-form {
     gap: 6px;
   }
+}
+
+.id-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  width: 100%;
+  padding: 10px;
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.file-label:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.file-help-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
 }
