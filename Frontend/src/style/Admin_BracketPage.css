@@ -1,11 +1,40 @@
 /* Bracket Page Styles with Dark Theme */
 .bracket-content {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
+/* Tab Navigation */
+.bracket-tabs {
+  display: flex;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--border-color);
+}
 
+.bracket-tab-button {
+  background: none;
+  border: none;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.bracket-tab-button:hover {
+  color: var(--text-primary);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.bracket-tab-button.bracket-tab-active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+/* Form Section */
 .bracket-create-section {
   background: var(--background-card);
   border-radius: var(--border-radius-lg);
@@ -85,7 +114,8 @@
   justify-content: flex-end;
 }
 
-.bracket-submit-btn {
+.bracket-submit-btn,
+.bracket-download-btn {
   background: var(--primary-color);
   color: white;
   border: none;
@@ -97,26 +127,9 @@
   transition: var(--transition);
 }
 
-.bracket-submit-btn:hover {
-  background: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
-}
-
-.bracket-download-btn {
-  background: var(--success-color);
-  color: white;
-  border: none;
-  padding: 14px 32px;
-  border-radius: var(--border-radius);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
+.bracket-submit-btn:hover,
 .bracket-download-btn:hover {
-  background: #2e8b57;
+  background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-medium);
 }
@@ -138,23 +151,603 @@
   transform: translateY(-2px);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .bracket-form-container {
-    padding: 24px;
-  }
+/* Team Input Styles */
+.bracket-team-input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
 
+.bracket-team-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-secondary);
+  color: var(--text-primary);
+}
+
+.bracket-add-team-btn {
+  padding: 10px 16px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-add-team-btn:hover {
+  background: var(--primary-hover);
+}
+
+.bracket-add-team-btn:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.bracket-team-count {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+}
+
+.bracket-teams-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.bracket-team-tag {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.bracket-remove-team-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+.bracket-remove-team-btn:hover {
+  color: var(--error-color);
+}
+
+/* View Section */
+.bracket-view-section {
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-color);
+}
+
+.bracket-view-section h2 {
+  margin-bottom: 30px;
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.bracket-no-brackets {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.bracket-no-brackets p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.bracket-create-first-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-create-first-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.bracket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.bracket-card {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 24px;
+  transition: var(--transition);
+}
+
+.bracket-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.bracket-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.bracket-card-header h3 {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.bracket-sport-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.bracket-sport-basketball {
+  background: rgba(255, 165, 0, 0.2);
+  color: #FFA500;
+}
+
+.bracket-sport-volleyball {
+  background: rgba(138, 43, 226, 0.2);
+  color: #8A2BE2;
+}
+
+.bracket-sport-football {
+  background: rgba(34, 139, 34, 0.2);
+  color: #228B22;
+}
+
+.bracket-sport-soccer {
+  background: rgba(0, 191, 255, 0.2);
+  color: #00BFFF;
+}
+
+.bracket-sport-tennis {
+  background: rgba(255, 20, 147, 0.2);
+  color: #FF1493;
+}
+
+.bracket-sport-baseball {
+  background: rgba(255, 69, 0, 0.2);
+  color: #FF4500;
+}
+
+.bracket-card-info {
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+}
+
+.bracket-card-info > div {
+  margin-bottom: 8px;
+}
+
+.bracket-card-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.bracket-view-btn {
+  flex: 1;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-view-btn:hover {
+  background: var(--primary-hover);
+}
+
+.bracket-delete-btn {
+  background: var(--error-color);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-delete-btn:hover {
+  background: #dc2626;
+}
+
+/* Bracket Display Section */
+.bracket-display-section {
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg);
+  padding: 30px;
+  box-shadow: var(--shadow-medium);
+  border: 1px solid var(--border-color);
+}
+
+.bracket-display-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.bracket-display-header h2 {
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.bracket-type-info {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 16px;
+}
+
+.bracket-back-btn {
+  background: var(--text-muted);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-back-btn:hover {
+  background: #475569;
+}
+
+/* Enhanced Bracket Visualization */
+.bracket-visualization {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 30px 20px;
+  gap: 80px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.02), rgba(139, 92, 246, 0.02));
+  border-radius: var(--border-radius-lg);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  position: relative;
+}
+
+.bracket-round {
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.bracket-round-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--primary-color), rgba(139, 92, 246, 0.8));
+  color: white;
+  border-radius: 25px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bracket-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  flex: 1;
+  justify-content: center;
+}
+
+.bracket-match {
+  position: relative;
+  background: var(--background-card);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.bracket-match:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
+}
+
+.bracket-match-teams {
+  display: flex;
+  flex-direction: column;
+}
+
+.bracket-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.bracket-team:last-child {
+  border-bottom: none;
+}
+
+.bracket-team:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.bracket-team.bracket-team-winner {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.05));
+  font-weight: 700;
+  color: var(--success-color);
+}
+
+.bracket-team.bracket-team-winner::before {
+  content: "✓";
+  position: absolute;
+  left: 8px;
+  color: var(--success-color);
+  font-weight: bold;
+}
+
+.bracket-team-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+  padding-left: 20px;
+}
+
+.bracket-team-score {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 40px;
+  text-align: center;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: var(--border-radius);
+}
+
+.bracket-team-bye {
+  color: var(--text-muted);
+  font-style: italic;
+  background-color: rgba(156, 163, 175, 0.1);
+}
+
+/* Connection Lines */
+.bracket-connection-line {
+  position: absolute;
+  background: linear-gradient(90deg, var(--primary-color), rgba(139, 92, 246, 0.8));
+  height: 2px;
+  right: -40px;
+  top: 50%;
+  width: 80px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.bracket-connection-line::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  background: var(--primary-color);
+  border-radius: 50%;
+}
+
+/* Final Match Styling */
+.bracket-final-match {
+  border: 3px solid var(--primary-color);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+}
+
+.bracket-final-match .bracket-round-title {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #1a1a1a;
+  font-size: 20px;
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* Championship Trophy */
+.bracket-champion-trophy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: #FFD700;
+  margin-bottom: 20px;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+/* Empty Bracket State */
+.bracket-empty-team {
+  color: var(--text-muted);
+  font-style: italic;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(156, 163, 175, 0.05) 10px,
+    rgba(156, 163, 175, 0.05) 20px
+  );
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .bracket-visualization {
+    gap: 60px;
+    padding: 20px 15px;
+  }
+  
+  .bracket-round {
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bracket-content {
+    padding: 15px;
+  }
+  
   .bracket-form-row {
     grid-template-columns: 1fr;
   }
-
+  
   .bracket-form-actions {
     flex-direction: column;
+    align-items: stretch;
   }
-
-  .bracket-submit-btn,
-  .bracket-download-btn,
-  .bracket-cancel-btn {
-    width: 100%;
+  
+  .bracket-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bracket-visualization {
+    gap: 40px;
+    padding: 15px 10px;
+  }
+  
+  .bracket-round {
+    min-width: 180px;
+  }
+  
+  .bracket-round-title {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+  
+  .bracket-team {
+    padding: 12px 16px;
+  }
+  
+  .bracket-team-name {
+    font-size: 14px;
+  }
+  
+  .bracket-team-score {
+    font-size: 16px;
+  }
+  
+  .bracket-connection-line {
+    width: 60px;
+    right: -30px;
   }
 }
+
+/* Loading States */
+.bracket-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  color: var(--text-muted);
+}
+
+.bracket-loading::after {
+  content: "";
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: bracket-spin 1s linear infinite;
+  margin-left: 15px;
+}
+
+@keyframes bracket-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error States */
+.bracket-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--error-color);
+  padding: 16px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+}
+
+/* Success States */
+.bracket-success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--success-color);
+  padding: 16px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+}
+
+/* Print Styles */
+@media print {
+  .bracket-content {
+    max-width: none;
+    padding: 0;
+  }
+  
+  .bracket-tabs,
+  .bracket-form-actions,
+  .bracket-card-actions,
+  .bracket-back-btn {
+    display: none;
+  }
+  
+  .bracket-visualization {
+    background: white;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+  
+  .bracket-match {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
