@@ -1,237 +1,148 @@
 import React, { useState } from "react";
-import "../../style/Admin_BracketPage.css";
+import Sidebar from "../../components/sidebar";
+import "../../style/Admin_TeamPage.css";
 
-const BracketsPage = ({ sidebarOpen }) => {
-  const [activeTab, setActiveTab] = useState("create");
-  const [brackets, setBrackets] = useState([]);
-  const [selectedBracket, setSelectedBracket] = useState(null);
+const TeamsPage = ({sidebarOpen}) => {
   
+  const [activeTab, setActiveTab] = useState("create");
+  const [teams, setTeams] = useState([]);
   const [formData, setFormData] = useState({
-    bracketName: "",
-    bracketType: "single",
+    teamName: "",
     sport: "",
-    description: "",
-    teams: []
+    coach: "",
+    players: []
   });
 
-  const [teamInput, setTeamInput] = useState("");
+  // Position options based on sport
+  const positions = {
+    Basketball: ["Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"],
+    Volleyball: ["Setter", "Outside Hitter", "Middle Blocker", "Opposite Hitter", "Libero", "Defensive Specialist"]
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
-  };
 
-  const handleTeamInputChange = (e) => {
-    setTeamInput(e.target.value);
-  };
-
-  const addTeam = () => {
-    if (teamInput.trim() && formData.teams.length < 16) {
+    // Reset players when sport changes
+    if (name === "sport") {
       setFormData(prev => ({
         ...prev,
-        teams: [...prev.teams, { name: teamInput.trim() }]
+        players: []
       }));
-      setTeamInput("");
     }
   };
 
-  const removeTeam = (index) => {
+  const addPlayer = () => {
+    if (formData.sport && formData.players.length < 15) {
+      setFormData(prev => ({
+        ...prev,
+        players: [...prev.players, { name: "", position: "" }]
+      }));
+    }
+  };
+
+  const removePlayer = (index) => {
     setFormData(prev => ({
       ...prev,
-      teams: prev.teams.filter((_, i) => i !== index)
+      players: prev.players.filter((_, i) => i !== index)
     }));
   };
 
-  const generateBracket = () => {
-    if (formData.bracketName && formData.bracketType && formData.sport && formData.teams.length >= 2) {
-      const bracket = {
+  const handlePlayerChange = (index, field, value) => {
+    const newPlayers = [...formData.players];
+    newPlayers[index][field] = value;
+    setFormData(prev => ({
+      ...prev,
+      players: newPlayers
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Filter out players with empty names
+    const validPlayers = formData.players.filter(player => player.name.trim() !== "");
+    
+    if (formData.teamName && formData.sport && formData.coach && validPlayers.length > 0) {
+      const newTeam = {
         id: Date.now(),
-        name: formData.bracketName,
-        type: formData.bracketType,
+        teamName: formData.teamName,
         sport: formData.sport,
-        description: formData.description,
-        teams: formData.teams,
-        rounds: [],
+        coach: formData.coach,
+        players: validPlayers,
         createdAt: new Date().toLocaleDateString()
       };
-
-      if (formData.bracketType === "single") {
-        let teams = [...formData.teams];
-        let roundNumber = 1;
-        
-        // If teams aren't a power of 2, add byes
-        while (!isPowerOfTwo(teams.length)) {
-          teams.push({ name: "BYE", isBye: true });
-        }
-
-        while (teams.length > 1) {
-          const round = {
-            name: roundNumber === 1 ? "First Round" : 
-                  teams.length === 2 ? "Final" :
-                  teams.length === 4 ? "Semi-Final" :
-                  teams.length === 8 ? "Quarter-Final" :
-                  `Round ${roundNumber}`,
-            matches: []
-          };
-
-          for (let i = 0; i < teams.length; i += 2) {
-            round.matches.push({
-              id: `${roundNumber}-${i/2}`,
-              team1: teams[i],
-              team2: teams[i + 1],
-              winner: null,
-              completed: false
-            });
-          }
-
-          bracket.rounds.push(round);
-          teams = Array(teams.length / 2).fill().map((_, index) => ({ 
-            name: "TBD", 
-            isTBD: true,
-            fromMatch: `${roundNumber}-${index}`
-          }));
-          roundNumber++;
-        }
-      }
-
-      setBrackets(prev => [...prev, bracket]);
+      
+      setTeams(prev => [...prev, newTeam]);
       
       // Reset form
       setFormData({
-        bracketName: "",
-        bracketType: "single",
+        teamName: "",
         sport: "",
-        description: "",
-        teams: []
+        coach: "",
+        players: []
       });
       
       // Switch to view tab
       setActiveTab("view");
     } else {
-      alert("Please fill in all required fields and add at least 2 teams.");
+      alert("Please fill in all required fields and add at least one player.");
     }
   };
 
-  const isPowerOfTwo = (num) => {
-    return num > 0 && (num & (num - 1)) === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    generateBracket();
-  };
-
-  const updateMatchWinner = (bracketId, roundIndex, matchIndex, winner) => {
-    setBrackets(prev => prev.map(bracket => {
-      if (bracket.id === bracketId) {
-        const updatedBracket = { ...bracket };
-        updatedBracket.rounds = [...bracket.rounds];
-        updatedBracket.rounds[roundIndex] = { ...bracket.rounds[roundIndex] };
-        updatedBracket.rounds[roundIndex].matches = [...bracket.rounds[roundIndex].matches];
-        updatedBracket.rounds[roundIndex].matches[matchIndex] = {
-          ...bracket.rounds[roundIndex].matches[matchIndex],
-          winner: winner,
-          completed: true
-        };
-
-        // Update next round if exists
-        if (roundIndex < bracket.rounds.length - 1) {
-          const nextRound = updatedBracket.rounds[roundIndex + 1];
-          const nextMatchIndex = Math.floor(matchIndex / 2);
-          const isTeam1 = matchIndex % 2 === 0;
-          
-          if (nextRound.matches[nextMatchIndex]) {
-            nextRound.matches[nextMatchIndex] = {
-              ...nextRound.matches[nextMatchIndex],
-              [isTeam1 ? 'team1' : 'team2']: winner
-            };
-          }
-        }
-
-        return updatedBracket;
-      }
-      return bracket;
-    }));
-  };
-
-  const deleteBracket = (id) => {
-    setBrackets(prev => prev.filter(bracket => bracket.id !== id));
-    if (selectedBracket && selectedBracket.id === id) {
-      setSelectedBracket(null);
-    }
+  const handleDeleteTeam = (id) => {
+    setTeams(prev => prev.filter(team => team.id !== id));
   };
 
   return (
     <div className="admin-dashboard">
+      
+      
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="dashboard-header">
-          <h1>Brackets Management</h1>
-          <p>Create and manage tournament brackets</p>
+          <h1>Teams Management</h1>
+          <p>Create and manage sports teams</p>
         </div>
-
-        <div className="bracket-content">
-          <div className="bracket-tabs">
+        
+        <div className="add-team-container">
+          <div className="add-team-tabs">
             <button 
-              className={`bracket-tab-button ${activeTab === "create" ? "bracket-tab-active" : ""}`}
+              className={`add-team-tab-button ${activeTab === "create" ? "add-team-active" : ""}`}
               onClick={() => setActiveTab("create")}
             >
-              Create Bracket
+              Create Team
             </button>
             <button 
-              className={`bracket-tab-button ${activeTab === "view" ? "bracket-tab-active" : ""}`}
+              className={`add-team-tab-button ${activeTab === "view" ? "add-team-active" : ""}`}
               onClick={() => setActiveTab("view")}
             >
-              View Brackets ({brackets.length})
+              View Teams ({teams.length})
             </button>
-            {selectedBracket && (
-              <button 
-                className={`bracket-tab-button ${activeTab === "bracket" ? "bracket-tab-active" : ""}`}
-                onClick={() => setActiveTab("bracket")}
-              >
-                {selectedBracket.name}
-              </button>
-            )}
           </div>
 
           {activeTab === "create" && (
-            <div className="bracket-create-section">
-              <div className="bracket-form-container">
-                <h2>Create New Bracket</h2>
-                <form className="bracket-form" onSubmit={handleSubmit}>
-                  <div className="bracket-form-row">
-                    <div className="bracket-form-group">
-                      <label htmlFor="bracketName">Bracket Name *</label>
+            <div className="add-team-create-section">
+              <div className="add-team-form-container">
+                <h2>Create New Team</h2>
+                <form onSubmit={handleSubmit} className="add-team-form">
+                  <div className="add-team-form-row">
+                    <div className="add-team-form-group">
+                      <label htmlFor="teamName">Team Name *</label>
                       <input
                         type="text"
-                        id="bracketName"
-                        name="bracketName"
-                        value={formData.bracketName}
+                        id="teamName"
+                        name="teamName"
+                        value={formData.teamName}
                         onChange={handleInputChange}
-                        placeholder="Enter bracket name"
+                        placeholder="Enter team name"
                         required
                       />
                     </div>
-
-                    <div className="bracket-form-group">
-                      <label htmlFor="bracketType">Bracket Type *</label>
-                      <select
-                        id="bracketType"
-                        name="bracketType"
-                        value={formData.bracketType}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="single">Single Elimination</option>
-                        <option value="double">Double Elimination</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="bracket-form-row">
-                    <div className="bracket-form-group">
+                    
+                    <div className="add-team-form-group">
                       <label htmlFor="sport">Sport *</label>
                       <select
                         id="sport"
@@ -247,72 +158,96 @@ const BracketsPage = ({ sidebarOpen }) => {
                     </div>
                   </div>
 
-                  <div className="bracket-form-group">
-                    <label htmlFor="description">Bracket Description</label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
+                  <div className="add-team-form-group">
+                    <label htmlFor="coach">Coach Name *</label>
+                    <input
+                      type="text"
+                      id="coach"
+                      name="coach"
+                      value={formData.coach}
                       onChange={handleInputChange}
-                      placeholder="Enter bracket description"
-                      rows="5"
+                      placeholder="Enter coach name"
+                      required
                     />
                   </div>
 
-                  <div className="bracket-form-group">
-                    <label>Teams *</label>
-                    <div className="bracket-team-input-container">
-                      <input
-                        type="text"
-                        value={teamInput}
-                        onChange={handleTeamInputChange}
-                        placeholder="Enter team name"
-                        className="bracket-team-input"
-                      />
-                      <button
-                        type="button"
-                        onClick={addTeam}
-                        className="bracket-add-team-btn"
-                        disabled={!teamInput.trim() || formData.teams.length >= 16}
+                  <div className="add-team-players-section">
+                    <div className="add-team-players-header">
+                      <h3>Players</h3>
+                      <button 
+                        type="button" 
+                        onClick={addPlayer}
+                        className="add-team-add-player-btn"
+                        disabled={!formData.sport || formData.players.length >= 15}
                       >
-                        Add Team
+                        Add Player
                       </button>
                     </div>
-                    <small className="bracket-team-count">
-                      {formData.teams.length} team(s) added (max 16)
-                    </small>
                     
-                    <div className="bracket-teams-list">
-                      {formData.teams.map((team, index) => (
-                        <div key={index} className="bracket-team-tag">
-                          {team.name}
-                          <button
-                            type="button"
-                            onClick={() => removeTeam(index)}
-                            className="bracket-remove-team-btn"
-                          >
-                            ×
-                          </button>
+                    {formData.sport && formData.players.length === 0 && (
+                      <p className="add-team-players-note">
+                        Click "Add Player" to start adding players for your {formData.sport} team
+                      </p>
+                    )}
+
+                    <div className="add-team-players-list">
+                      {formData.players.map((player, index) => (
+                        <div key={index} className="add-team-player-card">
+                          <div className="add-team-player-header">
+                            <span className="add-team-player-number">Player {index + 1}</span>
+                            <button 
+                              type="button"
+                              onClick={() => removePlayer(index)}
+                              className="add-team-remove-player-btn"
+                            >
+                              ×
+                            </button>
+                          </div>
+                          
+                          <div className="add-team-player-inputs">
+                            <div className="add-team-player-input-group">
+                              <label>Player Name *</label>
+                              <input
+                                type="text"
+                                value={player.name}
+                                onChange={(e) => handlePlayerChange(index, 'name', e.target.value)}
+                                placeholder="Enter player name"
+                                required
+                              />
+                            </div>
+                            
+                            <div className="add-team-player-input-group">
+                              <label>Position *</label>
+                              <select
+                                value={player.position}
+                                onChange={(e) => handlePlayerChange(index, 'position', e.target.value)}
+                                required
+                              >
+                                <option value="">Select position</option>
+                                {positions[formData.sport]?.map(pos => (
+                                  <option key={pos} value={pos}>{pos}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  
-                  <div className="bracket-form-actions">
-                    <button type="submit" className="bracket-submit-btn">
-                      Generate Bracket
+
+                  <div className="add-team-form-actions">
+                    <button type="submit" className="add-team-submit-btn">
+                      Create Team
                     </button>
-                    
-                    <button
-                      type="button"
-                      className="bracket-cancel-btn"
+                    <button 
+                      type="button" 
+                      className="add-team-cancel-btn"
                       onClick={() => {
                         setFormData({
-                          bracketName: "",
-                          bracketType: "single",
+                          teamName: "",
                           sport: "",
-                          description: "",
-                          teams: []
+                          coach: "",
+                          players: []
                         });
                       }}
                     >
@@ -325,148 +260,66 @@ const BracketsPage = ({ sidebarOpen }) => {
           )}
 
           {activeTab === "view" && (
-            <div className="bracket-view-section">
-              <h2>All Brackets</h2>
-              {brackets.length === 0 ? (
-                <div className="bracket-no-brackets">
-                  <p>No brackets created yet. Create your first bracket!</p>
-                  <button className="bracket-create-first-btn" onClick={() => setActiveTab("create")}>
-                    Create Bracket
+            <div className="add-team-view-section">
+              <h2>All Teams</h2>
+              {teams.length === 0 ? (
+
+                <div className="add-team-no-teams">
+                  <p>No teams created yet. Create your first team!</p>
+                  <button className="add-team-create-first-btn" onClick={() => setActiveTab("create")}>
+                    Create Team
                   </button>
                 </div>
-              ) : (
-                <div className="bracket-grid">
-                  {brackets.map((bracket) => (
-                    <div key={bracket.id} className="bracket-card">
-                      <div className="bracket-card-header">
-                        <h3>{bracket.name}</h3>
-                        <span className={`bracket-sport-badge bracket-sport-${bracket.sport.toLowerCase()}`}>
-                          {bracket.sport}
+
+              )
+               
+              : (
+                <div className="add-team-grid">
+                  {teams.map((team) => (
+                    <div key={team.id} className="add-team-card">
+
+                      <div className="add-team-card-header">
+
+                        <h3>{team.teamName}</h3>
+
+                        <span className={`add-team-sport-badge add-team-sport-${team.sport.toLowerCase()}`}>
+                          {team.sport}
                         </span>
+
                       </div>
                       
-                      <div className="bracket-card-info">
-                        <div className="bracket-type-info">
-                          <strong>Type:</strong> {bracket.type === "single" ? "Single Elimination" : "Double Elimination"}
+                      <div className="add-team-card-info">
+
+                        <div className="add-team-coach-info">
+                          <strong>Coach:</strong> {team.coach}
                         </div>
-                        <div className="bracket-teams-count">
-                          <strong>Teams:</strong> {bracket.teams.length}
+
+                        <div className="add-team-created-date">
+                          <strong>Created:</strong> {team.createdAt}
                         </div>
-                        <div className="bracket-created-date">
-                          <strong>Created:</strong> {bracket.createdAt}
-                        </div>
-                        {bracket.description && (
-                          <div className="bracket-description">
-                            <strong>Description:</strong> {bracket.description}
-                          </div>
-                        )}
+                        
                       </div>
 
-                      <div className="bracket-card-actions">
-                        <button 
-                          className="bracket-view-btn"
-                          onClick={() => {
-                            setSelectedBracket(bracket);
-                            setActiveTab("bracket");
-                          }}
-                        >
-                          View Bracket
-                        </button>
-                        <button 
-                          className="bracket-delete-btn" 
-                          onClick={() => deleteBracket(bracket.id)}
-                        >
-                          Delete
+                      <div className="add-team-players-display">
+                        <h4>Players ({team.players.length})</h4>
+                        <div className="add-team-players-grid">
+                          {team.players.map((player, index) => (
+                            <div key={index} className="add-team-player-item">
+                              <div className="add-team-player-name">{player.name}</div>
+                              <div className="add-team-player-position">{player.position}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="add-team-card-actions">
+                        <button className="add-team-delete-btn" onClick={() => handleDeleteTeam(team.id)}>
+                          Delete Team
                         </button>
                       </div>
+                      
                     </div>
                   ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === "bracket" && selectedBracket && (
-            <div className="bracket-display-section">
-              <div className="bracket-display-header">
-                <div>
-                  <h2>{selectedBracket.name}</h2>
-                  <p className="bracket-type-info">
-                    {selectedBracket.type === "single" 
-                      ? "Single Elimination Tournament" 
-                      : "Double Elimination Tournament"} - {selectedBracket.sport}
-                  </p>
-                </div>
-                <button 
-                  className="bracket-back-btn"
-                  onClick={() => setActiveTab("view")}
-                >
-                  ← Back to Brackets
-                </button>
-              </div>
-              
-              <div className="bracket-visualization">
-                {selectedBracket.rounds.map((round, roundIndex) => (
-                  <div key={roundIndex} className="bracket-round">
-                    <h3 className="bracket-round-title">{round.name}</h3>
-                    <div className="bracket-matches">
-                      {round.matches.map((match, matchIndex) => (
-                        <div key={matchIndex} className="bracket-match">
-                          <div className="bracket-match-container">
-                            <div 
-                              className={`bracket-team bracket-team-top ${
-                                match.winner && match.winner.name === match.team1.name ? 'bracket-winner' : ''
-                              } ${match.team1.isBye ? 'bracket-bye' : ''}`}
-                              onClick={() => {
-                                if (!match.team1.isBye && !match.team2.isBye && !match.team1.isTBD && !match.team2.isTBD) {
-                                  updateMatchWinner(selectedBracket.id, roundIndex, matchIndex, match.team1);
-                                }
-                              }}
-                            >
-                              {match.team1.name}
-                            </div>
-                            
-                            <div className="bracket-versus">vs</div>
-                            
-                            <div 
-                              className={`bracket-team bracket-team-bottom ${
-                                match.winner && match.winner.name === match.team2.name ? 'bracket-winner' : ''
-                              } ${match.team2.isBye ? 'bracket-bye' : ''}`}
-                              onClick={() => {
-                                if (!match.team1.isBye && !match.team2.isBye && !match.team1.isTBD && !match.team2.isTBD) {
-                                  updateMatchWinner(selectedBracket.id, roundIndex, matchIndex, match.team2);
-                                }
-                              }}
-                            >
-                              {match.team2.name}
-                            </div>
-
-                            {/* Connector line to next round */}
-                            {roundIndex < selectedBracket.rounds.length - 1 && (
-                              <div className="bracket-connector">
-                                <div className="bracket-line-horizontal"></div>
-                                <div className="bracket-line-vertical"></div>
-                                <div className="bracket-line-horizontal-next"></div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Championship winner display */}
-              {selectedBracket.rounds.length > 0 && 
-               selectedBracket.rounds[selectedBracket.rounds.length - 1].matches[0]?.winner && (
-                <div className="bracket-champion">
-                  <div className="bracket-champion-container">
-                    <h3>🏆 Tournament Champion</h3>
-                    <div className="bracket-champion-name">
-                      {selectedBracket.rounds[selectedBracket.rounds.length - 1].matches[0].winner.name}
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
@@ -477,4 +330,4 @@ const BracketsPage = ({ sidebarOpen }) => {
   );
 };
 
-export default BracketsPage;
+export default TeamsPage;
