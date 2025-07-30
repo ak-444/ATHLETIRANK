@@ -65,6 +65,11 @@ const Register = ({ setCurrentView }) => {
         setError('');
         setSuccess('');
 
+        console.log('Submitting form:', {
+        ...formData,
+        universityId: formData.universityId ? formData.universityId.name : 'No file'
+    });
+
         // Validation
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');

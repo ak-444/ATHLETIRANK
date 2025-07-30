@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Check if user is logged in on app start
     useEffect(() => {
         const currentUser = authService.getCurrentUser();
         if (currentUser) {
@@ -26,9 +25,9 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         try {
-            const response = await authService.login(credentials);
-            setUser(response.user);
-            return response;
+            const { user } = await authService.login(credentials);
+            setUser(user);
+            return { user };
         } catch (error) {
             throw error;
         }
@@ -36,8 +35,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
-            const response = await authService.register(userData);
-            return response;
+            return await authService.register(userData);
         } catch (error) {
             throw error;
         }
@@ -48,12 +46,18 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const isAuthenticated = () => {
+        return authService.isAuthenticated();
+    };
+
     const value = {
         user,
         login,
         register,
         logout,
-        isAuthenticated: authService.isAuthenticated(),
+        isAuthenticated,
+        isAdmin: user?.role === 'admin',
+        isStaff: user?.role === 'staff',
         loading
     };
 

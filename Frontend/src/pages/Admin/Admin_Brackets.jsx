@@ -5,6 +5,8 @@ const BracketsPage = ({ sidebarOpen }) => {
   const [activeTab, setActiveTab] = useState("create");
   const [brackets, setBrackets] = useState([]);
   const [selectedBracket, setSelectedBracket] = useState(null);
+  const [draggingTeam, setDraggingTeam] = useState(null);
+  const [highlightDrop, setHighlightDrop] = useState(null);
   
   const [formData, setFormData] = useState({
     bracketName: "",
@@ -146,7 +148,8 @@ const BracketsPage = ({ sidebarOpen }) => {
           if (nextRound.matches[nextMatchIndex]) {
             nextRound.matches[nextMatchIndex] = {
               ...nextRound.matches[nextMatchIndex],
-              [isTeam1 ? 'team1' : 'team2']: winner
+              [isTeam1 ? 'team1' : 'team2']: winner,
+              isTBD: false
             };
           }
         }
@@ -162,6 +165,117 @@ const BracketsPage = ({ sidebarOpen }) => {
     if (selectedBracket && selectedBracket.id === id) {
       setSelectedBracket(null);
     }
+  };
+
+  const getChampion = (bracket) => {
+    if (bracket.rounds.length > 0) {
+      const finalRound = bracket.rounds[bracket.rounds.length - 1];
+      if (finalRound.matches[0]?.winner) {
+        return finalRound.matches[0].winner;
+      }
+    }
+    return null;
+  };
+
+  const renderBracketMatch = (match, roundIndex, matchIndex, totalRounds) => {
+    const isClickable = !match.team1.isBye && !match.team2.isBye && 
+                       !match.team1.isTBD && !match.team2.isTBD;
+    const hasNextRound = roundIndex < totalRounds - 1;
+
+    // Handle drag start for teams
+    const handleDragStart = (e, team) => {
+      e.dataTransfer.setData('team', JSON.stringify(team));
+      e.dataTransfer.setData('source', JSON.stringify({
+        roundIndex,
+        matchIndex,
+        isTeam1: team.name === match.team1.name
+      }));
+      setDraggingTeam(team);
+      e.target.classList.add('dragging');
+    };
+
+    // Handle drag end
+    const handleDragEnd = (e) => {
+      setHighlightDrop(null);
+      setDraggingTeam(null);
+      e.target.classList.remove('dragging');
+    };
+
+    // Handle drop on team slot
+    const handleDrop = (e, isTeam1) => {
+      e.preventDefault();
+      const team = JSON.parse(e.dataTransfer.getData('team'));
+      const source = JSON.parse(e.dataTransfer.getData('source'));
+      
+      // Only allow dropping if this is the next round
+      if (source.roundIndex === roundIndex - 1) {
+        updateMatchWinner(
+          selectedBracket.id, 
+          source.roundIndex, 
+          source.matchIndex, 
+          team
+        );
+      }
+      
+      setHighlightDrop(null);
+      setDraggingTeam(null);
+      e.target.classList.remove('highlight-drop');
+    };
+
+    // Allow drop and highlight
+    const handleDragOver = (e, isTeam1) => {
+      e.preventDefault();
+      const source = JSON.parse(e.dataTransfer.getData('source'));
+      
+      // Only highlight if this is the next round
+      if (source.roundIndex === roundIndex - 1) {
+        setHighlightDrop({ roundIndex, matchIndex, isTeam1 });
+        e.target.classList.add('highlight-drop');
+      }
+    };
+
+    return (
+      <div key={matchIndex} className="bracket-match-wrapper">
+        <div className="bracket-match">
+          <div 
+            className={`bracket-team ${match.winner?.name === match.team1.name ? 'bracket-winner' : ''} ${match.team1.isBye ? 'bracket-bye' : ''} ${match.team1.isTBD ? 'bracket-tbd' : ''} ${highlightDrop?.roundIndex === roundIndex && highlightDrop?.matchIndex === matchIndex && highlightDrop?.isTeam1 ? 'highlight-drop' : ''}`}
+            draggable={isClickable && !match.team1.isTBD && !match.completed}
+            onDragStart={(e) => handleDragStart(e, match.team1)}
+            onDragEnd={handleDragEnd}
+            onDrop={(e) => handleDrop(e, true)}
+            onDragOver={(e) => handleDragOver(e, true)}
+          >
+            <span className="bracket-team-name">{match.team1.name}</span>
+          </div>
+          
+          <div className="bracket-versus">vs</div>
+          
+          <div 
+            className={`bracket-team ${match.winner?.name === match.team2.name ? 'bracket-winner' : ''} ${match.team2.isBye ? 'bracket-bye' : ''} ${match.team2.isTBD ? 'bracket-tbd' : ''} ${highlightDrop?.roundIndex === roundIndex && highlightDrop?.matchIndex === matchIndex && !highlightDrop?.isTeam1 ? 'highlight-drop' : ''}`}
+            draggable={isClickable && !match.team2.isTBD && !match.completed}
+            onDragStart={(e) => handleDragStart(e, match.team2)}
+            onDragEnd={handleDragEnd}
+            onDrop={(e) => handleDrop(e, false)}
+            onDragOver={(e) => handleDragOver(e, false)}
+          >
+            <span className="bracket-team-name">{match.team2.name}</span>
+          </div>
+        </div>
+
+        {/* Connection lines to next round */}
+        {hasNextRound && (
+          <div className="bracket-connector">
+            <div className="bracket-line-horizontal"></div>
+            {matchIndex % 2 === 0 ? (
+              <div className="bracket-line-vertical bracket-line-down"></div>
+            ) : (
+              <div className="bracket-line-vertical bracket-line-up"></div>
+            )}
+            <div className="bracket-line-horizontal-next"></div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -407,68 +521,27 @@ const BracketsPage = ({ sidebarOpen }) => {
               
               <div className="bracket-visualization">
                 {selectedBracket.rounds.map((round, roundIndex) => (
-                  <div key={roundIndex} className="bracket-round">
+                  <div key={roundIndex} className={`bracket-round ${round.name === 'Final' ? 'bracket-final-round' : ''}`}>
                     <h3 className="bracket-round-title">{round.name}</h3>
                     <div className="bracket-matches">
-                      {round.matches.map((match, matchIndex) => (
-                        <div key={matchIndex} className="bracket-match">
-                          <div className="bracket-match-container">
-                            <div 
-                              className={`bracket-team bracket-team-top ${
-                                match.winner && match.winner.name === match.team1.name ? 'bracket-winner' : ''
-                              } ${match.team1.isBye ? 'bracket-bye' : ''}`}
-                              onClick={() => {
-                                if (!match.team1.isBye && !match.team2.isBye && !match.team1.isTBD && !match.team2.isTBD) {
-                                  updateMatchWinner(selectedBracket.id, roundIndex, matchIndex, match.team1);
-                                }
-                              }}
-                            >
-                              {match.team1.name}
-                            </div>
-                            
-                            <div className="bracket-versus">vs</div>
-                            
-                            <div 
-                              className={`bracket-team bracket-team-bottom ${
-                                match.winner && match.winner.name === match.team2.name ? 'bracket-winner' : ''
-                              } ${match.team2.isBye ? 'bracket-bye' : ''}`}
-                              onClick={() => {
-                                if (!match.team1.isBye && !match.team2.isBye && !match.team1.isTBD && !match.team2.isTBD) {
-                                  updateMatchWinner(selectedBracket.id, roundIndex, matchIndex, match.team2);
-                                }
-                              }}
-                            >
-                              {match.team2.name}
-                            </div>
-
-                            {/* Connector line to next round */}
-                            {roundIndex < selectedBracket.rounds.length - 1 && (
-                              <div className="bracket-connector">
-                                <div className="bracket-line-horizontal"></div>
-                                <div className="bracket-line-vertical"></div>
-                                <div className="bracket-line-horizontal-next"></div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                      {round.matches.map((match, matchIndex) => 
+                        renderBracketMatch(match, roundIndex, matchIndex, selectedBracket.rounds.length)
+                      )}
                     </div>
                   </div>
                 ))}
-              </div>
 
-              {/* Championship winner display */}
-              {selectedBracket.rounds.length > 0 && 
-               selectedBracket.rounds[selectedBracket.rounds.length - 1].matches[0]?.winner && (
-                <div className="bracket-champion">
-                  <div className="bracket-champion-container">
-                    <h3>🏆 Tournament Champion</h3>
+                {/* Champion Display */}
+                {getChampion(selectedBracket) && (
+                  <div className="bracket-champion-section">
+                    <div className="bracket-champion-trophy">🏆</div>
+                    <div className="bracket-champion-title">CHAMPION</div>
                     <div className="bracket-champion-name">
-                      {selectedBracket.rounds[selectedBracket.rounds.length - 1].matches[0].winner.name}
+                      {getChampion(selectedBracket).name}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -1,0 +1,211 @@
+/* User Management Styles */
+.user-management-toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-light);
+}
+
+.filter-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.filter-select, .search-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background-primary);
+  color: var(--text-primary);
+}
+
+.search-input {
+  flex-grow: 1;
+  max-width: 300px;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  background: var(--background-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-light);
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th, .users-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.users-table th {
+  background: var(--background-secondary);
+  font-weight: 600;
+}
+
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.role-badge.admin {
+  background: rgba(101, 87, 255, 0.1);
+  color: #6557ff;
+}
+
+.role-badge.staff {
+  background: rgba(0, 184, 217, 0.1);
+  color: #00b8d9;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-badge.approved {
+  background: rgba(54, 179, 126, 0.1);
+  color: #36b37e;
+}
+
+.status-badge.pending {
+  background: rgba(255, 171, 0, 0.1);
+  color: #ffab00;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-buttons button {
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.approve-btn {
+  background: rgba(54, 179, 126, 0.1);
+  color: #36b37e;
+}
+
+.approve-btn:hover {
+  background: rgba(54, 179, 126, 0.2);
+}
+
+.reject-btn {
+  background: rgba(255, 86, 48, 0.1);
+  color: #ff5630;
+}
+
+.reject-btn:hover {
+  background: rgba(255, 86, 48, 0.2);
+}
+
+.delete-btn {
+  background: rgba(222, 68, 54, 0.1);
+  color: #de4436;
+}
+
+.delete-btn:hover {
+  background: rgba(222, 68, 54, 0.2);
+}
+
+.view-id-btn {
+  background: rgba(101, 87, 255, 0.1);
+  color: #6557ff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+}
+
+.view-id-btn:hover {
+  background: rgba(101, 87, 255, 0.2);
+}
+
+.no-id {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.no-users {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #6557ff;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.alert {
+  padding: 12px 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alert-danger {
+  background: rgba(222, 68, 54, 0.1);
+  color: #de4436;
+  border-left: 4px solid #de4436;
+}
+
+.alert-success {
+  background: rgba(54, 179, 126, 0.1);
+  color: #36b37e;
+  border-left: 4px solid #36b37e;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0 0 0 10px;
+}

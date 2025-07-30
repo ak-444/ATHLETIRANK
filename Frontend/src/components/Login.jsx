@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../style/RegisterAndLogin.css'
+import { useNavigate } from 'react-router-dom';
+import '../style/RegisterAndLogin.css';
 import universityLogo from '../assets/Arellano_University_logo.png';
 
 const Login = ({ setCurrentView }) => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -27,11 +28,14 @@ const Login = ({ setCurrentView }) => {
         setLoading(true);
 
         try {
-            await login(formData);
-            alert('Login successful!');
-            // Redirect or update UI as needed
+            const response = await login(formData);
+            if (response?.user?.role === 'admin') {
+                navigate('/AdminDashboard');
+            } else {
+                navigate('/StaffDashboard');
+            }
         } catch (error) {
-            setError(error.message);
+            setError(error.message || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -40,9 +44,7 @@ const Login = ({ setCurrentView }) => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-
                 <div className="auth-header">
-                    
                     <div className="logo">
                         <img 
                             src={universityLogo} 
@@ -50,17 +52,14 @@ const Login = ({ setCurrentView }) => {
                             className="logo-image"
                         />
                     </div>
-
                     <h1 className="brand-name">Arellano University</h1>
                     <p className="brand-subtitle">ATHLETIRANK</p>
                 </div>
 
                 <div className="auth-tabs">
-
                     <button className="tab-btn active" onClick={() => setCurrentView('login')}>
                         Login
                     </button>
-
                     <button className="tab-btn" onClick={() => setCurrentView('register')}>
                         Register
                     </button>
@@ -78,7 +77,6 @@ const Login = ({ setCurrentView }) => {
                     <form className="auth-form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className="form-label">Email:</label>
-
                             <input
                                 type="email"
                                 name="email"
@@ -92,7 +90,6 @@ const Login = ({ setCurrentView }) => {
 
                         <div className="form-group">
                             <label className="form-label">Password:</label>
-
                             <input
                                 type="password"
                                 name="password"
@@ -104,14 +101,14 @@ const Login = ({ setCurrentView }) => {
                             />
                         </div>
 
-                        
-                            <Link to="/AdminDashboard" className="submit-btn">Login</Link>
-                       
-
-
-
+                        <button
+                            type="submit"
+                            className="submit-btn"
+                            disabled={loading}
+                        >
+                            {loading ? 'Logging in...' : 'Login'}
+                        </button>
                     </form>
-
                 </div>
             </div>
         </div>

@@ -1,104 +1,122 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { pool } = require('../config/database');
 
 const router = express.Router();
 
-// Test route
-router.get('/test', (req, res) => {
-    console.log('📍 Auth test route hit');
-    res.json({ message: 'Auth routes working!' });
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Created uploads directory:', uploadsDir);
+}
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadsDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
 });
 
-// GET route for login endpoint (for testing only)
-router.get('/login', (req, res) => {
-    res.json({ 
-        message: 'Login endpoint is working! Use POST request to actually login.',
-        method: 'POST',
-        endpoint: '/api/auth/login',
-        body: {
-            email: 'user@example.com',
-            password: 'yourpassword'
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Images only (JPEG, JPG, PNG)!'));
         }
-    });
+    }
 });
 
-// GET route for register endpoint (for testing only)
-router.get('/register', (req, res) => {
-    res.json({ 
-        message: 'Register endpoint is working! Use POST request to actually register.',
-        method: 'POST',
-        endpoint: '/api/auth/register',
-        body: {
-            username: 'yourusername',
-            email: 'user@example.com',
-            password: 'yourpassword'
-        }
-    });
-});
-
-// Register route with detailed logging
-router.post('/register', async (req, res) => {
-    console.log('📍 Register route hit');
-    console.log('📦 Request body:', req.body);
-    
+// Register route
+router.post('/register', upload.single('universityId'), async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        console.log('Registration request received:', {
+            body: req.body,
+            file: req.file ? { filename: req.file.filename, size: req.file.size } : 'No file'
+        });
 
-        // Validate input
-        if (!username || !email || !password) {
-            console.log('❌ Missing required fields');
-            return res.status(400).json({ message: 'Username, email, and password are required' });
+        const { username, email, password, role } = req.body;
+        const universityIdImage = req.file ? req.file.filename : null;
+
+        // Validation
+        if (!username || !email || !password || !role) {
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
-        console.log('✅ Input validation passed');
-        console.log('👤 Attempting to register:', { username, email, password: '[HIDDEN]' });
+        if (!universityIdImage) {
+            return res.status(400).json({ message: 'University ID image is required' });
+        }
 
-        // Check if user already exists
-        console.log('🔍 Checking if user already exists...');
+        // Check if user exists
         const [existingUsers] = await pool.execute(
             'SELECT * FROM users WHERE email = ? OR username = ?',
             [email, username]
         );
 
-        console.log('🔍 Existing users found:', existingUsers.length);
-
         if (existingUsers.length > 0) {
-            console.log('❌ User already exists');
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        console.log('✅ User does not exist, proceeding with registration');
+        // Check if this is the first admin user
+        let isApproved = false;
+        if (role === 'admin') {
+            const [existingAdmins] = await pool.execute(
+                'SELECT COUNT(*) as adminCount FROM users WHERE role = "admin" AND is_approved = 1'
+            );
+            
+            // Auto-approve if this is the first approved admin
+            if (existingAdmins[0].adminCount === 0) {
+                isApproved = true;
+                console.log('🔑 Auto-approving first admin user');
+            }
+        }
 
         // Hash password
-        console.log('🔐 Hashing password...');
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        console.log('✅ Password hashed successfully');
 
         // Insert new user
-        console.log('💾 Inserting user into database...');
         const [result] = await pool.execute(
-            'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-            [username, email, hashedPassword]
+            'INSERT INTO users (username, email, password, role, university_id_image, is_approved) VALUES (?, ?, ?, ?, ?, ?)',
+            [username, email, hashedPassword, role, universityIdImage, isApproved]
         );
 
-        console.log('✅ User inserted successfully');
-        console.log('📊 Insert result:', result);
+        const message = isApproved 
+            ? 'Admin account created and auto-approved! You can login now.'
+            : 'User registered successfully. Pending admin approval.';
 
         res.status(201).json({ 
-            message: 'User registered successfully',
+            message,
             userId: result.insertId,
-            debug: {
-                affectedRows: result.affectedRows,
-                insertId: result.insertId
-            }
+            isApproved
         });
 
     } catch (error) {
-        console.error('💥 Registration error:', error);
-        console.error('💥 Error stack:', error.stack);
+        console.error('Registration error:', error);
+        
+        // Clean up uploaded file if registration fails
+        if (req.file) {
+            try {
+                fs.unlinkSync(req.file.path);
+            } catch (unlinkError) {
+                console.error('Error cleaning up file:', unlinkError);
+            }
+        }
+        
         res.status(500).json({ 
             message: 'Server error during registration',
             error: error.message 
@@ -106,72 +124,151 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login route with logging
+// Login route with enhanced error handling
+// Enhanced Login Route
+// Enhanced Login Route
 router.post('/login', async (req, res) => {
-    console.log('📍 Login route hit');
-    console.log('📦 Request body:', { email: req.body.email, password: '[HIDDEN]' });
-    
     try {
         const { email, password } = req.body;
 
+        // Input validation
         if (!email || !password) {
-            console.log('❌ Missing email or password');
-            return res.status(400).json({ message: 'Email and password are required' });
+            return res.status(400).json({ 
+                success: false,
+                message: 'Both email and password are required',
+                errorCode: 'MISSING_CREDENTIALS'
+            });
         }
 
-        // Find user
-        console.log('🔍 Looking for user with email:', email);
+        // Validate email format
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid email format',
+                errorCode: 'INVALID_EMAIL'
+            });
+        }
+
+        // Check JWT_SECRET configuration
+        if (!process.env.JWT_SECRET) {
+            console.error('JWT_SECRET not configured');
+            return res.status(500).json({
+                success: false,
+                message: 'Server configuration error',
+                errorCode: 'SERVER_ERROR'
+            });
+        }
+
+        // Find user with case-insensitive email comparison
         const [users] = await pool.execute(
-            'SELECT * FROM users WHERE email = ?',
+            'SELECT * FROM users WHERE LOWER(email) = LOWER(?)',
             [email]
         );
 
-        console.log('🔍 Users found:', users.length);
-
         if (users.length === 0) {
-            console.log('❌ No user found with that email');
-            return res.status(400).json({ message: 'Invalid credentials' });
+            // Don't reveal whether email exists for security
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials',
+                errorCode: 'AUTH_FAILED'
+            });
         }
 
         const user = users[0];
-        console.log('👤 User found:', { id: user.id, username: user.username, email: user.email });
 
-        // Check password
-        console.log('🔐 Checking password...');
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        console.log('🔐 Password valid:', isValidPassword);
-        
-        if (!isValidPassword) {
-            console.log('❌ Invalid password');
-            return res.status(400).json({ message: 'Invalid credentials' });
+        // Check account approval status
+        if (!user.is_approved) {
+            return res.status(403).json({
+                success: false,
+                message: 'Account pending approval',
+                errorCode: 'ACCOUNT_PENDING'
+            });
         }
 
-        // Generate JWT token
-        console.log('🎫 Generating JWT token...');
+        // Verify password with timing-safe comparison
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        
+        if (!isValidPassword) {
+            // Log failed attempt (you might want to implement attempt limiting)
+            console.warn(`Failed login attempt for user ${user.email}`);
+            
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials',
+                errorCode: 'AUTH_FAILED'
+            });
+        }
+
+        // Generate JWT token with additional security claims
         const token = jwt.sign(
-            { userId: user.id, email: user.email },
+            { 
+                userId: user.id,
+                email: user.email,
+                role: user.role,
+                iss: 'your-app-name',  // Issuer
+                aud: 'your-app-client' // Audience
+            },
             process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            { 
+                expiresIn: '8h', // Shorter expiration for better security
+                algorithm: 'HS256' // Explicit algorithm specification
+            }
         );
 
-        console.log('✅ Login successful for user:', user.username);
+        // Set secure HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 8 * 60 * 60 * 1000 // 8 hours
+        });
 
+        console.log('Login successful for user:', user.email, 'Role:', user.role);
+
+        // Successful login response - ALWAYS return token for frontend
         res.json({
+            success: true,
             message: 'Login successful',
-            token,
             user: {
                 id: user.id,
                 username: user.username,
-                email: user.email
-            }
+                email: user.email,
+                role: user.role,
+                isApproved: user.is_approved
+            },
+            // Always return token for frontend authentication
+            token: token
         });
 
     } catch (error) {
-        console.error('💥 Login error:', error);
-        console.error('💥 Error stack:', error.stack);
+        console.error('Login error:', error);
+        
+        // Generic error message to avoid leaking sensitive info
         res.status(500).json({ 
-            message: 'Server error during login',
-            error: error.message 
+            success: false,
+            message: 'Authentication failed',
+            errorCode: 'SERVER_ERROR'
+        });
+    }
+});
+
+// Test route to verify everything is working
+router.get('/test', async (req, res) => {
+    try {
+        // Test database connection
+        const [result] = await pool.execute('SELECT COUNT(*) as userCount FROM users');
+        
+        res.json({
+            message: 'Auth service is working',
+            database: 'Connected',
+            userCount: result[0].userCount,
+            jwtSecret: process.env.JWT_SECRET ? 'Configured' : 'Missing',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Auth service test failed',
+            error: error.message
         });
     }
 });

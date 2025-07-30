@@ -1,10 +1,11 @@
 /* Bracket Page Styles with Dark Theme */
 .bracket-content {
   padding: 20px;
-  max-width: 1400px;
+  width: 100%;
+  max-width: none; /* Remove max-width restriction */
   margin: 0 auto;
+  overflow-x: auto;
 }
-
 /* Tab Navigation */
 .bracket-tabs {
   display: flex;
@@ -319,25 +320,6 @@
   color: #8A2BE2;
 }
 
-.bracket-sport-football {
-  background: rgba(34, 139, 34, 0.2);
-  color: #228B22;
-}
-
-.bracket-sport-soccer {
-  background: rgba(0, 191, 255, 0.2);
-  color: #00BFFF;
-}
-
-.bracket-sport-tennis {
-  background: rgba(255, 20, 147, 0.2);
-  color: #FF1493;
-}
-
-.bracket-sport-baseball {
-  background: rgba(255, 69, 0, 0.2);
-  color: #FF4500;
-}
 
 .bracket-card-info {
   margin-bottom: 20px;
@@ -439,15 +421,17 @@
   overflow-x: auto;
   overflow-y: visible;
   padding: 30px 20px;
-  gap: 80px;
+  gap: 40px; /* Reduced from 80px to fit more content */
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.02), rgba(139, 92, 246, 0.02));
   border-radius: var(--border-radius-lg);
   border: 1px solid rgba(59, 130, 246, 0.1);
   position: relative;
+  width: 100%; /* Ensure it takes full width */
+  min-width: 100%; /* Prevent shrinking */
 }
 
 .bracket-round {
-  min-width: 220px;
+  min-width: 280px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -474,6 +458,7 @@
   gap: 40px;
   flex: 1;
   justify-content: center;
+  
 }
 
 .bracket-match {
@@ -484,6 +469,8 @@
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  width: 260px; /* Fixed width for matches */
+  min-width: 260px; /* Prevent shrinking */
 }
 
 .bracket-match:hover {
@@ -502,10 +489,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
+  min-height: 50px; /* Ensure consistent height */
   border-bottom: 1px solid var(--border-color);
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
+  width: 100%; /* Full width of parent */
 }
 
 .bracket-team:last-child {
@@ -751,3 +740,65 @@
   }
 }
 
+
+/* Add to your bracket CSS */
+.bracket-team[draggable="true"] {
+  cursor: grab;
+}
+
+.bracket-team[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.bracket-team.bracket-tbd {
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 2px dashed var(--border-color);
+}
+
+.bracket-team.bracket-tbd:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-color);
+}
+
+.bracket-team.bracket-tbd.highlight-drop {
+  background-color: rgba(34, 197, 94, 0.2);
+  border-color: var(--success-color);
+}
+
+.bracket-team.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+/* Add these styles to your Admin_BracketPage.css */
+
+/* Drag and Drop Styles */
+.bracket-team[draggable="true"] {
+  cursor: grab;
+}
+
+.bracket-team[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.bracket-team.bracket-tbd {
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 2px dashed var(--border-color);
+}
+
+.bracket-team.bracket-tbd:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-color);
+}
+
+.bracket-team.highlight-drop {
+  background-color: rgba(34, 197, 94, 0.2);
+  border-color: var(--success-color) !important;
+}
+
+.bracket-team.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+/* Rest of your existing CSS remains the same */
