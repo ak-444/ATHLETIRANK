@@ -6,6 +6,7 @@ require('dotenv').config();
 const { testConnection } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin'); // Add this line
+const eventsRoutes = require('./routes/events');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +24,7 @@ testConnection();
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes); // Add this line
+app.use("/api/events", eventsRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

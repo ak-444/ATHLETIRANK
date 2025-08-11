@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Homepage from './pages/HomePage';
 import RegisterAndLoginPage from './pages/RegisterLogin_Page';
 import AdminDashboard from './pages/Admin/Admin_Dashboard';
+import AdminEvents from './pages/Admin/Admin_Events';
 import BracketsPage from './pages/Admin/Admin_Brackets';
 import SchedulesPage from './pages/Admin/Admin_Schedules';
 import SideBar from './components/sidebar';
@@ -36,7 +37,16 @@ function App() {
                                     <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
                                     <AdminDashboard sidebarOpen={sidebarOpen}/> 
                                 </>
-                            }/>
+                            } />
+                        
+                        <Route path="/AdminDashboard/events" 
+                            element={
+                                <>
+                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                                    <AdminEvents sidebarOpen={sidebarOpen}/> 
+                                </>
+                            }
+                        />
 
                         <Route path="/AdminDashboard/brackets" 
                             element={
