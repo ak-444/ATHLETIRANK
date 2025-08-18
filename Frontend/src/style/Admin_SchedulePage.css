@@ -1,9 +1,12 @@
 /* Admin_SchedulePage.css */
+
+/* Main content wrapper */
 .schedule-content {
   padding: 20px;
   flex: 1;
 }
 
+/* Tabs */
 .schedule-tabs {
   display: flex;
   margin-bottom: 30px;
@@ -15,7 +18,7 @@
   border: none;
   padding: 15px 30px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 500; /* ✅ match bracket tabs */
   color: var(--text-muted);
   cursor: pointer;
   border-bottom: 3px solid transparent;
@@ -30,6 +33,7 @@
 .schedule-tab-active {
   color: var(--primary-color);
   border-bottom-color: var(--primary-color);
+  font-weight: 600; /* ✅ consistent with bracket active tab */
 }
 
 /* Form Card */
@@ -41,11 +45,9 @@
   padding: 40px;
 }
 
-
-
-
 .schedule-form-container h2 {
   font-size: 28px;
+  font-weight: 700; /* ✅ match bracket form heading */
   margin-bottom: 30px;
   color: var(--text-primary);
 }
@@ -62,7 +64,7 @@
 }
 
 .schedule-form-group label {
-  font-weight: 600;
+  font-weight: 500; /* ✅ same as bracket form labels */
   margin-bottom: 8px;
   color: var(--text-primary);
 }
@@ -94,6 +96,7 @@
   justify-content: flex-end;
 }
 
+/* Buttons */
 .schedule-submit-btn {
   background: var(--primary-color);
   color: white;
@@ -101,7 +104,7 @@
   padding: 14px 32px;
   border-radius: var(--border-radius);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 600; /* ✅ match bracket buttons */
   cursor: pointer;
   transition: var(--transition);
 }
@@ -119,7 +122,7 @@
   padding: 14px 32px;
   border-radius: var(--border-radius);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 600; /* ✅ match bracket buttons */
   cursor: pointer;
   transition: var(--transition);
 }
@@ -129,10 +132,25 @@
   transform: translateY(-2px);
 }
 
+.schedule-create-first-btn {
+  margin-top: 20px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-weight: 600; /* ✅ consistent */
+  cursor: pointer;
+  transition: var(--transition);
+}
+
 /* View Section */
 .schedule-view-section h2 {
   font-size: 28px;
+  font-weight: 700; /* ✅ match bracket view header */
   margin-bottom: 20px;
+  color: var(--text-primary);
 }
 
 .schedule-no-schedules {
@@ -142,16 +160,6 @@
   border-radius: var(--border-radius-lg);
   padding: 40px;
   box-shadow: var(--shadow-light);
-}
-
-.schedule-create-first-btn {
-  margin-top: 20px;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
 }
 
 .schedule-grid {
@@ -177,6 +185,11 @@
   margin-bottom: 12px;
 }
 
+.schedule-card-header h3 {
+  font-weight: 600; /* ✅ match bracket card titles */
+  color: var(--text-primary);
+}
+
 .schedule-card-info {
   font-size: 14px;
   color: var(--text-secondary);
@@ -195,9 +208,12 @@
   padding: 10px 20px;
   border-radius: var(--border-radius);
   cursor: pointer;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 600; /* ✅ match bracket delete button */
+  transition: var(--transition);
 }
 
 .schedule-delete-btn:hover {
   background: #dc2626;
+  transform: translateY(-2px);
 }
