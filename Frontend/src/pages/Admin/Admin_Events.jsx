@@ -100,7 +100,7 @@ const AdminEvents = ({ sidebarOpen }) => {
   };
 
   return (
-    <div className="admin-events">
+    <div className="admin-dashboard">
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         
         {/* Header */}
