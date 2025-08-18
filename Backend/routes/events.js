@@ -37,14 +37,14 @@ router.post('/', async (req, res) => {
         console.log('Received POST request to create event');
         console.log('Request body:', req.body);
 
-        const { name, sport_type, elimination_type, start_date, end_date } = req.body;
+        const { name, start_date, end_date } = req.body;
 
         // Validate required fields
-        if (!name || !sport_type || !elimination_type || !start_date || !end_date) {
+        if (!name || !start_date || !end_date) {
             console.log('Validation failed - missing fields');
             return res.status(400).json({
                 message: 'All fields are required',
-                received: { name, sport_type, elimination_type, start_date, end_date }
+                received: { name, start_date, end_date }
             });
         }
 
@@ -53,17 +53,15 @@ router.post('/', async (req, res) => {
         const archived = 'no';
 
         const query = `
-            INSERT INTO events (name, sport_type, elimination_type, start_date, end_date, status, archived)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO events (name, start_date, end_date, status, archived)
+            VALUES (?, ?, ?, ?, ?)
         `;
 
         console.log('Executing INSERT query:', query);
-        console.log('With values:', [name, sport_type, elimination_type, start_date, end_date, status, archived]);
+        console.log('With values:', [name, start_date, end_date, status, archived]);
 
         const [result] = await db.pool.query(query, [
             name,
-            sport_type,
-            elimination_type,
             start_date,
             end_date,
             status,

@@ -124,28 +124,6 @@ const AdminEvents = ({ sidebarOpen }) => {
           </div>
 
           <div className="form-group">
-            <label>Sport Type:</label>
-            <select
-              value={sportType}
-              onChange={(e) => setSportType(e.target.value)}
-            >
-              <option value="basketball">Basketball</option>
-              <option value="volleyball">Volleyball</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Elimination Type:</label>
-            <select
-              value={eliminationType}
-              onChange={(e) => setEliminationType(e.target.value)}
-            >
-              <option value="single">Single Elimination</option>
-              <option value="double">Double Elimination</option>
-            </select>
-          </div>
-
-          <div className="form-group">
             <label>Start Date:</label>
             <input
               type="date"
@@ -182,10 +160,8 @@ const AdminEvents = ({ sidebarOpen }) => {
             events.map((event) => (
               <div className="event-card" key={event.id}>
                 <h3>{event.name}</h3>
-                <p><strong>Sport:</strong> {event.sport_type}</p>
-                <p><strong>Elimination:</strong> {event.elimination_type}</p>
-                <p><strong>Start:</strong> {event.start_date}</p>
-                <p><strong>End:</strong> {event.end_date}</p>
+                <p><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</p>
+                <p><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</p>
                 <p><strong>Status:</strong> 
                   <span className={event.status === "ongoing" ? "status-ongoing" : "status-completed"}>
                     {event.status}
