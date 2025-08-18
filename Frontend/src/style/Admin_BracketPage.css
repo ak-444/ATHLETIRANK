@@ -801,4 +801,19 @@
   transform: scale(0.95);
 }
 
+.bracket-stats-btn {
+  background-color: #4f46e5; /* Indigo */
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.bracket-stats-btn:hover {
+  background-color: #4338ca; /* Darker indigo */
+}
+
 /* Rest of your existing CSS remains the same */

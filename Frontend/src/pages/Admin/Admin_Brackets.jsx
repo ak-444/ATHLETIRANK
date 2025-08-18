@@ -12,8 +12,7 @@ const BracketsPage = ({ sidebarOpen }) => {
   const [formData, setFormData] = useState({
     bracketName: "",
     bracketType: "single",
-    sport: "",
-    customSport: "",
+    sport: "",             // only 'basketball' or 'volleyball'
     description: "",
     teams: []
   });
@@ -65,18 +64,17 @@ const BracketsPage = ({ sidebarOpen }) => {
 
   const generateBracket = () => {
     const event = events.find(ev => ev.id === parseInt(selectedEventId));
-
-    // decide final sport/game
-    const sportChosen = formData.sport === "custom" ? formData.customSport : formData.sport;
+    const sportChosen = formData.sport; // only basketball or volleyball now
 
     if (event && sportChosen && formData.bracketType && formData.teams.length >= 2) {
       const bracket = {
         id: Date.now(),
         eventId: event.id,
         eventName: event.name,
-        name: formData.bracketName || (event.name + " Bracket"),
+        // include sport in the bracket name if no custom provided
+        name: formData.bracketName || `${event.name} - ${capitalize(sportChosen)} Bracket`,
         type: formData.bracketType,
-        sport: sportChosen,   // ✅ store real sport/game
+        sport: sportChosen,
         description: formData.description,
         teams: formData.teams,
         rounds: [],
@@ -127,14 +125,13 @@ const BracketsPage = ({ sidebarOpen }) => {
         bracketName: "",
         bracketType: "single",
         sport: "",
-        customSport: "",
         description: "",
         teams: []
       });
       setSelectedEventId("");
       setActiveTab("view");
     } else {
-      alert("Please select an event, choose a sport, and add at least 2 teams.");
+      alert("Please select an event, choose a sport (Basketball or Volleyball), and add at least 2 teams.");
     }
   };
 
@@ -149,6 +146,7 @@ const BracketsPage = ({ sidebarOpen }) => {
     setBrackets(prev => prev.filter(bracket => bracket.id !== id));
     if (selectedBracket && selectedBracket.id === id) {
       setSelectedBracket(null);
+      setActiveTab("view");
     }
   };
 
@@ -161,6 +159,9 @@ const BracketsPage = ({ sidebarOpen }) => {
     }
     return null;
   };
+
+  // helper to capitalize sport label
+  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
   return (
     <div className="admin-dashboard">
@@ -219,9 +220,9 @@ const BracketsPage = ({ sidebarOpen }) => {
                     </select>
                   </div>
 
-                  {/* Sport/Game */}
+                  {/* Sport/Game: only Basketball or Volleyball */}
                   <div className="bracket-form-group">
-                    <label htmlFor="sport">Sport/Game *</label>
+                    <label htmlFor="sport">Sport *</label>
                     <select
                       id="sport"
                       name="sport"
@@ -229,27 +230,11 @@ const BracketsPage = ({ sidebarOpen }) => {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="">Select a sport/game</option>
+                      <option value="">Select sport</option>
                       <option value="basketball">Basketball</option>
                       <option value="volleyball">Volleyball</option>
-                      <option value="custom">Other (Custom)</option>
                     </select>
                   </div>
-
-                  {formData.sport === "custom" && (
-                    <div className="bracket-form-group">
-                      <label htmlFor="customSport">Custom Game *</label>
-                      <input
-                        type="text"
-                        id="customSport"
-                        name="customSport"
-                        value={formData.customSport}
-                        onChange={handleInputChange}
-                        placeholder="Enter game name (e.g., CODM, Tekken, Chess)"
-                        required
-                      />
-                    </div>
-                  )}
 
                   <div className="bracket-form-group">
                     <label htmlFor="bracketType">Bracket Type *</label>
@@ -273,7 +258,7 @@ const BracketsPage = ({ sidebarOpen }) => {
                       value={formData.description}
                       onChange={handleInputChange}
                       placeholder="Enter bracket description"
-                      rows="5"
+                      rows="4"
                     />
                   </div>
 
@@ -329,7 +314,6 @@ const BracketsPage = ({ sidebarOpen }) => {
                           bracketName: "",
                           bracketType: "single",
                           sport: "",
-                          customSport: "",
                           description: "",
                           teams: []
                         });
@@ -361,8 +345,8 @@ const BracketsPage = ({ sidebarOpen }) => {
                     <div key={bracket.id} className="bracket-card">
                       <div className="bracket-card-header">
                         <h3>{bracket.name}</h3>
-                        <span className="bracket-sport-badge">
-                          {bracket.sport}
+                        <span className={`bracket-sport-badge bracket-sport-${bracket.sport}`}>
+                          {capitalize(bracket.sport)}
                         </span>
                       </div>
                       
@@ -388,6 +372,16 @@ const BracketsPage = ({ sidebarOpen }) => {
                         >
                           View Bracket
                         </button>
+
+                        {bracket.sport === "basketball" || bracket.sport === "volleyball" ? (
+                          <button 
+                            className="bracket-stats-btn"
+                            onClick={() => alert("Open statistics page for this bracket")}
+                          >
+                            Stats
+                          </button>
+                        ) : null}
+
                         <button 
                           className="bracket-delete-btn" 
                           onClick={() => deleteBracket(bracket.id)}
@@ -395,6 +389,7 @@ const BracketsPage = ({ sidebarOpen }) => {
                           Delete
                         </button>
                       </div>
+
                     </div>
                   ))}
                 </div>
@@ -411,7 +406,7 @@ const BracketsPage = ({ sidebarOpen }) => {
                   <p className="bracket-type-info">
                     {selectedBracket.type === "single" 
                       ? "Single Elimination Tournament" 
-                      : "Double Elimination Tournament"} - {selectedBracket.sport}
+                      : "Double Elimination Tournament"} - {capitalize(selectedBracket.sport)}
                   </p>
                   <p><strong>Event:</strong> {selectedBracket.eventName}</p>
                 </div>
