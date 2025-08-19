@@ -4,9 +4,16 @@ const path = require('path');
 require('dotenv').config();
 
 const { testConnection } = require('./config/database');
+
+// Routes
 const authRoutes = require('./routes/auth');
-const adminRoutes = require('./routes/admin'); // Add this line
+const adminRoutes = require('./routes/admin');
 const eventsRoutes = require('./routes/events');
+const bracketsRoutes = require('./routes/brackets');
+const teamsRoutes = require('./routes/teams');      // ✅ NEW
+const playersRoutes = require('./routes/players');  // ✅ NEW
+const bracketTeamsRoutes = require("./routes/bracketTeams");
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,10 +28,15 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Test database connection
 testConnection();
 
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes); // Add this line
-app.use("/api/events", eventsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/events', eventsRoutes);
+app.use('/api/brackets', bracketsRoutes);
+app.use('/api/teams', teamsRoutes);        // ✅ NEW
+app.use('/api/players', playersRoutes);    // ✅ NEW
+app.use("/api/bracket_teams", bracketTeamsRoutes);
+
 
 // Test route
 app.get('/api/test', (req, res) => {
@@ -49,6 +61,8 @@ app.listen(PORT, () => {
     console.log(`📊 Test your API at: http://localhost:${PORT}/api/test`);
     console.log(`📁 Uploads accessible at: http://localhost:${PORT}/uploads/`);
     console.log(`👥 Admin routes available at: http://localhost:${PORT}/api/admin/`);
+    console.log(`🏀 Teams routes available at: http://localhost:${PORT}/api/teams/`);
+    console.log(`👤 Players routes available at: http://localhost:${PORT}/api/players/`);
 });
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
