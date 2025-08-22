@@ -13,7 +13,9 @@ import TeamsPage from './pages/Admin/Admin_Teams';
 import AdminStats from './pages/Admin/Admin_Stats';
 import AdminUsers from './pages/Admin/Admin_Users';
 import StaffDashboard from './pages/Staff/Staff_Dashboard';
+import StaffEvents from './pages/Staff/Staff_Events'
 import ProtectedRoute from './components/ProtectedRoute';
+
 
 import './style/app.css';
 
@@ -98,6 +100,15 @@ function App() {
                                     <StaffDashboard sidebarOpen={sidebarOpen}/> 
                                 </>
                             }/>
+
+                        <Route path="/StaffDashboard/stats" 
+                            element={
+                                <>
+                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                                    <StaffEvents sidebarOpen={sidebarOpen}/> 
+                                </>
+                            }/>
+
                     </Route>
                 </Routes>
             </Router>
