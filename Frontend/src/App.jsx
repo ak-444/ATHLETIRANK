@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Homepage from './pages/HomePage';
@@ -13,107 +13,133 @@ import TeamsPage from './pages/Admin/Admin_Teams';
 import AdminStats from './pages/Admin/Admin_Stats';
 import AdminUsers from './pages/Admin/Admin_Users';
 import StaffDashboard from './pages/Staff/Staff_Dashboard';
-import StaffEvents from './pages/Staff/Staff_Events'
+import StaffEvents from './pages/Staff/Staff_Events';
+import StaffStats from './pages/Staff/Staff_Stats';
 import ProtectedRoute from './components/ProtectedRoute';
-
 
 import './style/app.css';
 
 function App() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-    return (
-        <AuthProvider>
-           <Router>
-                <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<Homepage />} />
-                    <Route path="/Register&Login" element={<RegisterAndLoginPage />} />
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Homepage />} />
+          <Route path="/Register&Login" element={<RegisterAndLoginPage />} />
 
-                    {/* Admin protected routes */}
-                    <Route element={<ProtectedRoute requiredRole="admin" />}>
-                        <Route path="/AdminDashboard" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-                                    <AdminDashboard sidebarOpen={sidebarOpen}/> 
-                                </>
-                            } />
-                        
-                        <Route path="/AdminDashboard/events" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-                                    <AdminEvents sidebarOpen={sidebarOpen}/> 
-                                </>
-                            }
-                        />
+          {/* Admin protected routes */}
+          <Route element={<ProtectedRoute requiredRole="admin" />}>
+            <Route
+              path="/AdminDashboard"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <AdminDashboard sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
-                        <Route path="/AdminDashboard/brackets" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-                                    <BracketsPage sidebarOpen={sidebarOpen}/>
-                                </>
-                            }/>
+            <Route
+              path="/AdminDashboard/events"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <AdminEvents sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
-                        <Route path="/AdminDashboard/schedules" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-                                    <SchedulesPage sidebarOpen={sidebarOpen} />
-                                </>
-                            }/>
+            <Route
+              path="/AdminDashboard/brackets"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <BracketsPage sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
-                        <Route path="/AdminDashboard/teams" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar}/>
-                                    <TeamsPage sidebarOpen={sidebarOpen} /> 
-                                </>
-                            }/>
+            <Route
+              path="/AdminDashboard/schedules"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <SchedulesPage sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
-                        <Route path="/AdminDashboard/stats" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar}/>
-                                    <AdminStats sidebarOpen={sidebarOpen} /> 
-                                </>
-                            }/>
+            <Route
+              path="/AdminDashboard/teams"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <TeamsPage sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
-                        <Route path="/AdminDashboard/users" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar}/>
-                                    <AdminUsers sidebarOpen={sidebarOpen} /> 
-                                </>
-                            }/>
-                    </Route>
+            <Route
+              path="/AdminDashboard/stats"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <AdminStats sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
-                    {/* Staff protected routes */}
-                    <Route element={<ProtectedRoute requiredRole="staff" />}>
-                        <Route path="/StaffDashboard" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-                                    <StaffDashboard sidebarOpen={sidebarOpen}/> 
-                                </>
-                            }/>
+            <Route
+              path="/AdminDashboard/users"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <AdminUsers sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
+          </Route>
 
-                        <Route path="/StaffDashboard/stats" 
-                            element={
-                                <>
-                                    <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-                                    <StaffEvents sidebarOpen={sidebarOpen}/> 
-                                </>
-                            }/>
+          {/* Staff protected routes */}
+          <Route element={<ProtectedRoute requiredRole="staff" />}>
+            <Route
+              path="/StaffDashboard"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <StaffDashboard sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
-                    </Route>
-                </Routes>
-            </Router>
-        </AuthProvider>
-    );
+            <Route
+              path="/StaffDashboard/events"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <StaffEvents sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
+
+            <Route
+              path="/StaffDashboard/stats"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <StaffStats sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
 }
 
 export default App;

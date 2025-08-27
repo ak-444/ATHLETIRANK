@@ -1,0 +1,366 @@
+/* Staff_Stats.css - Fixed & Improved Layout */
+
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --background-primary: #0a0f1c;
+  --background-secondary: #1a2332;
+  --background-card: #0f172a;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #2d3748;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main wrapper */
+.events-content {
+  padding: 20px;
+  flex: 1;
+}
+
+/* Tabs */
+.events-tabs {
+  display: flex;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.events-tab-button {
+  background: none;
+  border: none;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: var(--transition);
+}
+
+.events-tab-button:hover {
+  color: var(--text-primary);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.events-tab-active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Stats Header */
+.stats-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.stats-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+/* Team Scores */
+.team-scores-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 500px;
+  box-shadow: var(--shadow-light);
+}
+
+.team-score {
+  text-align: center;
+  flex: 1;
+}
+
+.team-score h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.score-display {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.score-separator {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 20px;
+  color: var(--text-secondary);
+}
+
+/* Actions */
+.stats-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.stats-action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Teams Section */
+.teams-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 20px;
+}
+
+.team-section {
+  background: var(--background-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-light);
+}
+
+.team-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Player Cards */
+.players-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.player-card {
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+}
+
+.player-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.player-header h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.player-points {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: var(--border-radius);
+}
+
+/* Stats Grid inside each player card - FIXED LAYOUT */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.stat-group {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-primary);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+}
+
+.stat-group:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.stat-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.stat-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.stat-controls input {
+  width: 50px;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-controls button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-controls button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Buttons */
+.events-submit-btn,
+.events-cancel-btn,
+.events-delete-btn {
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+
+.events-submit-btn {
+  background: var(--primary-color);
+  color: white;
+}
+
+.events-submit-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.events-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.events-cancel-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.events-cancel-btn:hover {
+  background: #d97706;
+  transform: translateY(-2px);
+}
+
+.events-delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.events-delete-btn:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .teams-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-scores-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .score-separator {
+    margin: 10px 0;
+  }
+  
+  .stats-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .stats-action-buttons {
+    justify-content: center;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .player-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 400px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
