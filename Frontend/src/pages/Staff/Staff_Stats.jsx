@@ -313,6 +313,40 @@ const StaffStats = ({ sidebarOpen }) => {
               </button>
             </div>
           </div>
+          <div className="stat-group">
+            <label>Steals</label>
+            <div className="stat-controls">
+              <button onClick={() => adjustPlayerStat(playerIndex, 'steals', false)}>
+                <FaMinus />
+              </button>
+              <input
+                type="number"
+                min="0"
+                value={player.steals}
+                onChange={(e) => updatePlayerStat(playerIndex, 'steals', e.target.value)}
+              />
+              <button onClick={() => adjustPlayerStat(playerIndex, 'steals', true)}>
+                <FaPlus />
+              </button>
+            </div>
+          </div>
+          <div className="stat-group">
+            <label>Fouls</label>
+            <div className="stat-controls">
+              <button onClick={() => adjustPlayerStat(playerIndex, 'fouls', false)}>
+                <FaMinus />
+              </button>
+              <input
+                type="number"
+                min="0"
+                value={player.fouls}
+                onChange={(e) => updatePlayerStat(playerIndex, 'fouls', e.target.value)}
+              />
+              <button onClick={() => adjustPlayerStat(playerIndex, 'fouls', true)}>
+                <FaPlus />
+              </button>
+            </div>
+          </div>
         </div>
       );
     } else { // Volleyball
