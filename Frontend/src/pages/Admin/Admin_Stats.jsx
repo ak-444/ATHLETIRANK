@@ -11,6 +11,20 @@ const AdminStats = ({ sidebarOpen }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sportFilter, setSportFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setShowFilters(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Mock data for demonstration
   const mockTeams = [
@@ -295,30 +309,71 @@ const AdminStats = ({ sidebarOpen }) => {
           </div>
           
           <div className="filter-controls">
-            <div className="filter-group">
-              <FaFilter />
-              <select 
-                value={sportFilter} 
-                onChange={(e) => setSportFilter(e.target.value)}
-                disabled
-              >
-                <option value="all">All Sports</option>
-                <option value="basketball">Basketball</option>
-                <option value="volleyball">Volleyball</option>
-              </select>
-            </div>
-            
-            <div className="filter-group">
-              <select 
-                value={timeFilter} 
-                onChange={(e) => setTimeFilter(e.target.value)}
-              >
-                <option value="all">All Time</option>
-                <option value="season">This Season</option>
-                <option value="month">This Month</option>
-                <option value="week">This Week</option>
-              </select>
-            </div>
+            {isMobile ? (
+              <>
+                <button 
+                  className="filter-toggle-btn"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <FaFilter /> Filters
+                </button>
+                
+                {showFilters && (
+                  <div className="mobile-filters">
+                    <div className="filter-group">
+                      <select 
+                        value={sportFilter} 
+                        onChange={(e) => setSportFilter(e.target.value)}
+                        disabled
+                      >
+                        <option value="all">All Sports</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="volleyball">Volleyball</option>
+                      </select>
+                    </div>
+                    
+                    <div className="filter-group">
+                      <select 
+                        value={timeFilter} 
+                        onChange={(e) => setTimeFilter(e.target.value)}
+                      >
+                        <option value="all">All Time</option>
+                        <option value="season">This Season</option>
+                        <option value="month">This Month</option>
+                        <option value="week">This Week</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="filter-group">
+                  
+                  <select 
+                    value={sportFilter} 
+                    onChange={(e) => setSportFilter(e.target.value)}
+                    disabled
+                  >
+                    <option value="all">All Sports</option>
+                    <option value="basketball">Basketball</option>
+                    <option value="volleyball">Volleyball</option>
+                  </select>
+                </div>
+                
+                <div className="filter-group">
+                  <select 
+                    value={timeFilter} 
+                    onChange={(e) => setTimeFilter(e.target.value)}
+                  >
+                    <option value="all">All Time</option>
+                    <option value="season">This Season</option>
+                    <option value="month">This Month</option>
+                    <option value="week">This Week</option>
+                  </select>
+                </div>
+              </>
+            )}
             
             <button className="export-btn" onClick={exportToCSV}>
               <FaDownload /> Export CSV

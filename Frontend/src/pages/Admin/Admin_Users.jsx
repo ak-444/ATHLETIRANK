@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import API from '../../services/api';
 import '../../style/admin_Users.css';
-import { FaEye, FaCheck, FaTimes, FaTrash, FaDownload } from 'react-icons/fa';
+import { FaEye, FaCheck, FaTimes, FaTrash, FaDownload, FaBars, FaSearch } from 'react-icons/fa';
 
 const AdminUsers = ({ sidebarOpen }) => {
   const { user } = useAuth();
@@ -12,6 +12,20 @@ const AdminUsers = ({ sidebarOpen }) => {
   const [success, setSuccess] = useState('');
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showSearch, setShowSearch] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setShowSearch(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (user && user.role === 'admin') {
@@ -127,13 +141,33 @@ const AdminUsers = ({ sidebarOpen }) => {
                 <option value="admin">Admins Only</option>
               </select>
               
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
+              {isMobile ? (
+                <div className="mobile-search-container">
+                  <button 
+                    className="mobile-search-toggle"
+                    onClick={() => setShowSearch(!showSearch)}
+                  >
+                    <FaSearch />
+                  </button>
+                  {showSearch && (
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input mobile-search-input"
+                    />
+                  )}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              )}
             </div>
           </div>
 
@@ -144,85 +178,153 @@ const AdminUsers = ({ sidebarOpen }) => {
             </div>
           ) : (
             <div className="users-table-container">
-              <table className="users-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>ID Verification</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
+              {isMobile ? (
+                <div className="users-cards">
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map(user => (
-                      <tr key={user.id}>
-                        <td>{user.username}</td>
-                        <td>{user.email}</td>
-                        <td>
+                      <div key={user.id} className="user-card">
+                        <div className="user-card-header">
+                          <h3>{user.username}</h3>
                           <span className={`role-badge ${user.role}`}>
                             {user.role}
                           </span>
-                        </td>
-                        <td>
-                          <span className={`status-badge ${user.is_approved ? 'approved' : 'pending'}`}>
-                            {user.is_approved ? 'Approved' : 'Pending'}
-                          </span>
-                        </td>
-                        <td>
-                          {user.university_id_image ? (
-                            <button 
-                              onClick={() => downloadId(user.university_id_image)}
-                              className="view-id-btn"
-                            >
-                              <FaEye /> View ID
-                            </button>
-                          ) : (
-                            <span className="no-id">No ID uploaded</span>
-                          )}
-                        </td>
-                        <td>
-                          <div className="action-buttons">
-                            {!user.is_approved && (
-                              <>
-                                <button 
-                                  onClick={() => approveUser(user.id)}
-                                  className="approve-btn"
-                                  title="Approve"
-                                >
-                                  <FaCheck />
-                                </button>
-                                <button 
-                                  onClick={() => rejectUser(user.id)}
-                                  className="reject-btn"
-                                  title="Reject"
-                                >
-                                  <FaTimes />
-                                </button>
-                              </>
-                            )}
-                            <button 
-                              onClick={() => deleteUser(user.id)}
-                              className="delete-btn"
-                              title="Delete"
-                            >
-                              <FaTrash />
-                            </button>
+                        </div>
+                        <div className="user-card-details">
+                          <p className="user-email">{user.email}</p>
+                          <div className="user-status">
+                            <span className={`status-badge ${user.is_approved ? 'approved' : 'pending'}`}>
+                              {user.is_approved ? 'Approved' : 'Pending'}
+                            </span>
                           </div>
-                        </td>
-                      </tr>
+                          <div className="user-id-verification">
+                            {user.university_id_image ? (
+                              <button 
+                                onClick={() => downloadId(user.university_id_image)}
+                                className="view-id-btn"
+                              >
+                                <FaEye /> View ID
+                              </button>
+                            ) : (
+                              <span className="no-id">No ID uploaded</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="user-card-actions">
+                          {!user.is_approved && (
+                            <>
+                              <button 
+                                onClick={() => approveUser(user.id)}
+                                className="approve-btn"
+                                title="Approve"
+                              >
+                                <FaCheck />
+                              </button>
+                              <button 
+                                onClick={() => rejectUser(user.id)}
+                                className="reject-btn"
+                                title="Reject"
+                              >
+                                <FaTimes />
+                              </button>
+                            </>
+                          )}
+                          <button 
+                            onClick={() => deleteUser(user.id)}
+                            className="delete-btn"
+                            title="Delete"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
                     ))
                   ) : (
-                    <tr>
-                      <td colSpan="6" className="no-users">
-                        No users found matching your criteria
-                      </td>
-                    </tr>
+                    <div className="no-users">
+                      No users found matching your criteria
+                    </div>
                   )}
-                </tbody>
-              </table>
+                </div>
+              ) : (
+                <table className="users-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>ID Verification</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.length > 0 ? (
+                      filteredUsers.map(user => (
+                        <tr key={user.id}>
+                          <td>{user.username}</td>
+                          <td>{user.email}</td>
+                          <td>
+                            <span className={`role-badge ${user.role}`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`status-badge ${user.is_approved ? 'approved' : 'pending'}`}>
+                              {user.is_approved ? 'Approved' : 'Pending'}
+                            </span>
+                          </td>
+                          <td>
+                            {user.university_id_image ? (
+                              <button 
+                                onClick={() => downloadId(user.university_id_image)}
+                                className="view-id-btn"
+                              >
+                                <FaEye /> View ID
+                              </button>
+                            ) : (
+                              <span className="no-id">No ID uploaded</span>
+                            )}
+                          </td>
+                          <td>
+                            <div className="action-buttons">
+                              {!user.is_approved && (
+                                <>
+                                  <button 
+                                    onClick={() => approveUser(user.id)}
+                                    className="approve-btn"
+                                    title="Approve"
+                                  >
+                                    <FaCheck />
+                                  </button>
+                                  <button 
+                                    onClick={() => rejectUser(user.id)}
+                                    className="reject-btn"
+                                    title="Reject"
+                                  >
+                                    <FaTimes />
+                                  </button>
+                                </>
+                              )}
+                              <button 
+                                onClick={() => deleteUser(user.id)}
+                                className="delete-btn"
+                                title="Delete"
+                              >
+                                <FaTrash />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="no-users">
+                          No users found matching your criteria
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
           )}
         </div>
