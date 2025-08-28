@@ -296,9 +296,9 @@ const AdminStats = ({ sidebarOpen }) => {
     const isBasketball = selectedTeam.sport === "Basketball";
     
     return (
-      <div className="stats-table-container">
-        <div className="table-controls">
-          <div className="search-box">
+      <div className="adminstats-table-container">
+        <div className="adminstats-table-controls">
+          <div className="adminstats-search-box">
             <FaSearch />
             <input
               type="text"
@@ -308,19 +308,19 @@ const AdminStats = ({ sidebarOpen }) => {
             />
           </div>
           
-          <div className="filter-controls">
+          <div className="adminstats-filter-controls">
             {isMobile ? (
               <>
                 <button 
-                  className="filter-toggle-btn"
+                  className="adminstats-filter-toggle-btn"
                   onClick={() => setShowFilters(!showFilters)}
                 >
                   <FaFilter /> Filters
                 </button>
                 
                 {showFilters && (
-                  <div className="mobile-filters">
-                    <div className="filter-group">
+                  <div className="adminstats-mobile-filters">
+                    <div className="adminstats-filter-group">
                       <select 
                         value={sportFilter} 
                         onChange={(e) => setSportFilter(e.target.value)}
@@ -332,7 +332,7 @@ const AdminStats = ({ sidebarOpen }) => {
                       </select>
                     </div>
                     
-                    <div className="filter-group">
+                    <div className="adminstats-filter-group">
                       <select 
                         value={timeFilter} 
                         onChange={(e) => setTimeFilter(e.target.value)}
@@ -348,7 +348,7 @@ const AdminStats = ({ sidebarOpen }) => {
               </>
             ) : (
               <>
-                <div className="filter-group">
+                <div className="adminstats-filter-group">
                   
                   <select 
                     value={sportFilter} 
@@ -361,7 +361,7 @@ const AdminStats = ({ sidebarOpen }) => {
                   </select>
                 </div>
                 
-                <div className="filter-group">
+                <div className="adminstats-filter-group">
                   <select 
                     value={timeFilter} 
                     onChange={(e) => setTimeFilter(e.target.value)}
@@ -375,14 +375,14 @@ const AdminStats = ({ sidebarOpen }) => {
               </>
             )}
             
-            <button className="export-btn" onClick={exportToCSV}>
+            <button className="adminstats-export-btn" onClick={exportToCSV}>
               <FaDownload /> Export CSV
             </button>
           </div>
         </div>
         
-        <div className="stats-table-wrapper">
-          <table className="stats-table">
+        <div className="adminstats-table-wrapper">
+          <table className="adminstats-table">
             <thead>
               <tr>
                 <th>Player</th>
@@ -430,13 +430,13 @@ const AdminStats = ({ sidebarOpen }) => {
             <tbody>
               {filteredPlayers.map((player) => (
                 <tr key={player.id}>
-                  <td className="player-name">{player.name}</td>
-                  <td className="jersey-number">{player.jersey}</td>
+                  <td className="adminstats-player-name">{player.name}</td>
+                  <td className="adminstats-jersey-number">{player.jersey}</td>
                   <td>{player.games_played || 0}</td>
                   
                   {isBasketball ? (
                     <>
-                      <td className="highlight">{player.points || 0}</td>
+                      <td className="adminstats-highlight">{player.points || 0}</td>
                       <td>{player.field_goals_made || 0}</td>
                       <td>{player.field_goals_attempted || 0}</td>
                       <td>{player.three_pointers_made || 0}</td>
@@ -454,7 +454,7 @@ const AdminStats = ({ sidebarOpen }) => {
                     </>
                   ) : (
                     <>
-                      <td className="highlight">{player.kills || 0}</td>
+                      <td className="adminstats-highlight">{player.kills || 0}</td>
                       <td>{player.kill_errors || 0}</td>
                       <td>{player.kill_attempts || 0}</td>
                       <td>{player.assists_volleyball || 0}</td>
@@ -475,13 +475,13 @@ const AdminStats = ({ sidebarOpen }) => {
               
               {/* Team Totals Row */}
               {teamTotals && (
-                <tr className="team-totals">
+                <tr className="adminstats-team-totals">
                   <td colSpan="2">TEAM TOTALS</td>
                   <td>{teamTotals.games_played || 0}</td>
                   
                   {isBasketball ? (
                     <>
-                      <td className="highlight">{teamTotals.points || 0}</td>
+                      <td className="adminstats-highlight">{teamTotals.points || 0}</td>
                       <td>{teamTotals.field_goals_made || 0}</td>
                       <td>{teamTotals.field_goals_attempted || 0}</td>
                       <td>{teamTotals.three_pointers_made || 0}</td>
@@ -499,7 +499,7 @@ const AdminStats = ({ sidebarOpen }) => {
                     </>
                   ) : (
                     <>
-                      <td className="highlight">{teamTotals.kills || 0}</td>
+                      <td className="adminstats-highlight">{teamTotals.kills || 0}</td>
                       <td>{teamTotals.kill_errors || 0}</td>
                       <td>{teamTotals.kill_attempts || 0}</td>
                       <td>{teamTotals.assists_volleyball || 0}</td>
@@ -522,7 +522,7 @@ const AdminStats = ({ sidebarOpen }) => {
         </div>
         
         {filteredPlayers.length === 0 && (
-          <div className="no-stats-message">
+          <div className="adminstats-no-stats-message">
             <FaChartLine />
             <p>No player statistics found for this team.</p>
           </div>
@@ -532,29 +532,29 @@ const AdminStats = ({ sidebarOpen }) => {
   };
 
   return (
-    <div className="admin-dashboard">
-      <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
-        <div className="dashboard-header">
+    <div className="adminstats-dashboard">
+      <div className={`adminstats-dashboard-content ${sidebarOpen ? "adminstats-sidebar-open" : ""}`}>
+        <div className="adminstats-dashboard-header">
           <h1>Admin Stats</h1>
           <p>View and analyze team and player statistics</p>
         </div>
         
-        <div className="admin-stats-content">
+        <div className="adminstats-content">
           {/* Team Selection */}
-          <div className="stats-section">
+          <div className="adminstats-section">
             <h2>Select a Team</h2>
-            <div className="teams-grid">
+            <div className="adminstats-teams-grid">
               {teams.map(team => (
                 <div 
                   key={team.id} 
-                  className={`team-card ${selectedTeam?.id === team.id ? 'selected' : ''}`}
+                  className={`adminstats-team-card ${selectedTeam?.id === team.id ? 'adminstats-selected' : ''}`}
                   onClick={() => handleTeamSelect(team)}
                 >
-                  <div className="team-icon">
+                  <div className="adminstats-team-icon">
                     <FaUsers />
                   </div>
                   <h3>{team.name}</h3>
-                  <p className="team-sport">{team.sport}</p>
+                  <p className="adminstats-team-sport">{team.sport}</p>
                 </div>
               ))}
             </div>
@@ -562,13 +562,13 @@ const AdminStats = ({ sidebarOpen }) => {
           
           {/* Statistics Display */}
           {selectedTeam && (
-            <div className="stats-section">
-              <div className="section-header">
+            <div className="adminstats-section">
+              <div className="adminstats-section-header">
                 <h2>
                   {selectedTeam.name} Statistics 
-                  <span className="sport-badge">{selectedTeam.sport}</span>
+                  <span className="adminstats-sport-badge">{selectedTeam.sport}</span>
                 </h2>
-                {loading && <div className="loading-spinner">Loading...</div>}
+                {loading && <div className="adminstats-loading-spinner">Loading...</div>}
               </div>
               
               {!loading && renderStatsTable()}

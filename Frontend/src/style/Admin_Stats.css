@@ -1,10 +1,16 @@
-/* Admin_Stats.css - Responsive Version */
+/* Admin_Stats.css - Responsive Version with Renamed Classnames */
 
-.admin-stats-content {
-  padding: 0;
+.adminstats-dashboard-header {
+  padding-left: 50px;
 }
 
-.stats-section {
+.adminstats-content {
+  padding: 0;
+  padding-left: 40px;
+  
+}
+
+.adminstats-section {
   background-color: var(--background-card);
   border-radius: var(--border-radius-lg);
   padding: 1.5rem;
@@ -12,7 +18,7 @@
   margin-bottom: 1.5rem;
 }
 
-.stats-section h2 {
+.adminstats-section h2 {
   color: var(--text-primary);
   margin: 0 0 1.25rem 0;
   font-size: 1.5rem;
@@ -20,13 +26,13 @@
 }
 
 /* Teams Grid */
-.teams-grid {
+.adminstats-teams-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
 }
 
-.team-card {
+.adminstats-team-card {
   background-color: var(--background-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -36,31 +42,31 @@
   transition: var(--transition);
 }
 
-.team-card:hover {
+.adminstats-team-card:hover {
   border-color: var(--primary-color);
   box-shadow: var(--shadow-light);
   transform: translateY(-2px);
 }
 
-.team-card.selected {
+.adminstats-team-card.adminstats-selected {
   border-color: var(--primary-color);
   background-color: rgba(59, 130, 246, 0.1);
 }
 
-.team-icon {
+.adminstats-team-icon {
   font-size: 2rem;
   color: var(--primary-color);
   margin-bottom: 0.75rem;
 }
 
-.team-card h3 {
+.adminstats-team-card h3 {
   color: var(--text-primary);
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
-.team-sport {
+.adminstats-team-sport {
   color: var(--text-secondary);
   margin: 0;
   font-size: 0.875rem;
@@ -69,7 +75,7 @@
 }
 
 /* Section Header */
-.section-header {
+.adminstats-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -78,7 +84,7 @@
   gap: 1rem;
 }
 
-.sport-badge {
+.adminstats-sport-badge {
   background-color: var(--primary-color);
   color: white;
   padding: 0.25rem 0.75rem;
@@ -89,12 +95,12 @@
 }
 
 /* Stats Table */
-.stats-table-container {
+.adminstats-table-container {
   overflow-x: auto;
 }
 
 /* FIX: Added big gap between search bar and filters */
-.table-controls {
+.adminstats-table-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -103,7 +109,7 @@
   gap: 20rem; /* Increased gap */
 }
 
-.search-box {
+.adminstats-search-box {
   display: flex;
   align-items: center;
   background-color: var(--background-primary);
@@ -115,7 +121,7 @@
   margin-right: auto; /* Pushes filters to the right */
 }
 
-.search-box input {
+.adminstats-search-box input {
   background: transparent;
   border: none;
   color: var(--text-primary);
@@ -123,25 +129,25 @@
   width: 100%;
 }
 
-.search-box input:focus {
+.adminstats-search-box input:focus {
   outline: none;
 }
 
-.filter-controls {
+.adminstats-filter-controls {
   display: flex;
   align-items: center;
   gap: 1rem; /* Increased gap */
   flex-wrap: wrap;
 }
 
-.filter-group {
+.adminstats-filter-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: var(--text-secondary);
 }
 
-.filter-group select {
+.adminstats-filter-group select {
   background-color: var(--background-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -151,7 +157,7 @@
   min-width: 120px;
 }
 
-.filter-toggle-btn {
+.adminstats-filter-toggle-btn {
   display: none;
   background-color: var(--background-primary);
   border: 1px solid var(--border-color);
@@ -164,7 +170,7 @@
   gap: 0.5rem;
 }
 
-.mobile-filters {
+.adminstats-mobile-filters {
   display: flex;
   flex-direction: column;
   gap: 0.75rem; /* Increased gap */
@@ -175,7 +181,7 @@
   margin-top: 0.75rem; /* Increased margin */
 }
 
-.export-btn {
+.adminstats-export-btn {
   background-color: var(--primary-color);
   color: white;
   border: none;
@@ -191,11 +197,11 @@
   white-space: nowrap;
 }
 
-.export-btn:hover {
+.adminstats-export-btn:hover {
   background-color: var(--primary-hover);
 }
 
-.stats-table-wrapper {
+.adminstats-table-wrapper {
   overflow-x: auto;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -203,14 +209,14 @@
   -webkit-overflow-scrolling: touch; /* Better scrolling on mobile */
 }
 
-.stats-table {
+.adminstats-table {
   width: 100%;
   border-collapse: collapse;
   background-color: var(--background-card);
   min-width: 800px;
 }
 
-.stats-table th {
+.adminstats-table th {
   background-color: var(--background-secondary);
   color: var(--text-primary);
   font-weight: 600;
@@ -221,263 +227,312 @@
   font-size: 0.875rem;
 }
 
-.stats-table td {
+.adminstats-table td {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
   font-size: 0.875rem;
 }
 
-.stats-table tr:last-child td {
+.adminstats-table tr:last-child td {
   border-bottom: none;
 }
 
-.stats-table tr:hover {
+.adminstats-table tr:hover {
   background-color: var(--background-secondary);
 }
 
-.player-name {
+.adminstats-player-name {
   font-weight: 500;
   color: var(--text-primary);
 }
 
-.jersey-number {
+.adminstats-jersey-number {
   text-align: center;
   font-weight: 500;
 }
 
-.highlight {
+.adminstats-highlight {
   font-weight: 600;
   color: var(--primary-color);
 }
 
-.team-totals {
+.adminstats-team-totals {
   background-color: var(--background-secondary);
   font-weight: 600;
 }
 
-.team-totals td {
+.adminstats-team-totals td {
   border-top: 2px solid var(--border-color);
 }
 
 /* Loading and Empty States */
-.loading-spinner {
+.adminstats-loading-spinner {
   color: var(--text-secondary);
   font-style: italic;
 }
 
-.no-stats-message {
+.adminstats-no-stats-message {
   text-align: center;
   padding: 2.5rem 1.25rem;
   color: var(--text-secondary);
 }
 
-.no-stats-message svg {
+.adminstats-no-stats-message svg {
   font-size: 3rem;
   margin-bottom: 1rem;
   opacity: 0.5;
 }
 
-.no-stats-message p {
+.adminstats-no-stats-message p {
   margin: 0;
   font-size: 1rem;
 }
 
+/* Main Dashboard Layout */
+.adminstats-dashboard {
+  min-height: 100vh;
+  background-color: var(--background-primary);
+}
+
+.adminstats-dashboard-content {
+  padding: 2rem;
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+.adminstats-dashboard-content.adminstats-sidebar-open {
+  margin-left: 250px;
+}
+
+.adminstats-dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.adminstats-dashboard-header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.adminstats-dashboard-header p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 1.1rem;
+}
+
 /* Responsive Design - Mobile Fixes */
 @media (max-width: 1024px) {
-  .teams-grid {
+  .adminstats-teams-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
-  .stats-section {
+  .adminstats-section {
     padding: 1rem;
   }
   
-  .teams-grid {
+  .adminstats-teams-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 0.75rem;
   }
   
-  .team-card {
+  .adminstats-team-card {
     padding: 1rem;
   }
   
-  .team-icon {
+  .adminstats-team-icon {
     font-size: 1.75rem;
   }
   
   /* FIX: Improved mobile layout for table controls */
-  .table-controls {
+  .adminstats-table-controls {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
   
-  .search-box {
+  .adminstats-search-box {
     min-width: 100%;
     margin-bottom: 0;
   }
   
-  .filter-controls {
+  .adminstats-filter-controls {
     width: 100%;
     justify-content: space-between;
     flex-wrap: nowrap;
   }
   
-  .filter-group {
+  .adminstats-filter-group {
     flex: 1;
     margin-right: 0.5rem;
   }
   
-  .filter-group select {
+  .adminstats-filter-group select {
     min-width: 0;
     width: 100%;
   }
   
-  .filter-toggle-btn {
+  .adminstats-filter-toggle-btn {
     display: flex;
     order: 1; /* Make it appear first in mobile view */
   }
   
-  .mobile-filters {
+  .adminstats-mobile-filters {
     order: 2; /* Make filters appear after the button */
     width: 100%;
   }
   
-  .mobile-filters .filter-group {
+  .adminstats-mobile-filters .adminstats-filter-group {
     margin-right: 0;
     margin-bottom: 0.5rem;
   }
   
   /* Ensure all filter controls stay in one line */
-  .filter-controls > :not(.mobile-filters):not(.filter-toggle-btn) {
+  .adminstats-filter-controls > :not(.adminstats-mobile-filters):not(.adminstats-filter-toggle-btn) {
     display: none;
   }
   
-  .export-btn {
+  .adminstats-export-btn {
     margin-left: 0;
     order: 3; /* Make export button appear last */
     flex: 0 0 auto;
   }
   
   /* FIX: Improved table display on mobile */
-  .stats-table-wrapper {
+  .adminstats-table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     width: 100%;
   }
   
-  .stats-table {
+  .adminstats-table {
     font-size: 0.8rem;
   }
   
-  .stats-table th,
-  .stats-table td {
+  .adminstats-table th,
+  .adminstats-table td {
     padding: 0.5rem;
     font-size: 0.75rem;
+  }
+
+  .adminstats-dashboard-content {
+    padding: 1rem;
+  }
+
+  .adminstats-dashboard-content.adminstats-sidebar-open {
+    margin-left: 0;
   }
 }
 
 @media (max-width: 480px) {
-  .stats-section h2 {
+  .adminstats-section h2 {
     font-size: 1.25rem;
   }
   
-  .teams-grid {
+  .adminstats-teams-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .section-header {
+  .adminstats-section-header {
     flex-direction: column;
     align-items: flex-start;
   }
   
   /* FIX: Better mobile filter layout */
-  .filter-controls {
+  .adminstats-filter-controls {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
   }
   
-  .filter-toggle-btn {
+  .adminstats-filter-toggle-btn {
     width: 100%;
     justify-content: center;
     font-size: 0.9rem;
     padding: 0.6rem;
   }
   
-  .export-btn {
+  .adminstats-export-btn {
     width: 100%;
     justify-content: center;
     font-size: 0.9rem;
     padding: 0.6rem;
   }
   
-  .mobile-filters {
+  .adminstats-mobile-filters {
     margin-top: 0.5rem;
   }
   
-  .stats-table th,
-  .stats-table td {
+  .adminstats-table th,
+  .adminstats-table td {
     padding: 0.4rem;
     font-size: 0.7rem;
   }
   
   /* Make sure the search and filters are properly aligned */
-  .table-controls {
+  .adminstats-table-controls {
     gap: 0.75rem;
   }
   
   /* FIX: Hide some less important columns on very small screens */
-  .stats-table th:nth-child(n+7),
-  .stats-table td:nth-child(n+7) {
+  .adminstats-table th:nth-child(n+7),
+  .adminstats-table td:nth-child(n+7) {
     display: none;
+  }
+
+  .adminstats-dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .adminstats-dashboard-header p {
+    font-size: 1rem;
   }
 }
 
 /* Specific fix for filter alignment in desktop view */
 @media (min-width: 769px) {
-  .filter-controls {
+  .adminstats-filter-controls {
     flex-wrap: nowrap;
   }
   
-  .filter-group {
+  .adminstats-filter-group {
     white-space: nowrap;
   }
   
   /* Ensure all elements stay in one line */
-  .table-controls {
+  .adminstats-table-controls {
     flex-wrap: nowrap;
   }
   
   /* FIX: Add proper spacing between search and filters on desktop */
-  .search-box {
+  .adminstats-search-box {
     margin-right: 2rem; /* Added space between search and filters */
   }
 }
 
 /* Fix for the mobile filter button when sidebar is open */
-.sidebar-open .filter-toggle-btn {
+.adminstats-sidebar-open .adminstats-filter-toggle-btn {
   z-index: 1;
 }
 
 /* FIX: Added responsive font sizes */
 @media (max-width: 360px) {
-  .stats-table {
+  .adminstats-table {
     font-size: 0.7rem;
   }
   
-  .stats-table th,
-  .stats-table td {
+  .adminstats-table th,
+  .adminstats-table td {
     padding: 0.3rem;
     font-size: 0.65rem;
   }
   
   /* Hide even more columns on very small screens */
-  .stats-table th:nth-child(n+5),
-  .stats-table td:nth-child(n+5) {
+  .adminstats-table th:nth-child(n+5),
+  .adminstats-table td:nth-child(n+5) {
     display: none;
   }
 }
