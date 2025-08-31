@@ -1,0 +1,266 @@
+.custom-bracket {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.bracket-container {
+  display: flex;
+  gap: 40px;
+  overflow-x: auto;
+  padding: 20px 0;
+}
+
+.round {
+  min-width: 300px;
+  flex-shrink: 0;
+}
+
+.round-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border-radius: 8px;
+}
+
+.round-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.matches {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.match {
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.match:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.match.completed {
+  border-color: #28a745;
+}
+
+.match.ongoing {
+  border-color: #ffc107;
+  background: #fff8e1;
+}
+
+.match.scheduled {
+  border-color: #6c757d;
+}
+
+.match-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 0.85em;
+}
+
+.match-id {
+  font-weight: bold;
+  color: #6c757d;
+}
+
+.match-status {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.match-status.scheduled {
+  background: #6c757d;
+  color: white;
+}
+
+.match-status.ongoing {
+  background: #ffc107;
+  color: black;
+}
+
+.match-status.completed {
+  background: #28a745;
+  color: white;
+}
+
+.teams {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #f8f9fa;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.team.winner {
+  background: #d4edda;
+  border-color: #28a745;
+  color: #155724;
+  font-weight: bold;
+}
+
+.team-name {
+  flex: 1;
+}
+
+.score {
+  background: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+}
+
+.vs-divider {
+  text-align: center;
+  font-weight: bold;
+  color: #6c757d;
+  padding: 8px;
+  font-size: 0.9em;
+}
+
+.match-winner {
+  margin-top: 15px;
+  padding: 10px;
+  background: #28a745;
+  color: white;
+  border-radius: 6px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.bye-notice {
+  margin-top: 10px;
+  padding: 8px;
+  background: #e9ecef;
+  border-radius: 6px;
+  text-align: center;
+  font-style: italic;
+  color: #6c757d;
+  font-size: 0.85em;
+}
+
+.no-matches {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.no-matches h3 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+.no-rounds {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Team tag styles for form */
+.bracket-teams-list {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: #f8f9fa;
+  min-height: 60px;
+}
+
+.bracket-team-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  margin: 3px;
+  font-size: 0.85em;
+  gap: 8px;
+}
+
+.bracket-remove-team-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.bracket-remove-team-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Sport badges */
+.bracket-sport-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.bracket-sport-basketball {
+  background: #ff6b35;
+  color: white;
+}
+
+.bracket-sport-volleyball {
+  background: #4ecdc4;
+  color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .bracket-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .round {
+    min-width: 100%;
+  }
+  
+  .match {
+    padding: 12px;
+  }
+}
