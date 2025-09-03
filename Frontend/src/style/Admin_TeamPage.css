@@ -65,10 +65,11 @@
 
 /* Main content wrapper */
 .team-content {
-  padding: 30px 40px;
+  padding: 25px 25px;
   flex: 1;
   max-width: 100%;
   overflow-x: hidden;
+  margin-left: -25px;
 }
 
 /* Tabs */
@@ -77,6 +78,7 @@
   margin-bottom: 30px;
   border-bottom: 2px solid var(--border-color);
   gap: 8px;
+  margin-top: -10px; /* Adjust this value as needed */
 }
 
 .team-tab-button {

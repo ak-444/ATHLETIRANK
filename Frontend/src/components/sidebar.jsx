@@ -12,6 +12,7 @@ import { IoStatsChart } from "react-icons/io5";
 import { HiUsers } from "react-icons/hi2";
 import { RiLogoutCircleLine } from "react-icons/ri"
 import { FaUser } from "react-icons/fa";
+import { GiHamburgerMenu } from "react-icons/gi";
 
 const SideBar = ({ isOpen, toggleSidebar }) => {
     const { user, logout } = useAuth();
@@ -48,7 +49,7 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
         <div className="sidebar-container">
             {/* Toggle Button */}
             <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
-                {isOpen ? "<" : ">"}
+                {isOpen ? <GiHamburgerMenu /> : <GiHamburgerMenu />}
             </button>
 
             {/* Sidebar */}

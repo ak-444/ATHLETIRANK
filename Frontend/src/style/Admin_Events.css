@@ -30,6 +30,7 @@
   display: flex;
   margin-bottom: 30px;
   border-bottom: 2px solid var(--border-color);
+  margin-left: -20px;
 }
 
 .events-tab-button {
@@ -62,6 +63,7 @@
   box-shadow: var(--shadow-medium);
   border: 1px solid var(--border-color);
   padding: 40px;
+  margin-left: -20px;
 }
 
 .events-form {

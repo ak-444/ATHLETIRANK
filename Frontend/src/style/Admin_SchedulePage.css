@@ -4,6 +4,7 @@
 .schedule-content {
   padding: 20px;
   flex: 1;
+  
 }
 
 /* Tabs */
@@ -11,6 +12,7 @@
   display: flex;
   margin-bottom: 30px;
   border-bottom: 2px solid var(--border-color);
+  margin-left: -20px;
 }
 
 .schedule-tab-button {
@@ -43,6 +45,7 @@
   box-shadow: var(--shadow-medium);
   border: 1px solid var(--border-color);
   padding: 40px;
+  margin-left: -20px;
 }
 
 .schedule-form-container h2 {

@@ -1,13 +1,39 @@
 /* Admin_Stats.css - Responsive Version with Renamed Classnames */
 
+.adminstats-dashboard{
+   margin-left: 4rem;
+}
+
 .adminstats-dashboard-header {
-  padding-left: 50px;
+  margin-top: -15px;
+  background-color: var(--background-card);
+  box-shadow: var(--shadow-medium);
+  padding: 35px;
+  margin-bottom: 2rem;
+  margin-left: -10px;
+  border-bottom: 3px solid transparent;
+  border-bottom: 2px solid var(--border-color);
+  
+}
+
+
+
+.adminstats-dashboard-header h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.adminstats-dashboard-header p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 1.1rem;
 }
 
 .adminstats-content {
   padding: 0;
-  padding-left: 40px;
-  
+  margin-left: -10px;
 }
 
 .adminstats-section {
@@ -305,23 +331,6 @@
   margin-left: 250px;
 }
 
-.adminstats-dashboard-header {
-  margin-bottom: 2rem;
-}
-
-.adminstats-dashboard-header h1 {
-  color: var(--text-primary);
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-}
-
-.adminstats-dashboard-header p {
-  color: var(--text-secondary);
-  margin: 0;
-  font-size: 1.1rem;
-}
-
 /* Responsive Design - Mobile Fixes */
 @media (max-width: 1024px) {
   .adminstats-teams-grid {
@@ -332,6 +341,10 @@
 @media (max-width: 768px) {
   .adminstats-section {
     padding: 1rem;
+  }
+  
+  .adminstats-dashboard-header {
+    padding: 1.5rem;
   }
   
   .adminstats-teams-grid {
@@ -430,6 +443,10 @@
 @media (max-width: 480px) {
   .adminstats-section h2 {
     font-size: 1.25rem;
+  }
+  
+  .adminstats-dashboard-header {
+    padding: 1rem;
   }
   
   .adminstats-teams-grid {
