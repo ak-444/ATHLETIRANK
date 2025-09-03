@@ -1,11 +1,13 @@
-/* Enhanced Custom Bracket Styles */
+/* =========================
+   Enhanced Custom Bracket Styles
+   ========================= */
 .enhanced-bracket-wrapper {
   padding: 32px;
   background: linear-gradient(135deg, #0c1445 0%, #1a237e 50%, #283593 100%);
   border-radius: 16px;
   min-height: 500px;
   position: relative;
-  overflow: visible; /* allows connector lines outside */
+  overflow: visible; /* allow connector lines */
 }
 
 .enhanced-bracket-wrapper::before {
@@ -28,7 +30,9 @@
   transition: opacity 0.3s ease;
 }
 
-/* SVG Connection Lines */
+/* =========================
+   SVG Connection Lines
+   ========================= */
 .connection-lines {
   position: absolute;
   top: 0;
@@ -36,7 +40,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 0; /* lines stay behind matches */
+  z-index: 0;
 }
 
 .connection-lines line {
@@ -44,11 +48,10 @@
   stroke-width: 2;
 }
 
-
 .connection-path {
   animation: drawLine 2s ease-out;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  stroke: rgba(255, 255, 255, 0.7); /* fallback stroke */
+  stroke: rgba(255, 255, 255, 0.7);
 }
 
 .connection-dot {
@@ -66,20 +69,27 @@
   50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* Bracket Container */
+/* =========================
+   Bracket Container
+   ========================= */
 .bracket-container {
   display: flex;
-  gap: 60px;
+  gap: 80px;
   overflow-x: auto;
   padding: 24px 0;
   position: relative;
-  z-index: 1; /* matches above lines */
+  z-index: 1;
 }
 
-/* Rounds */
+/* =========================
+   Rounds
+   ========================= */
 .round {
   min-width: 320px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around; /* tree alignment */
 }
 
 .round-header {
@@ -106,11 +116,14 @@
   margin-top: 4px;
 }
 
-/* Matches */
+/* =========================
+   Matches
+   ========================= */
 .matches {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  justify-content: space-around; /* evenly spaced like tree */
+  flex-grow: 1;
 }
 
 .match {
@@ -147,7 +160,7 @@
   box-shadow: 
     0 20px 40px rgba(0,0,0,0.25),
     0 5px 15px rgba(0,0,0,0.15),
-    inset 0 1px 0 rgba(255,255,255,0.9);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .match.completed {
@@ -170,7 +183,9 @@
   50% { box-shadow: 0 10px 30px rgba(0,0,0,0.2), 0 0 20px rgba(245, 158, 11, 0.3); }
 }
 
-/* Match Header */
+/* =========================
+   Match Header
+   ========================= */
 .match-header {
   display: flex;
   justify-content: space-between;
@@ -213,7 +228,9 @@
   color: white;
 }
 
-/* Teams */
+/* =========================
+   Teams
+   ========================= */
 .teams-container {
   margin-bottom: 16px;
 }
@@ -279,7 +296,9 @@
   box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
 }
 
-/* VS Divider */
+/* =========================
+   VS Divider
+   ========================= */
 .vs-divider {
   text-align: center;
   padding: 12px;
@@ -297,7 +316,9 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-/* Match Results & Indicators */
+/* =========================
+   Match Results & Indicators
+   ========================= */
 .match-result {
   display: flex;
   align-items: center;
@@ -371,7 +392,9 @@
   50% { opacity: 0.5; transform: scale(1.2); }
 }
 
-/* Empty States */
+/* =========================
+   Empty States
+   ========================= */
 .no-matches, .no-rounds {
   display: flex;
   align-items: center;
@@ -409,21 +432,23 @@
   line-height: 1.5;
 }
 
-/* Responsive */
+/* =========================
+   Responsive
+   ========================= */
 @media (max-width: 768px) {
   .enhanced-bracket-wrapper {
     padding: 20px;
   }
-  
+
   .bracket-container {
     flex-direction: column;
     gap: 30px;
   }
-  
+
   .round {
     min-width: 100%;
   }
-  
+
   .match {
     padding: 16px;
   }

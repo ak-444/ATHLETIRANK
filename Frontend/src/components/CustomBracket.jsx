@@ -46,7 +46,7 @@ const CustomBracket = ({ matches }) => {
       const x = rect.right - containerRect.left;
       const y = rect.top - containerRect.top + rect.height / 2;
 
-      // Left-center of current match (needed for connecting TO this match)
+      // Left-center of current match (for connecting into)
       const xLeft = rect.left - containerRect.left;
       const yLeft = rect.top - containerRect.top + rect.height / 2;
 
@@ -59,22 +59,23 @@ const CustomBracket = ({ matches }) => {
   return (
     <div className="enhanced-bracket-wrapper">
       <div className="enhanced-bracket" ref={bracketRef}>
+        {/* Connection Lines */}
         <svg className="connection-lines" xmlns="http://www.w3.org/2000/svg">
           {connectionPoints.map((fromPoint, i) => {
             const toPoint = connectionPoints.find(
               (p) =>
                 p.roundIndex === fromPoint.roundIndex + 1 &&
-                Math.floor(p.matchIndex / 2) === Math.floor(fromPoint.matchIndex / 2)
+                Math.floor(fromPoint.matchIndex / 2) === p.matchIndex
             );
 
             if (!toPoint) return null;
 
-            // midpoint between source and target horizontally
-            const midX = (fromPoint.x + toPoint.x) / 2;
+            // midpoint X (between child.right and parent.left)
+            const midX = (fromPoint.x + toPoint.xLeft) / 2;
 
             return (
               <g key={i} className="bracket-connection">
-                {/* horizontal from source to midpoint */}
+                {/* child → halfway */}
                 <line
                   x1={fromPoint.x}
                   y1={fromPoint.y}
@@ -83,21 +84,21 @@ const CustomBracket = ({ matches }) => {
                   stroke="black"
                   strokeWidth="2"
                 />
-                {/* vertical from source row down/up to target row */}
+                {/* vertical line */}
                 <line
                   x1={midX}
                   y1={fromPoint.y}
                   x2={midX}
-                  y2={toPoint.y}
+                  y2={toPoint.yLeft}
                   stroke="black"
                   strokeWidth="2"
                 />
-                {/* horizontal into target */}
+                {/* into parent */}
                 <line
                   x1={midX}
-                  y1={toPoint.y}
-                  x2={toPoint.x}
-                  y2={toPoint.y}
+                  y1={toPoint.yLeft}
+                  x2={toPoint.xLeft}
+                  y2={toPoint.yLeft}
                   stroke="black"
                   strokeWidth="2"
                 />
@@ -106,6 +107,7 @@ const CustomBracket = ({ matches }) => {
           })}
         </svg>
 
+        {/* Rounds */}
         <div className="bracket-container">
           {sortedRounds.map((roundNumber, roundIndex) => (
             <div key={roundNumber} className="round" data-round={roundIndex}>
