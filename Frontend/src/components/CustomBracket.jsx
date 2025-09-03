@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import "../style/CustomBrackets.css";
 
 const CustomBracket = ({ matches }) => {
   const bracketRef = useRef(null);
-
-  console.log("CustomBracket received matches:", matches);
+  const [connectionPoints, setConnectionPoints] = useState([]);
 
   if (!matches || matches.length === 0) {
     return (
@@ -29,75 +28,82 @@ const CustomBracket = ({ matches }) => {
 
   const sortedRounds = Object.keys(rounds).sort((a, b) => parseInt(a) - parseInt(b));
 
-  // Calculate SVG connections
-  const generateConnections = () => {
-    const connections = [];
-    
-    for (let i = 0; i < sortedRounds.length - 1; i++) {
-      const currentRound = sortedRounds[i];
-      const nextRound = sortedRounds[i + 1];
-      const currentMatches = rounds[currentRound];
-      const nextMatches = rounds[nextRound];
-
-      currentMatches.forEach((match, matchIndex) => {
-        const nextMatchIndex = Math.floor(matchIndex / 2);
-        if (nextMatches[nextMatchIndex]) {
-          connections.push({
-            fromRound: i,
-            fromMatch: matchIndex,
-            toRound: i + 1,
-            toMatch: nextMatchIndex
-          });
-        }
-      });
-    }
-
-    return connections;
-  };
-
-  const connections = generateConnections();
-
+  // Measure match positions
   useEffect(() => {
-    // Force re-render connections when component mounts
-    const timer = setTimeout(() => {
-      if (bracketRef.current) {
-        bracketRef.current.style.opacity = '1';
-      }
-    }, 100);
+    if (!bracketRef.current) return;
 
-    return () => clearTimeout(timer);
+    const matchEls = bracketRef.current.querySelectorAll(".match");
+    const points = [];
+
+    matchEls.forEach((matchEl) => {
+      const roundIndex = parseInt(matchEl.closest(".round")?.dataset.round, 10);
+      const matchIndex = parseInt(matchEl.dataset.match, 10);
+
+      const rect = matchEl.getBoundingClientRect();
+      const containerRect = bracketRef.current.getBoundingClientRect();
+
+      // Right-center of current match
+      const x = rect.right - containerRect.left;
+      const y = rect.top - containerRect.top + rect.height / 2;
+
+      // Left-center of current match (needed for connecting TO this match)
+      const xLeft = rect.left - containerRect.left;
+      const yLeft = rect.top - containerRect.top + rect.height / 2;
+
+      points.push({ roundIndex, matchIndex, x, y, xLeft, yLeft });
+    });
+
+    setConnectionPoints(points);
   }, [matches]);
 
   return (
     <div className="enhanced-bracket-wrapper">
       <div className="enhanced-bracket" ref={bracketRef}>
         <svg className="connection-lines" xmlns="http://www.w3.org/2000/svg">
-          {connections.map((conn, index) => (
-            <g key={index}>
-              <defs>
-                <linearGradient id={`gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.6" />
-                </linearGradient>
-              </defs>
-              <path
-                d={`M ${300 + conn.fromRound * 340} ${120 + conn.fromMatch * 200} 
-                    Q ${300 + conn.fromRound * 340 + 170} ${120 + conn.fromMatch * 200} 
-                    ${300 + conn.toRound * 340} ${120 + conn.toMatch * 200}`}
-                stroke={`url(#gradient-${index})`}
-                strokeWidth="3"
-                fill="none"
-                className="connection-path"
-              />
-              <circle
-                cx={300 + conn.fromRound * 340}
-                cy={120 + conn.fromMatch * 200}
-                r="4"
-                fill="#4f46e5"
-                className="connection-dot"
-              />
-            </g>
-          ))}
+          {connectionPoints.map((fromPoint, i) => {
+            const toPoint = connectionPoints.find(
+              (p) =>
+                p.roundIndex === fromPoint.roundIndex + 1 &&
+                Math.floor(p.matchIndex / 2) === Math.floor(fromPoint.matchIndex / 2)
+            );
+
+            if (!toPoint) return null;
+
+            // midpoint between source and target horizontally
+            const midX = (fromPoint.x + toPoint.x) / 2;
+
+            return (
+              <g key={i} className="bracket-connection">
+                {/* horizontal from source to midpoint */}
+                <line
+                  x1={fromPoint.x}
+                  y1={fromPoint.y}
+                  x2={midX}
+                  y2={fromPoint.y}
+                  stroke="black"
+                  strokeWidth="2"
+                />
+                {/* vertical from source row down/up to target row */}
+                <line
+                  x1={midX}
+                  y1={fromPoint.y}
+                  x2={midX}
+                  y2={toPoint.y}
+                  stroke="black"
+                  strokeWidth="2"
+                />
+                {/* horizontal into target */}
+                <line
+                  x1={midX}
+                  y1={toPoint.y}
+                  x2={toPoint.x}
+                  y2={toPoint.y}
+                  stroke="black"
+                  strokeWidth="2"
+                />
+              </g>
+            );
+          })}
         </svg>
 
         <div className="bracket-container">

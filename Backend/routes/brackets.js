@@ -2,15 +2,8 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/database");
 
-// Fisher-Yates Shuffle utility function
-function fisherYatesShuffle(array) {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+// Import Fisher-Yates shuffle from utils
+const fisherYatesShuffle = require("../utils/fisherYates");
 
 // GET all brackets with team count
 router.get("/", async (req, res) => {
@@ -124,12 +117,12 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// POST generate matches using Fisher–Yates shuffle
+// POST generate full bracket (all rounds with placeholders)
 router.post("/:id/generate", async (req, res) => {
   const bracketId = req.params.id;
 
   try {
-    // First, clear any existing matches for this bracket
+    // Clear existing matches
     await db.pool.query("DELETE FROM matches WHERE bracket_id = ?", [bracketId]);
 
     // Fetch teams in this bracket
@@ -145,73 +138,79 @@ router.post("/:id/generate", async (req, res) => {
       return res.status(400).json({ error: "At least 2 teams are required to generate matches" });
     }
 
-    console.log(`Generating matches for ${teams.length} teams in bracket ${bracketId}`);
-
-    // Shuffle teams for random bracket seeding
+    // Shuffle teams
     const shuffledTeams = fisherYatesShuffle(teams);
 
-    // Create first round matches
-    const matches = [];
-    for (let i = 0; i < shuffledTeams.length; i += 2) {
-      const team1 = shuffledTeams[i];
-      const team2 = shuffledTeams[i + 1] || null;
-
-      if (team2 === null) {
-        // Handle bye - team1 advances automatically
-        console.log(`Creating bye match: ${team1.name} gets a bye`);
-        
-        const [result] = await db.pool.query(
-          `INSERT INTO matches 
-           (bracket_id, round_number, team1_id, team2_id, winner_id, status) 
-           VALUES (?, 1, ?, NULL, ?, 'completed')`,
-          [bracketId, team1.id, team1.id]
-        );
-
-        matches.push({
-          id: result.insertId,
-          round_number: 1,
-          team1_id: team1.id,
-          team1_name: team1.name,
-          team2_id: null,
-          team2_name: null,
-          winner_id: team1.id,
-          winner_name: team1.name,
-          status: "completed"
-        });
-      } else {
-        // Normal match between two teams
-        console.log(`Creating match: ${team1.name} vs ${team2.name}`);
-        
-        const [result] = await db.pool.query(
-          `INSERT INTO matches 
-           (bracket_id, round_number, team1_id, team2_id, status) 
-           VALUES (?, 1, ?, ?, 'scheduled')`,
-          [bracketId, team1.id, team2.id]
-        );
-
-        matches.push({
-          id: result.insertId,
-          round_number: 1,
-          team1_id: team1.id,
-          team1_name: team1.name,
-          team2_id: team2.id,
-          team2_name: team2.name,
-          winner_id: null,
-          winner_name: null,
-          status: "scheduled"
-        });
-      }
+    // Pad teams to next power of 2 (for complete bracket structure)
+    const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(shuffledTeams.length)));
+    while (shuffledTeams.length < nextPowerOfTwo) {
+      shuffledTeams.push(null); // BYE slot
     }
 
-    console.log(`Successfully created ${matches.length} matches for bracket ${bracketId}`);
-    res.json({ 
+    const totalRounds = Math.log2(nextPowerOfTwo);
+    const allMatches = [];
+
+    let currentRoundTeams = shuffledTeams;
+
+    for (let round = 1; round <= totalRounds; round++) {
+      const nextRoundTeams = [];
+
+      for (let i = 0; i < currentRoundTeams.length; i += 2) {
+        const team1 = currentRoundTeams[i];
+        const team2 = currentRoundTeams[i + 1];
+
+        let matchData = {
+          bracket_id: bracketId,
+          round_number: round,
+          team1_id: team1 ? team1.id : null,
+          team2_id: team2 ? team2.id : null,
+          winner_id: null,
+          status: "scheduled"
+        };
+
+        // If BYE → auto advance
+        if (team1 && !team2) {
+          matchData.winner_id = team1.id;
+          matchData.status = "completed";
+          nextRoundTeams.push(team1);
+        } else if (team2 && !team1) {
+          matchData.winner_id = team2.id;
+          matchData.status = "completed";
+          nextRoundTeams.push(team2);
+        } else {
+          nextRoundTeams.push({ placeholder: true }); // advance slot for winner
+        }
+
+        const [result] = await db.pool.query(
+          `INSERT INTO matches (bracket_id, round_number, team1_id, team2_id, winner_id, status) 
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            matchData.bracket_id,
+            matchData.round_number,
+            matchData.team1_id,
+            matchData.team2_id,
+            matchData.winner_id,
+            matchData.status
+          ]
+        );
+
+        allMatches.push({
+          id: result.insertId,
+          ...matchData
+        });
+      }
+
+      currentRoundTeams = nextRoundTeams;
+    }
+
+    res.json({
       success: true,
-      message: `Generated ${matches.length} matches for Round 1`, 
-      matches 
+      message: `Generated ${allMatches.length} matches across ${totalRounds} rounds`,
+      matches: allMatches
     });
 
   } catch (err) {
-    console.error("Error generating matches:", err);
+    console.error("Error generating full bracket:", err);
     res.status(500).json({ error: "Database error: " + err.message });
   }
 });
