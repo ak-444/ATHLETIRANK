@@ -174,18 +174,18 @@
 }
 
 .player-header h4 {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
 
 .player-points {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--primary-color);
   background: rgba(59, 130, 246, 0.1);
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: var(--border-radius);
 }
 
@@ -212,7 +212,7 @@
 }
 
 .stat-group label {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
@@ -227,14 +227,14 @@
 }
 
 .stat-controls input {
-  width: 50px;
+  width: 60px;
   text-align: center;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   background: var(--background-secondary);
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -242,8 +242,8 @@
   background: var(--primary-color);
   color: white;
   border: none;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: var(--transition);
@@ -363,4 +363,54 @@
   .stats-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Staff_Stats.css - Additional styles for quarter/set navigation */
+
+.period-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  gap: 15px;
+}
+
+.period-nav-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.period-nav-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+.period-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.period-display {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--background-card);
+  padding: 8px 20px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.period-total {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 5px;
 }

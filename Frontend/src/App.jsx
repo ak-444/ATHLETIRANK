@@ -16,6 +16,7 @@ import StaffDashboard from './pages/Staff/Staff_Dashboard';
 import StaffEvents from './pages/Staff/Staff_Events';
 import StaffSchedulePage from './pages/Staff/Staff_Schedules';
 import StaffStats from './pages/Staff/Staff_Stats';
+import StaffSchedules from './pages/Staff/Staff_Schedules';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import './style/app.css';
@@ -148,6 +149,18 @@ function App() {
               }
             />
 
+
+
+
+            <Route
+              path="/StaffDashboard/schedules"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <StaffSchedules sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
 
           </Route>
         </Routes>

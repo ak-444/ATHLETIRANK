@@ -1,11 +1,16 @@
 /* Bracket Page Styles with Dark Theme - Updated to match Schedule Page */
+
+
 .bracket-content {
   padding: 20px;
   width: 100%;
-  max-width: none; /* Remove max-width restriction */
+  max-width: none;
   margin: 0 auto;
   overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow-medium);
 }
+
 /* Tab Navigation */
 .bracket-tabs {
   display: flex;
@@ -18,7 +23,7 @@
   border: none;
   padding: 15px 30px;
   font-size: 16px;
-  font-weight: 500; /* ✅ match schedule page */
+  font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
   border-bottom: 3px solid transparent;
@@ -33,7 +38,7 @@
 .bracket-tab-button.bracket-tab-active {
   color: var(--primary-color);
   border-bottom-color: var(--primary-color);
-  font-weight: 600; /* ✅ match schedule page active tab */
+  font-weight: 600;
 }
 
 /* Form Section */
@@ -52,7 +57,7 @@
   margin-bottom: 30px;
   color: var(--text-primary);
   font-size: 28px;
-  font-weight: 700; /* ✅ match schedule page form heading */
+  font-weight: 700;
 }
 
 .bracket-form {
@@ -73,7 +78,7 @@
 }
 
 .bracket-form-group label {
-  font-weight: 500; /* ✅ match schedule page labels */
+  font-weight: 500;
   margin-bottom: 8px;
   color: var(--text-primary);
   font-size: 16px;
@@ -124,7 +129,7 @@
   padding: 14px 32px;
   border-radius: var(--border-radius);
   font-size: 16px;
-  font-weight: 600; /* ✅ match schedule page buttons */
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -137,19 +142,19 @@
 }
 
 .bracket-cancel-btn {
-  background: var(--error-color); /* ✅ match schedule page cancel button */
+  background: var(--error-color);
   color: white;
   border: none;
   padding: 14px 32px;
   border-radius: var(--border-radius);
   font-size: 16px;
-  font-weight: 600; /* ✅ match schedule page buttons */
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
 }
 
 .bracket-cancel-btn:hover {
-  background: #dc2626; /* ✅ match schedule page cancel hover */
+  background: #dc2626;
   transform: translateY(-2px);
 }
 
@@ -199,31 +204,46 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
+  padding: 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--background-secondary);
+  min-height: 80px;
 }
 
 .bracket-team-tag {
-  background: var(--background-secondary);
+  background: var(--primary-color);
+  color: white;
   border: 1px solid var(--border-color);
   border-radius: 20px;
-  padding: 6px 12px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 14px;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
 }
 
 .bracket-remove-team-btn {
-  background: none;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  color: var(--text-muted);
+  color: white;
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
-  padding: 0;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .bracket-remove-team-btn:hover {
-  color: var(--error-color);
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }
 
 /* View Section */
@@ -239,7 +259,7 @@
   margin-bottom: 30px;
   color: var(--text-primary);
   font-size: 28px;
-  font-weight: 700; /* ✅ match schedule page view header */
+  font-weight: 700;
 }
 
 .bracket-no-brackets {
@@ -260,7 +280,7 @@
   padding: 12px 24px;
   border-radius: var(--border-radius);
   font-size: 16px;
-  font-weight: 600; /* ✅ match schedule page */
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -299,35 +319,26 @@
 .bracket-card-header h3 {
   color: var(--text-primary);
   font-size: 20px;
-  font-weight: 600; /* ✅ match schedule page card titles */
-  margin: 0;
-}
-
-.bracket-sport-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
   font-weight: 600;
-  text-transform: uppercase;
-}
-
-.bracket-sport-basketball {
-  background: rgba(255, 165, 0, 0.2);
-  color: #FFA500;
-}
-
-.bracket-sport-volleyball {
-  background: rgba(138, 43, 226, 0.2);
-  color: #8A2BE2;
+  margin: 0;
+  flex: 1;
+  margin-right: 12px;
 }
 
 .bracket-card-info {
   margin-bottom: 20px;
-  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .bracket-card-info > div {
   margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}
+
+.bracket-card-info strong {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .bracket-card-actions {
@@ -343,7 +354,7 @@
   padding: 10px 16px;
   border-radius: var(--border-radius);
   font-size: 14px;
-  font-weight: 600; /* ✅ match schedule page buttons */
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -359,7 +370,7 @@
   padding: 10px 16px;
   border-radius: var(--border-radius);
   font-size: 14px;
-  font-weight: 600; /* ✅ match schedule page delete button */
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
 }
@@ -369,50 +380,72 @@
 }
 
 /* Bracket Display Section */
-.bracket-display-section {
+.bracket-visualization-section {
+  padding: 32px;
   background: var(--background-card);
   border-radius: var(--border-radius-lg);
-  padding: 30px;
   box-shadow: var(--shadow-medium);
   border: 1px solid var(--border-color);
 }
 
-.bracket-display-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid var(--border-color);
-}
-
-.bracket-display-header h2 {
+.bracket-visualization-section h2 {
   color: var(--text-primary);
+  margin-bottom: 20px;
   font-size: 28px;
-  font-weight: 700; /* ✅ match schedule page */
-  margin: 0 0 8px 0;
+  font-weight: 700;
+  text-align: center;
 }
 
-.bracket-type-info {
-  color: var(--text-muted);
+/* FIXED: Bracket Info Visibility */
+.bracket-info {
+  background: var(--background-secondary);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-medium);
+  border: 2px solid var(--border-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.bracket-info p {
+  display: inline-block;
   margin: 0;
-  font-size: 16px;
+  padding: 8px 16px;
+  background: var(--background-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 1em;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
-.bracket-back-btn {
-  background: var(--text-muted);
+.bracket-info strong {
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+/* Sport badges */
+.bracket-sport-badge {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.bracket-sport-basketball {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
   color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  font-weight: 600; /* ✅ match schedule page */
-  cursor: pointer;
-  transition: var(--transition);
 }
 
-.bracket-back-btn:hover {
-  background: #475569;
+.bracket-sport-volleyball {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  color: white;
 }
 
 /* Enhanced Bracket Visualization */
@@ -421,13 +454,13 @@
   overflow-x: auto;
   overflow-y: visible;
   padding: 30px 20px;
-  gap: 40px; /* Reduced from 80px to fit more content */
+  gap: 40px;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.02), rgba(139, 92, 246, 0.02));
   border-radius: var(--border-radius-lg);
   border: 1px solid rgba(59, 130, 246, 0.1);
   position: relative;
-  width: 100%; /* Ensure it takes full width */
-  min-width: 100%; /* Prevent shrinking */
+  width: 100%;
+  min-width: 100%;
 }
 
 .bracket-round {
@@ -468,8 +501,8 @@
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  width: 260px; /* Fixed width for matches */
-  min-width: 260px; /* Prevent shrinking */
+  width: 260px;
+  min-width: 260px;
 }
 
 .bracket-match:hover {
@@ -488,12 +521,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  min-height: 50px; /* Ensure consistent height */
+  min-height: 50px;
   border-bottom: 1px solid var(--border-color);
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
-  width: 100%; /* Full width of parent */
+  width: 100%;
 }
 
 .bracket-team:last-child {
@@ -604,68 +637,6 @@
   );
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .bracket-visualization {
-    gap: 60px;
-    padding: 20px 15px;
-  }
-  
-  .bracket-round {
-    min-width: 200px;
-  }
-}
-
-@media (max-width: 768px) {
-  .bracket-content {
-    padding: 15px;
-  }
-  
-  .bracket-form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .bracket-form-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .bracket-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .bracket-visualization {
-    gap: 40px;
-    padding: 15px 10px;
-  }
-  
-  .bracket-round {
-    min-width: 180px;
-  }
-  
-  .bracket-round-title {
-    font-size: 16px;
-    padding: 8px 16px;
-  }
-  
-  .bracket-team {
-    padding: 12px 16px;
-  }
-  
-  .bracket-team-name {
-    font-size: 14px;
-  }
-  
-  .bracket-team-score {
-    font-size: 16px;
-  }
-  
-  .bracket-connection-line {
-    width: 60px;
-    right: -30px;
-  }
-}
-
 /* Loading States */
 .bracket-loading {
   display: flex;
@@ -712,6 +683,96 @@
   margin-bottom: 20px;
 }
 
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .bracket-visualization {
+    gap: 60px;
+    padding: 20px 15px;
+  }
+  
+  .bracket-round {
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content.sidebar-open {
+    margin-left: 0;
+  }
+  
+  .bracket-content {
+    padding: 15px;
+  }
+  
+  .bracket-tabs {
+    flex-direction: column;
+  }
+  
+  .bracket-tab-button {
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    border-right: none;
+  }
+  
+  .bracket-tab-button.bracket-tab-active {
+    border-bottom-color: var(--border-color);
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .bracket-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .bracket-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .bracket-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bracket-visualization {
+    gap: 40px;
+    padding: 15px 10px;
+  }
+  
+  .bracket-round {
+    min-width: 180px;
+  }
+  
+  .bracket-round-title {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
+  
+  .bracket-team {
+    padding: 12px 16px;
+  }
+  
+  .bracket-team-name {
+    font-size: 14px;
+  }
+  
+  .bracket-team-score {
+    font-size: 16px;
+  }
+  
+  .bracket-connection-line {
+    width: 60px;
+    right: -30px;
+  }
+  
+  .bracket-card-actions {
+    flex-direction: column;
+  }
+  
+  .bracket-info p {
+    display: block;
+    margin: 8px 0;
+  }
+}
+
 /* Print Styles */
 @media print {
   .bracket-content {
@@ -739,52 +800,16 @@
   }
 }
 
-/* Drag and Drop Styles */
-.bracket-team[draggable="true"] {
-  cursor: grab;
+/* Ensure good contrast for all text elements */
+.bracket-visualization-section h2,
+.bracket-info strong,
+.bracket-info p {
+  text-shadow: none;
+  color: var(--text-primary) !important;
 }
 
-.bracket-team[draggable="true"]:active {
-  cursor: grabbing;
-}
-
-.bracket-team.bracket-tbd {
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 2px dashed var(--border-color);
-}
-
-.bracket-team.bracket-tbd:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: var(--primary-color);
-}
-
-.bracket-team.bracket-tbd.highlight-drop {
-  background-color: rgba(34, 197, 94, 0.2);
-  border-color: var(--success-color);
-}
-
-.bracket-team.bracket-tbd.highlight-drop {
-  background-color: rgba(34, 197, 94, 0.2);
-  border-color: var(--success-color) !important;
-}
-
-.bracket-team.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
-}
-
-.bracket-stats-btn {
-  background-color: #4f46e5; /* Indigo */
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600; /* ✅ match schedule page buttons */
-  cursor: pointer;
-  transition: background 0.2s ease-in-out;
-}
-
-.bracket-stats-btn:hover {
-  background-color: #4338ca; /* Darker indigo */
+/* Make sure the enhanced bracket fits well in the admin layout */
+.bracket-visualization-section .enhanced-bracket-wrapper {
+  border-radius: 12px;
+  box-shadow: var(--shadow-medium);
 }
