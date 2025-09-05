@@ -10,6 +10,12 @@ const AdminEvents = ({ sidebarOpen }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // New state for event details view
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [eventBrackets, setEventBrackets] = useState([]);
+  const [eventMatches, setEventMatches] = useState([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
   // Fetch events
   const fetchEvents = async () => {
     try {
@@ -62,8 +68,50 @@ const AdminEvents = ({ sidebarOpen }) => {
     }
   };
 
-  const handleViewEvent = (event) => alert(`Viewing event: ${event.name}`);
+  // Fetch event brackets and matches
+  const fetchEventDetails = async (event) => {
+    setLoadingDetails(true);
+    setSelectedEvent(event);
+    
+    try {
+      // Fetch brackets for this event
+      const bracketsRes = await fetch(`http://localhost:5000/api/events/${event.id}/brackets`);
+      const bracketsData = await bracketsRes.json();
+      setEventBrackets(bracketsData);
+
+      // Fetch all matches for brackets in this event
+      if (bracketsData.length > 0) {
+        const allMatches = [];
+        for (const bracket of bracketsData) {
+          const matchesRes = await fetch(`http://localhost:5000/api/brackets/${bracket.id}/matches`);
+          const matchesData = await matchesRes.json();
+          const matchesWithBracket = matchesData.map(match => ({
+            ...match,
+            bracket_name: bracket.name,
+            sport_type: bracket.sport_type
+          }));
+          allMatches.push(...matchesWithBracket);
+        }
+        setEventMatches(allMatches);
+      } else {
+        setEventMatches([]);
+      }
+    } catch (err) {
+      console.error("Error fetching event details:", err);
+      alert("Error fetching event details.");
+    } finally {
+      setLoadingDetails(false);
+    }
+    
+    setActiveTab("details");
+  };
+
+  const handleViewEvent = (event) => {
+    fetchEventDetails(event);
+  };
+
   const handleEditEvent = (event) => alert(`Editing event: ${event.name}`);
+
   const handleDeleteEvent = async (id) => {
     try {
       await fetch(`http://localhost:5000/api/events/${id}`, { method: "DELETE" });
@@ -71,6 +119,22 @@ const AdminEvents = ({ sidebarOpen }) => {
     } catch (err) {
       console.error("Error deleting event:", err);
     }
+  };
+
+  const getMatchStatusBadge = (status) => {
+    const statusClasses = {
+      scheduled: "status-scheduled",
+      ongoing: "status-ongoing", 
+      completed: "status-completed"
+    };
+    return <span className={`match-status ${statusClasses[status] || ""}`}>{status}</span>;
+  };
+
+  const formatMatchTeams = (match) => {
+    if (!match.team1_name && !match.team2_name) {
+      return "TBD vs TBD";
+    }
+    return `${match.team1_name || "TBD"} vs ${match.team2_name || "TBD"}`;
   };
 
   return (
@@ -96,6 +160,14 @@ const AdminEvents = ({ sidebarOpen }) => {
             >
               View Events ({events.length})
             </button>
+            {selectedEvent && (
+              <button
+                className={`events-tab-button ${activeTab === "details" ? "events-tab-active" : ""}`}
+                onClick={() => setActiveTab("details")}
+              >
+                {selectedEvent.name} Details
+              </button>
+            )}
           </div>
 
           {/* Create Event */}
@@ -193,6 +265,92 @@ const AdminEvents = ({ sidebarOpen }) => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Event Details - Brackets and Matches */}
+          {activeTab === "details" && selectedEvent && (
+            <div className="event-details-section">
+              <div className="event-details-header">
+                <h2>{selectedEvent.name} - Event Details</h2>
+                <div className="event-details-info">
+                  <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
+                  <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
+                  <span><strong>Status:</strong> {selectedEvent.status}</span>
+                </div>
+              </div>
+
+              {loadingDetails ? (
+                <p>Loading event details...</p>
+              ) : (
+                <div className="event-details-content">
+                  {/* Brackets Section */}
+                  <div className="event-brackets-section">
+                    <h3>Brackets ({eventBrackets.length})</h3>
+                    {eventBrackets.length === 0 ? (
+                      <p className="no-data">No brackets created for this event yet.</p>
+                    ) : (
+                      <div className="brackets-grid">
+                        {eventBrackets.map((bracket) => (
+                          <div key={bracket.id} className="bracket-card">
+                            <div className="bracket-card-header">
+                              <h4>{bracket.name}</h4>
+                              <span className={`sport-badge sport-${bracket.sport_type}`}>
+                                {bracket.sport_type.charAt(0).toUpperCase() + bracket.sport_type.slice(1)}
+                              </span>
+                            </div>
+                            <div className="bracket-info">
+                              <p><strong>Type:</strong> {bracket.elimination_type === "single" ? "Single" : "Double"} Elimination</p>
+                              <p><strong>Teams:</strong> {bracket.team_count || 0}</p>
+                              <p><strong>Created:</strong> {new Date(bracket.created_at).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Matches Section */}
+                  <div className="event-matches-section">
+                    <h3>Matches ({eventMatches.length})</h3>
+                    {eventMatches.length === 0 ? (
+                      <p className="no-data">No matches scheduled for this event yet.</p>
+                    ) : (
+                      <div className="matches-list">
+                        {eventMatches.map((match) => (
+                          <div key={match.id} className="match-card">
+                            <div className="match-header">
+                              <div className="match-teams">
+                                <h4>{formatMatchTeams(match)}</h4>
+                                {match.status === "completed" && (
+                                  <div className="match-score">
+                                    {match.score_team1} - {match.score_team2}
+                                  </div>
+                                )}
+                              </div>
+                              {getMatchStatusBadge(match.status)}
+                            </div>
+                            <div className="match-info">
+                              <p><strong>Bracket:</strong> {match.bracket_name}</p>
+                              <p><strong>Sport:</strong> {match.sport_type?.charAt(0).toUpperCase() + match.sport_type?.slice(1)}</p>
+                              <p><strong>Round:</strong> {match.round_number}</p>
+                              {match.scheduled_at && (
+                                <p><strong>Scheduled:</strong> {new Date(match.scheduled_at).toLocaleString()}</p>
+                              )}
+                              {match.winner_name && (
+                                <p><strong>Winner:</strong> {match.winner_name}</p>
+                              )}
+                              {match.mvp_name && (
+                                <p><strong>MVP:</strong> {match.mvp_name}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

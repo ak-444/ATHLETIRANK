@@ -13,6 +13,8 @@ const bracketsRoutes = require('./routes/brackets');
 const teamsRoutes = require('./routes/teams');      // ✅ NEW
 const playersRoutes = require('./routes/players');  // ✅ NEW
 const bracketTeamRoutes = require('./routes/bracketTeams');
+const statsRouter = require("./routes/stats");
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,7 +37,7 @@ app.use('/api/brackets', bracketsRoutes);
 app.use('/api/teams', teamsRoutes);        // ✅ NEW
 app.use('/api/players', playersRoutes);    // ✅ NEW
 app.use('/api/bracketTeams', bracketTeamRoutes);
-
+app.use("/api/stats", statsRouter);
 
 
 // Test route
