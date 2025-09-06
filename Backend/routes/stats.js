@@ -1,110 +1,107 @@
-// routes/stats.js
 const express = require("express");
 const router = express.Router();
-const db = require("../config/database"); // adjust path to your db connection
+const db = require("../config/database");
 
 // Get all events
 router.get("/events", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM events WHERE archived = 'no'");
+    const [rows] = await db.pool.query("SELECT * FROM events WHERE archived = 'no' ORDER BY id DESC");
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching events:", err);
     res.status(500).json({ error: "Failed to fetch events" });
   }
 });
 
-// GET matches by event
-router.get("/events/:eventId/matches", async (req, res) => {
+// GET brackets by event
+router.get("/events/:eventId/brackets", async (req, res) => {
   try {
-    // Find the bracket for this event
-    const [brackets] = await db.query(
-      "SELECT id FROM brackets WHERE event_id = ? LIMIT 1",
-      [req.params.eventId]
-    );
+    const { eventId } = req.params;
+    console.log("Fetching brackets for event:", eventId);
+    
+    const query = `
+      SELECT b.*, COUNT(bt.team_id) as team_count 
+      FROM brackets b
+      LEFT JOIN bracket_teams bt ON b.id = bt.bracket_id
+      WHERE b.event_id = ?
+      GROUP BY b.id
+      ORDER BY b.created_at DESC
+    `;
+    const [brackets] = await db.pool.query(query, [eventId]);
+    console.log("Brackets found:", brackets);
+    res.json(brackets);
+  } catch (error) {
+    console.error("Error fetching brackets:", error);
+    res.status(500).json({ error: "Failed to fetch brackets" });
+  }
+});
 
-    if (brackets.length === 0) {
-      return res.json([]); // no bracket yet
-    }
+// GET teams by bracket
+router.get('/:bracketId/teams', async (req, res) => {
+  try {
+    const { bracketId } = req.params;
+    const query = `
+      SELECT t.*, bt.bracket_id 
+      FROM teams t
+      INNER JOIN bracket_teams bt ON t.id = bt.team_id
+      WHERE bt.bracket_id = ?
+      ORDER BY t.name
+    `;
+    const [teams] = await db.pool.query(query, [bracketId]);
+    res.json(teams);
+  } catch (error) {
+    console.error('Error fetching bracket teams:', error);
+    res.status(500).json({ 
+      message: 'Error fetching teams',
+      error: error.message 
+    });
+  }
+});
 
-    const bracketId = brackets[0].id;
-
-    // Now fetch matches for this bracket
-    const [rows] = await db.query(
-      `SELECT m.*, 
-              t1.name as team1_name, 
-              t2.name as team2_name,
-              w.name as winner_name,
-              b.sport_type as sport_type
+// GET matches by bracket
+router.get('/:bracketId/matches', async (req, res) => {
+  try {
+    const { bracketId } = req.params;
+    const query = `
+      SELECT 
+        m.*,
+        t1.name as team1_name,
+        t2.name as team2_name,
+        tw.name as winner_name,
+        p.name as mvp_name,
+        b.sport_type,
+        b.name as bracket_name
       FROM matches m
-      JOIN brackets b ON m.bracket_id = b.id
       LEFT JOIN teams t1 ON m.team1_id = t1.id
       LEFT JOIN teams t2 ON m.team2_id = t2.id
-      LEFT JOIN teams w ON m.winner_id = w.id
+      LEFT JOIN teams tw ON m.winner_id = tw.id
+      LEFT JOIN players p ON m.mvp_id = p.id
+      LEFT JOIN brackets b ON m.bracket_id = b.id
       WHERE m.bracket_id = ?
-      ORDER BY m.round_number, m.id`,
-      [bracketId]
-    );
-
-    res.json(rows);
-  } catch (err) {
-    console.error("Error fetching matches by event:", err);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
-// GET teams by event
-router.get("/events/:eventId/teams", async (req, res) => {
-  try {
-    // Find the bracket for this event
-    const [brackets] = await db.query(
-      "SELECT id FROM brackets WHERE event_id = ? LIMIT 1",
-      [req.params.eventId]
-    );
-
-    if (brackets.length === 0) {
-      return res.json([]); // no bracket yet
-    }
-
-    const bracketId = brackets[0].id;
-
-    // Now fetch teams assigned to this bracket
-    const [rows] = await db.query(
-      `SELECT DISTINCT t.* 
-       FROM teams t
-       JOIN bracket_teams bt ON t.id = bt.team_id
-       WHERE bt.bracket_id = ?`,
-      [bracketId]
-    );
-
-    res.json(rows);
-  } catch (err) {
-    console.error("Error fetching teams by event:", err);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
-
-// Get all teams (optional, if you want a list of all teams)
-router.get("/teams", async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM teams");
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch teams" });
+      ORDER BY m.round_number, m.match_order
+    `;
+    const [matches] = await db.pool.query(query, [bracketId]);
+    res.json(matches);
+  } catch (error) {
+    console.error('Error fetching matches:', error);
+    res.status(500).json({ 
+      message: 'Error fetching matches',
+      error: error.message 
+    });
   }
 });
 
 // Get players for a team
 router.get("/teams/:teamId/players", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM players WHERE team_id = ?", [
-      req.params.teamId,
-    ]);
+    const [rows] = await db.pool.query(
+      "SELECT * FROM players WHERE team_id = ? ORDER BY name", 
+      [req.params.teamId]
+    );
+    console.log(`Players for team ${req.params.teamId}:`, rows);
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching players:", err);
     res.status(500).json({ error: "Failed to fetch players" });
   }
 });
@@ -112,13 +109,14 @@ router.get("/teams/:teamId/players", async (req, res) => {
 // Get existing stats for a match
 router.get("/matches/:matchId/stats", async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const [rows] = await db.pool.query(
       "SELECT * FROM player_stats WHERE match_id = ?",
       [req.params.matchId]
     );
+    console.log(`Stats for match ${req.params.matchId}:`, rows);
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching match stats:", err);
     res.status(500).json({ error: "Failed to fetch stats" });
   }
 });
@@ -128,7 +126,10 @@ router.post("/matches/:matchId/stats", async (req, res) => {
   const { players, team1_id, team2_id } = req.body;
   const matchId = req.params.matchId;
 
-  const conn = await db.getConnection();
+  console.log("Saving stats for match:", matchId);
+  console.log("Players data:", players);
+
+  const conn = await db.pool.getConnection();
   try {
     await conn.beginTransaction();
 
@@ -197,11 +198,12 @@ router.post("/matches/:matchId/stats", async (req, res) => {
     );
 
     await conn.commit();
-    res.json({ message: "Stats saved", team1Total, team2Total, winnerId });
+    console.log("Stats saved successfully:", { team1Total, team2Total, winnerId });
+    res.json({ message: "Stats saved successfully", team1Total, team2Total, winnerId });
   } catch (err) {
     await conn.rollback();
-    console.error(err);
-    res.status(500).json({ error: "Failed to save stats" });
+    console.error("Error saving stats:", err);
+    res.status(500).json({ error: "Failed to save stats: " + err.message });
   } finally {
     conn.release();
   }

@@ -5,7 +5,6 @@
 }
 
 .dashboard-content {
-  padding: 2rem;
   transition: margin-left 0.3s ease;
 }
 
@@ -13,10 +12,6 @@
   margin-left: 250px;
 }
 
-/* Header Section */
-.dashboard-header {
-  margin-bottom: 2rem;
-}
 
 .header-content {
   display: flex;
