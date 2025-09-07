@@ -143,24 +143,33 @@ router.post("/matches/:matchId/stats", async (req, res) => {
       const {
         player_id,
         team_id,
+        // Basketball stats
         points = 0,
         assists = 0,
         rebounds = 0,
         three_points_made = 0,
         steals = 0,
         blocks = 0,
-        serves = 0,
-        receptions = 0,
-        digs = 0,
         fouls = 0,
         turnovers = 0,
+        // Volleyball stats
+        serves = 0,
+        service_aces = 0,
+        serve_errors = 0,
+        receptions = 0,
+        reception_errors = 0,
+        digs = 0,
         kills = 0,
+        attack_attempts = 0,
+        attack_errors = 0,
+        volleyball_assists = 0,
       } = player;
 
       await conn.query(
         `INSERT INTO player_stats 
-        (match_id, player_id, points, assists, rebounds, three_points_made, steals, blocks, serves, receptions, digs, fouls, turnovers, kills) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (match_id, player_id, points, assists, rebounds, three_points_made, steals, blocks, fouls, turnovers,
+         serves, service_aces, serve_errors, receptions, reception_errors, digs, kills, attack_attempts, attack_errors, volleyball_assists) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           matchId,
           player_id,
@@ -170,18 +179,28 @@ router.post("/matches/:matchId/stats", async (req, res) => {
           three_points_made,
           steals,
           blocks,
-          serves,
-          receptions,
-          digs,
           fouls,
           turnovers,
+          serves,
+          service_aces,
+          serve_errors,
+          receptions,
+          reception_errors,
+          digs,
           kills,
+          attack_attempts,
+          attack_errors,
+          volleyball_assists,
         ]
       );
 
-      // Track total team points
-      if (team_id === team1_id) team1Total += points;
-      if (team_id === team2_id) team2Total += points;
+      // Track total team points/kills for scoring
+      if (team_id === team1_id) {
+        team1Total += points > 0 ? points : kills; // Use points for basketball, kills for volleyball
+      }
+      if (team_id === team2_id) {
+        team2Total += points > 0 ? points : kills; // Use points for basketball, kills for volleyball
+      }
     }
 
     // Determine winner
@@ -206,6 +225,52 @@ router.post("/matches/:matchId/stats", async (req, res) => {
     res.status(500).json({ error: "Failed to save stats: " + err.message });
   } finally {
     conn.release();
+  }
+});
+
+// Get player statistics summary for a match or event
+router.get("/matches/:matchId/summary", async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    
+    const query = `
+      SELECT 
+        ps.*,
+        p.name as player_name,
+        p.jersey_number,
+        t.name as team_name,
+        m.sport_type,
+        -- Calculate hitting percentage for volleyball
+        CASE 
+          WHEN ps.attack_attempts > 0 
+          THEN ROUND((ps.kills - ps.attack_errors) / ps.attack_attempts * 100, 2)
+          ELSE 0 
+        END as hitting_percentage,
+        -- Calculate service percentage
+        CASE 
+          WHEN (ps.serves + ps.serve_errors) > 0 
+          THEN ROUND(ps.serves / (ps.serves + ps.serve_errors) * 100, 2)
+          ELSE 0 
+        END as service_percentage,
+        -- Calculate reception percentage
+        CASE 
+          WHEN (ps.receptions + ps.reception_errors) > 0 
+          THEN ROUND(ps.receptions / (ps.receptions + ps.reception_errors) * 100, 2)
+          ELSE 0 
+        END as reception_percentage
+      FROM player_stats ps
+      JOIN players p ON ps.player_id = p.id
+      JOIN teams t ON p.team_id = t.id
+      JOIN matches m ON ps.match_id = m.id
+      WHERE ps.match_id = ?
+      ORDER BY t.name, p.name
+    `;
+    
+    const [rows] = await db.pool.query(query, [matchId]);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching match summary:", err);
+    res.status(500).json({ error: "Failed to fetch match summary" });
   }
 });
 
