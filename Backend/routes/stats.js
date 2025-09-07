@@ -121,24 +121,43 @@ router.get("/matches/:matchId/stats", async (req, res) => {
   }
 });
 
-// Save stats for a match
+// Enhanced Save stats for a match with bracket advancement and awards
 router.post("/matches/:matchId/stats", async (req, res) => {
-  const { players, team1_id, team2_id } = req.body;
+  const { players, team1_id, team2_id, awards = [] } = req.body;
   const matchId = req.params.matchId;
 
   console.log("Saving stats for match:", matchId);
   console.log("Players data:", players);
+  console.log("Awards data:", awards);
 
   const conn = await db.pool.getConnection();
   try {
     await conn.beginTransaction();
 
-    // Clear existing stats
+    // Get match details first to know the bracket and round info
+    const [matchDetails] = await conn.query(
+      `SELECT m.*, b.elimination_type, b.sport_type 
+       FROM matches m 
+       JOIN brackets b ON m.bracket_id = b.id 
+       WHERE m.id = ?`, 
+      [matchId]
+    );
+
+    if (matchDetails.length === 0) {
+      throw new Error("Match not found");
+    }
+
+    const match = matchDetails[0];
+    console.log("Match details:", match);
+
+    // Clear existing stats and awards
     await conn.query("DELETE FROM player_stats WHERE match_id = ?", [matchId]);
+    await conn.query("DELETE FROM match_awards WHERE match_id = ?", [matchId]);
 
     let team1Total = 0;
     let team2Total = 0;
 
+    // Save player stats
     for (const player of players) {
       const {
         player_id,
@@ -194,21 +213,37 @@ router.post("/matches/:matchId/stats", async (req, res) => {
         ]
       );
 
-      // Track total team points/kills for scoring
+      // Calculate team totals based on sport type
+      const scoringStat = match.sport_type === 'basketball' ? points : kills;
       if (team_id === team1_id) {
-        team1Total += points > 0 ? points : kills; // Use points for basketball, kills for volleyball
+        team1Total += scoringStat;
       }
       if (team_id === team2_id) {
-        team2Total += points > 0 ? points : kills; // Use points for basketball, kills for volleyball
+        team2Total += scoringStat;
+      }
+    }
+
+    // Save match awards if provided
+    for (const award of awards) {
+      if (award.player_id && award.award_type) {
+        await conn.query(
+          `INSERT INTO match_awards (match_id, player_id, award_type) 
+           VALUES (?, ?, ?)`,
+          [matchId, award.player_id, award.award_type]
+        );
       }
     }
 
     // Determine winner
     let winnerId = null;
-    if (team1Total > team2Total) winnerId = team1_id;
-    else if (team2Total > team1Total) winnerId = team2_id;
+    if (team1Total > team2Total) {
+      winnerId = team1_id;
+    } else if (team2Total > team1Total) {
+      winnerId = team2_id;
+    }
+    // If tied, winnerId remains null
 
-    // Update match
+    // Update current match with scores and winner
     await conn.query(
       `UPDATE matches 
        SET score_team1 = ?, score_team2 = ?, winner_id = ?, status = 'completed' 
@@ -216,15 +251,119 @@ router.post("/matches/:matchId/stats", async (req, res) => {
       [team1Total, team2Total, winnerId, matchId]
     );
 
+    // BRACKET ADVANCEMENT LOGIC
+    let advanced = false;
+    if (winnerId) {
+      console.log("Advancing winner to next round...");
+      
+      // Find the next round match where this winner should advance
+      const nextRound = match.round_number + 1;
+      const currentMatchOrder = match.match_order || 0;
+      
+      // Calculate which match in the next round this winner should advance to
+      const nextMatchOrder = Math.floor(currentMatchOrder / 2);
+      
+      console.log(`Looking for next round match: Round ${nextRound}, Order ${nextMatchOrder}`);
+      
+      // Find the next round match
+      const [nextMatches] = await conn.query(
+        `SELECT * FROM matches 
+         WHERE bracket_id = ? AND round_number = ? AND match_order = ?`,
+        [match.bracket_id, nextRound, nextMatchOrder]
+      );
+
+      if (nextMatches.length > 0) {
+        const nextMatch = nextMatches[0];
+        console.log("Found next match:", nextMatch);
+        
+        // Determine if winner goes to team1_id or team2_id slot
+        const isEvenMatch = currentMatchOrder % 2 === 0;
+        
+        if (isEvenMatch) {
+          // Winner of even-positioned match goes to team1_id slot
+          await conn.query(
+            `UPDATE matches SET team1_id = ? WHERE id = ?`,
+            [winnerId, nextMatch.id]
+          );
+          console.log(`Advanced team ${winnerId} to team1_id of match ${nextMatch.id}`);
+        } else {
+          // Winner of odd-positioned match goes to team2_id slot
+          await conn.query(
+            `UPDATE matches SET team2_id = ? WHERE id = ?`,
+            [winnerId, nextMatch.id]
+          );
+          console.log(`Advanced team ${winnerId} to team2_id of match ${nextMatch.id}`);
+        }
+
+        // Check if next match is now ready to be played (both teams assigned)
+        const [updatedNextMatch] = await conn.query(
+          `SELECT * FROM matches WHERE id = ?`,
+          [nextMatch.id]
+        );
+        
+        if (updatedNextMatch[0].team1_id && updatedNextMatch[0].team2_id) {
+          await conn.query(
+            `UPDATE matches SET status = 'scheduled' WHERE id = ?`,
+            [nextMatch.id]
+          );
+          console.log(`Match ${nextMatch.id} is now ready - both teams assigned`);
+        }
+        
+        advanced = true;
+      } else {
+        console.log("No next round match found - this might be the final match");
+      }
+
+      // Handle double elimination logic if needed
+      if (match.elimination_type === 'double') {
+        console.log("Double elimination logic needed here");
+        // Future enhancement for double elimination tournaments
+      }
+    }
+
     await conn.commit();
-    console.log("Stats saved successfully:", { team1Total, team2Total, winnerId });
-    res.json({ message: "Stats saved successfully", team1Total, team2Total, winnerId });
+    console.log("Stats saved and bracket advanced successfully:", { 
+      team1Total, 
+      team2Total, 
+      winnerId,
+      matchId,
+      advanced
+    });
+    
+    res.json({ 
+      message: "Stats saved and bracket updated successfully", 
+      team1Total, 
+      team2Total, 
+      winnerId,
+      advanced
+    });
+    
   } catch (err) {
     await conn.rollback();
     console.error("Error saving stats:", err);
     res.status(500).json({ error: "Failed to save stats: " + err.message });
   } finally {
     conn.release();
+  }
+});
+
+// Get match awards
+router.get("/matches/:matchId/awards", async (req, res) => {
+  try {
+    const [rows] = await db.pool.query(
+      `SELECT ma.*, p.name as player_name, t.name as team_name
+       FROM match_awards ma
+       JOIN players p ON ma.player_id = p.id
+       JOIN teams t ON p.team_id = t.id
+       WHERE ma.match_id = ?
+       ORDER BY ma.award_type`,
+      [req.params.matchId]
+    );
+    console.log(`Awards for match ${req.params.matchId}:`, rows);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching match awards:", err);
+    res.status(500).json({ error: "Failed to fetch awards" });
   }
 });
 
@@ -239,7 +378,7 @@ router.get("/matches/:matchId/summary", async (req, res) => {
         p.name as player_name,
         p.jersey_number,
         t.name as team_name,
-        m.sport_type,
+        b.sport_type,
         -- Calculate hitting percentage for volleyball
         CASE 
           WHEN ps.attack_attempts > 0 
@@ -262,6 +401,7 @@ router.get("/matches/:matchId/summary", async (req, res) => {
       JOIN players p ON ps.player_id = p.id
       JOIN teams t ON p.team_id = t.id
       JOIN matches m ON ps.match_id = m.id
+      JOIN brackets b ON m.bracket_id = b.id
       WHERE ps.match_id = ?
       ORDER BY t.name, p.name
     `;
