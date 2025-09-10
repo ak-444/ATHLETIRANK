@@ -1,138 +1,257 @@
-/* Admin_Stats.css - Responsive Version with Renamed Classnames */
-
-.adminstats-dashboard{
-   margin-left: 4rem;
-}
-
-.adminstats-dashboard-header {
-  margin-top: -15px;
-  background-color: var(--background-card);
-  box-shadow: var(--shadow-medium);
-  padding: 35px;
-  margin-bottom: 2rem;
-  margin-left: -10px;
-  border-bottom: 3px solid transparent;
-  border-bottom: 2px solid var(--border-color);
-  
-}
 
 
-
-.adminstats-dashboard-header h1 {
-  color: var(--text-primary);
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-}
-
-.adminstats-dashboard-header p {
-  color: var(--text-secondary);
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.adminstats-content {
-  padding: 0;
-  margin-left: -10px;
-}
-
-.adminstats-section {
-  background-color: var(--background-card);
+.bracket-content {
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
-  padding: 1.5rem;
-  border: 1px solid var(--border-color);
-  margin-bottom: 1.5rem;
-}
-
-.adminstats-section h2 {
-  color: var(--text-primary);
-  margin: 0 0 1.25rem 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-/* Teams Grid */
-.adminstats-teams-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-}
-
-.adminstats-team-card {
-  background-color: var(--background-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 1.25rem;
-  text-align: center;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.adminstats-team-card:hover {
-  border-color: var(--primary-color);
   box-shadow: var(--shadow-light);
-  transform: translateY(-2px);
+  overflow: hidden;
 }
 
-.adminstats-team-card.adminstats-selected {
-  border-color: var(--primary-color);
+/* Tab Navigation */
+.bracket-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border-color);
+  background: var(--background-secondary);
+}
+
+.bracket-tab-button {
+  background: none;
+  border: none;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.bracket-tab-button:hover {
+  color: var(--text-primary);
   background-color: rgba(59, 130, 246, 0.1);
 }
 
-.adminstats-team-icon {
-  font-size: 2rem;
+.bracket-tab-button.bracket-tab-active {
   color: var(--primary-color);
-  margin-bottom: 0.75rem;
-}
-
-.adminstats-team-card h3 {
-  color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
+  border-bottom-color: var(--primary-color);
   font-weight: 600;
 }
 
-.adminstats-team-sport {
-  color: var(--text-secondary);
-  margin: 0;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.bracket-tab-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Section Header */
-.adminstats-section-header {
+/* View Section */
+.bracket-view-section {
+  background: var(--background-card);
+  padding: 2rem;
+}
+
+.bracket-view-section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.bracket-no-brackets {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.bracket-no-brackets p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.bracket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.bracket-card {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  cursor: pointer;
+}
+
+.bracket-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.bracket-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.bracket-card-header h3 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  margin-right: 0.75rem;
+}
+
+.bracket-card-info {
   margin-bottom: 1.25rem;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.bracket-card-info > div {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}
+
+.bracket-card-info strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.bracket-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.bracket-view-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+  text-align: center;
+}
+
+.bracket-view-btn:hover {
+  background: var(--primary-hover);
+}
+
+/* Status badges */
+.status-ongoing, .status-completed {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.status-ongoing {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.status-completed {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+/* Sport badges */
+.bracket-sport-badge {
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+.bracket-sport-basketball {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+}
+
+.bracket-sport-volleyball {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  color: white;
+}
+
+/* Event Details Styles */
+.event-details-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.event-details-header h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.event-details-info {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
   flex-wrap: wrap;
-  gap: 1rem;
+}
+
+.event-details-info span {
+  background: var(--background-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.event-details-info strong {
+  color: var(--text-primary);
+  margin-right: 0.25rem;
 }
 
 .adminstats-sport-badge {
   background-color: var(--primary-color);
   color: white;
   padding: 0.25rem 0.75rem;
-  border-radius: 20px;
+  border-radius: 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  margin-left: 0.75rem;
 }
 
 /* Stats Table */
 .adminstats-table-container {
   overflow-x: auto;
+  margin-top: 1.5rem;
 }
 
-/* FIX: Added big gap between search bar and filters */
 .adminstats-table-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
-  gap: 20rem; /* Increased gap */
+  gap: 1rem;
 }
 
 .adminstats-search-box {
@@ -144,7 +263,6 @@
   padding: 0.5rem 0.75rem;
   min-width: 250px;
   flex: 1;
-  margin-right: auto; /* Pushes filters to the right */
 }
 
 .adminstats-search-box input {
@@ -162,7 +280,7 @@
 .adminstats-filter-controls {
   display: flex;
   align-items: center;
-  gap: 1rem; /* Increased gap */
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
@@ -199,12 +317,12 @@
 .adminstats-mobile-filters {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem; /* Increased gap */
+  gap: 0.75rem;
   width: 100%;
-  padding: 1rem; /* Increased padding */
+  padding: 1rem;
   background-color: var(--background-secondary);
   border-radius: var(--border-radius);
-  margin-top: 0.75rem; /* Increased margin */
+  margin-top: 0.75rem;
 }
 
 .adminstats-export-btn {
@@ -232,7 +350,7 @@
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   max-width: 100%;
-  -webkit-overflow-scrolling: touch; /* Better scrolling on mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 .adminstats-table {
@@ -296,6 +414,8 @@
 .adminstats-loading-spinner {
   color: var(--text-secondary);
   font-style: italic;
+  text-align: center;
+  padding: 2rem;
 }
 
 .adminstats-no-stats-message {
@@ -315,52 +435,55 @@
   font-size: 1rem;
 }
 
-/* Main Dashboard Layout */
-.adminstats-dashboard {
-  min-height: 100vh;
-  background-color: var(--background-primary);
-}
-
-.adminstats-dashboard-content {
-  padding: 2rem;
-  margin-left: 0;
-  transition: margin-left 0.3s ease;
-}
-
-.adminstats-dashboard-content.adminstats-sidebar-open {
-  margin-left: 250px;
-}
-
-/* Responsive Design - Mobile Fixes */
+/* Responsive Design */
 @media (max-width: 1024px) {
-  .adminstats-teams-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  .bracket-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
-  .adminstats-section {
+  .dashboard-content {
     padding: 1rem;
   }
   
-  .adminstats-dashboard-header {
-    padding: 1.5rem;
+  .dashboard-content.sidebar-open {
+    margin-left: 0;
   }
   
-  .adminstats-teams-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  .dashboard-header {
+    padding: 1.25rem;
+  }
+  
+  .bracket-view-section {
+    padding: 1.25rem;
+  }
+  
+  .bracket-tabs {
+    flex-direction: column;
+  }
+  
+  .bracket-tab-button {
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    border-right: none;
+  }
+  
+  .bracket-tab-button.bracket-tab-active {
+    border-bottom-color: var(--border-color);
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .bracket-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .event-details-info {
+    flex-direction: column;
+    align-items: center;
     gap: 0.75rem;
   }
   
-  .adminstats-team-card {
-    padding: 1rem;
-  }
-  
-  .adminstats-team-icon {
-    font-size: 1.75rem;
-  }
-  
-  /* FIX: Improved mobile layout for table controls */
   .adminstats-table-controls {
     flex-direction: column;
     align-items: stretch;
@@ -369,52 +492,33 @@
   
   .adminstats-search-box {
     min-width: 100%;
-    margin-bottom: 0;
   }
   
   .adminstats-filter-controls {
     width: 100%;
     justify-content: space-between;
-    flex-wrap: nowrap;
   }
   
   .adminstats-filter-group {
     flex: 1;
-    margin-right: 0.5rem;
   }
   
   .adminstats-filter-group select {
-    min-width: 0;
     width: 100%;
   }
   
   .adminstats-filter-toggle-btn {
     display: flex;
-    order: 1; /* Make it appear first in mobile view */
   }
   
-  .adminstats-mobile-filters {
-    order: 2; /* Make filters appear after the button */
-    width: 100%;
-  }
-  
-  .adminstats-mobile-filters .adminstats-filter-group {
-    margin-right: 0;
-    margin-bottom: 0.5rem;
-  }
-  
-  /* Ensure all filter controls stay in one line */
   .adminstats-filter-controls > :not(.adminstats-mobile-filters):not(.adminstats-filter-toggle-btn) {
     display: none;
   }
   
   .adminstats-export-btn {
     margin-left: 0;
-    order: 3; /* Make export button appear last */
-    flex: 0 0 auto;
   }
   
-  /* FIX: Improved table display on mobile */
   .adminstats-table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -430,57 +534,40 @@
     padding: 0.5rem;
     font-size: 0.75rem;
   }
-
-  .adminstats-dashboard-content {
-    padding: 1rem;
-  }
-
-  .adminstats-dashboard-content.adminstats-sidebar-open {
-    margin-left: 0;
-  }
 }
 
 @media (max-width: 480px) {
-  .adminstats-section h2 {
-    font-size: 1.25rem;
+  .dashboard-header h1 {
+    font-size: 1.5rem;
   }
   
-  .adminstats-dashboard-header {
-    padding: 1rem;
+  .dashboard-header p {
+    font-size: 1rem;
   }
   
-  .adminstats-teams-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .bracket-view-section h2 {
+    font-size: 1.5rem;
   }
   
-  .adminstats-section-header {
+  .event-details-header h2 {
+    font-size: 1.5rem;
     flex-direction: column;
-    align-items: flex-start;
+    gap: 0.5rem;
   }
   
-  /* FIX: Better mobile filter layout */
   .adminstats-filter-controls {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
   }
   
   .adminstats-filter-toggle-btn {
     width: 100%;
     justify-content: center;
-    font-size: 0.9rem;
-    padding: 0.6rem;
   }
   
   .adminstats-export-btn {
     width: 100%;
     justify-content: center;
-    font-size: 0.9rem;
-    padding: 0.6rem;
-  }
-  
-  .adminstats-mobile-filters {
-    margin-top: 0.5rem;
   }
   
   .adminstats-table th,
@@ -488,68 +575,24 @@
     padding: 0.4rem;
     font-size: 0.7rem;
   }
-  
-  /* Make sure the search and filters are properly aligned */
-  .adminstats-table-controls {
-    gap: 0.75rem;
-  }
-  
-  /* FIX: Hide some less important columns on very small screens */
-  .adminstats-table th:nth-child(n+7),
-  .adminstats-table td:nth-child(n+7) {
-    display: none;
-  }
-
-  .adminstats-dashboard-header h1 {
-    font-size: 1.5rem;
-  }
-  
-  .adminstats-dashboard-header p {
-    font-size: 1rem;
-  }
 }
 
-/* Specific fix for filter alignment in desktop view */
-@media (min-width: 769px) {
-  .adminstats-filter-controls {
-    flex-wrap: nowrap;
-  }
-  
-  .adminstats-filter-group {
-    white-space: nowrap;
-  }
-  
-  /* Ensure all elements stay in one line */
-  .adminstats-table-controls {
-    flex-wrap: nowrap;
-  }
-  
-  /* FIX: Add proper spacing between search and filters on desktop */
-  .adminstats-search-box {
-    margin-right: 2rem; /* Added space between search and filters */
-  }
-}
-
-/* Fix for the mobile filter button when sidebar is open */
-.adminstats-sidebar-open .adminstats-filter-toggle-btn {
-  z-index: 1;
-}
-
-/* FIX: Added responsive font sizes */
-@media (max-width: 360px) {
-  .adminstats-table {
-    font-size: 0.7rem;
-  }
-  
-  .adminstats-table th,
-  .adminstats-table td {
-    padding: 0.3rem;
-    font-size: 0.65rem;
-  }
-  
-  /* Hide even more columns on very small screens */
-  .adminstats-table th:nth-child(n+5),
-  .adminstats-table td:nth-child(n+5) {
-    display: none;
-  }
+/* CSS Variables */
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --error-color: #ef4444;
+  --background-primary: #0a0f1c;
+  --background-secondary: #1a2332;
+  --background-card: #0f172a;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #2d3748;
+  --border-focus: #3b82f6;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

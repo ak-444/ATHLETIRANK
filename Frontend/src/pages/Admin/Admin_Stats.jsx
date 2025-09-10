@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaFilter, FaDownload, FaUsers, FaChartLine } from "react-icons/fa";
+import { FaSearch, FaFilter, FaDownload, FaUsers, FaChartLine, FaTrophy } from "react-icons/fa";
 import "../../style/Admin_Stats.css";
 
 const AdminStats = ({ sidebarOpen }) => {
@@ -11,6 +11,7 @@ const AdminStats = ({ sidebarOpen }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sportFilter, setSportFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("teams");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -28,10 +29,10 @@ const AdminStats = ({ sidebarOpen }) => {
 
   // Mock data for demonstration
   const mockTeams = [
-    { id: 1, name: "Team A", sport: "Basketball" },
-    { id: 2, name: "Team B", sport: "Basketball" },
-    { id: 3, name: "Team C", sport: "Volleyball" },
-    { id: 4, name: "Team D", sport: "Volleyball" }
+    { id: 1, name: "Team A", sport: "Basketball", status: "active" },
+    { id: 2, name: "Team B", sport: "Basketball", status: "active" },
+    { id: 3, name: "Team C", sport: "Volleyball", status: "active" },
+    { id: 4, name: "Team D", sport: "Volleyball", status: "inactive" }
   ];
 
   const mockPlayers = [
@@ -190,6 +191,7 @@ const AdminStats = ({ sidebarOpen }) => {
       
       setPlayerStats(stats);
       setLoading(false);
+      setActiveTab("statistics");
     }, 500);
   };
 
@@ -240,7 +242,7 @@ const AdminStats = ({ sidebarOpen }) => {
         block_attempts: playerStats.reduce((sum, player) => sum + (player.block_attempts || 0), 0),
         reception_errors: playerStats.reduce((sum, player) => sum + (player.reception_errors || 0), 0),
         reception_attempts: playerStats.reduce((sum, player) => sum + (player.reception_attempts || 0), 0),
-        minutes_played: playerStats.reduce((sum, player) => sum + (player.minutes_played || 0), 0),
+        minutes_played: playerStats.reduce((sum, player) => sum + (player.minutes_played || 极), 0),
       };
     }
   };
@@ -264,7 +266,7 @@ const AdminStats = ({ sidebarOpen }) => {
     // Rows
     playerStats.forEach(player => {
       if (isBasketball) {
-        csvContent += `${player.name},${player.jersey},${player.games_played || 0},${player.points || 0},${player.field_goals_made || 0},${player.field_goals_attempted || 0},${player.three_pointers_made || 0},${player.three_pointers_attempted || 0},${player.free_throws_made || 0},${player.free_throws_attempted || 0},${player.rebounds_offensive || 0},${player.rebounds_defensive || 0},${player.assists || 0},${player.steals || 0},${player.blocks || 0},${player.turnovers || 0},${player.fouls || 0},${player.minutes_played || 0}\n`;
+        csvContent += `${player.name},${player.jersey},${player.games_played || 0},${player.points || 0},${player.field_goals_made || 0},${player.field_goals_attempted || 0},${player.three_pointers_made || 0},${player.three_pointers_attempted || 极},${player.free_throws_made || 0},${player.free_throws_attempted || 0},${player.rebounds_offensive || 0},${player.rebounds_defensive || 0},${player.assists || 0},${player.steals || 0},${player.blocks || 0},${极.player.turnovers || 0},${player.fouls || 0},${player.minutes_played || 0}\n`;
       } else {
         csvContent += `${player.name},${player.jersey},${player.games_played || 0},${player.kills || 0},${player.kill_errors || 0},${player.kill_attempts || 0},${player.assists_volleyball || 0},${player.service_aces || 0},${player.service_errors || 0},${player.service_attempts || 0},${player.digs || 0},${player.blocks_volleyball || 0},${player.block_errors || 0},${player.block_attempts || 0},${player.reception_errors || 0},${player.reception_attempts || 0},${player.minutes_played || 0}\n`;
       }
@@ -274,7 +276,7 @@ const AdminStats = ({ sidebarOpen }) => {
     if (teamTotals) {
       csvContent += "TOTALS,,";
       if (isBasketball) {
-        csvContent += `${teamTotals.games_played || 0},${teamTotals.points || 0},${teamTotals.field_goals_made || 0},${teamTotals.field_goals_attempted || 0},${teamTotals.three_pointers_made || 0},${teamTotals.three_pointers_attempted || 0},${teamTotals.free_throws_made || 0},${teamTotals.free_throws_attempted || 0},${teamTotals.rebounds_offensive || 0},${teamTotals.rebounds_defensive || 0},${teamTotals.assists || 0},${teamTotals.steals || 0},${teamTotals.blocks || 0},${teamTotals.turnovers || 0},${teamTotals.fouls || 0},${teamTotals.minutes_played || 0}\n`;
+        csvContent += `${teamTotals.games_played || 0},${teamTotals.points || 0},${teamTotals.field_goals_made || 0},${teamTotals.field_goals_attempted || 0},${teamTotals.three_pointers_made || 0},${teamTotals.three_pointers_attempted || 0},${teamTotals.free_throws_made || 0},${teamTotals.free_throws_attempted || 0},${teamTotals.rebounds_offensive || 0},${team极als.rebounds_defensive || 0},${teamTotals.assists || 0},${teamTotals.steals || 0},${teamTotals.blocks || 0},${teamTotals.turnovers || 0},${teamTotals.fouls || 0},${teamTot极.minutes_played || 0}\n`;
       } else {
         csvContent += `${teamTotals.games_played || 0},${teamTotals.kills || 0},${teamTotals.kill_errors || 0},${teamTotals.kill_attempts || 0},${teamTotals.assists_volleyball || 0},${teamTotals.service_aces || 0},${teamTotals.service_errors || 0},${teamTotals.service_attempts || 0},${teamTotals.digs || 0},${teamTotals.blocks_volleyball || 0},${teamTotals.block_errors || 0},${teamTotals.block_attempts || 0},${teamTotals.reception_errors || 0},${teamTotals.reception_attempts || 0},${teamTotals.minutes_played || 0}\n`;
       }
@@ -295,61 +297,33 @@ const AdminStats = ({ sidebarOpen }) => {
     
     const isBasketball = selectedTeam.sport === "Basketball";
     
-    return (
-      <div className="adminstats-table-container">
-        <div className="adminstats-table-controls">
-          <div className="adminstats-search-box">
-            <FaSearch />
-            <input
-              type="text"
-              placeholder="Search players..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <div className="adminstats-filter-controls">
-            {isMobile ? (
-              <>
-                <button 
-                  className="adminstats-filter-toggle-btn"
-                  onClick={() => setShowFilters(!showFilters)}
-                >
-                  <FaFilter /> Filters
-                </button>
-                
-                {showFilters && (
-                  <div className="adminstats-mobile-filters">
-                    <div className="adminstats-filter-group">
-                      <select 
-                        value={sportFilter} 
-                        onChange={(e) => setSportFilter(e.target.value)}
-                        disabled
-                      >
-                        <option value="all">All Sports</option>
-                        <option value="basketball">Basketball</option>
-                        <option value="volleyball">Volleyball</option>
-                      </select>
-                    </div>
-                    
-                    <div className="adminstats-filter-group">
-                      <select 
-                        value={timeFilter} 
-                        onChange={(e) => setTimeFilter(e.target.value)}
-                      >
-                        <option value="all">All Time</option>
-                        <option value="season">This Season</option>
-                        <option value="month">This Month</option>
-                        <option value="week">This Week</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
+
+      return (
+  <div className="adminstats-table-container">
+    <div className="adminstats-table-controls">
+      <div className="adminstats-search-box">
+        <FaSearch />
+        <input
+          type="text"
+          placeholder="Search players..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+      
+      <div className="adminstats-filter-controls">
+        {isMobile ? (
+          <>
+            <button 
+              className="adminstats-filter-toggle-btn"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <FaFilter /> Filters
+            </button>
+            
+            {showFilters && (
+              <div className="adminstats-mobile-filters">
                 <div className="adminstats-filter-group">
-                  
                   <select 
                     value={sportFilter} 
                     onChange={(e) => setSportFilter(e.target.value)}
@@ -372,208 +346,273 @@ const AdminStats = ({ sidebarOpen }) => {
                     <option value="week">This Week</option>
                   </select>
                 </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="adminstats-filter-group">
+              <select 
+                value={sportFilter} 
+                onChange={(e) => setSportFilter(e.target.value)}
+                disabled
+              >
+                <option value="all">All Sports</option>
+                <option value="basketball">Basketball</option>
+                <option value="volleyball">Volleyball</option>
+              </select>
+            </div>
+            
+            <div className="adminstats-filter-group">
+              <select 
+                value={timeFilter} 
+                onChange={(e) => setTimeFilter(e.target.value)}
+              >
+                <option value="all">All Time</option>
+                <option value="season">This Season</option>
+                <option value="month">This Month</option>
+                <option value="week">This Week</option>
+              </select>
+            </div>
+          </>
+        )}
+        
+        <button className="adminstats-export-btn" onClick={exportToCSV}>
+          <FaDownload /> Export CSV
+        </button>
+      </div>
+    </div>
+    
+    <div className="adminstats-table-wrapper">
+      <table className="adminstats-table">
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Jersey</th>
+            <th>GP</th>
+            
+            {isBasketball ? (
+              <>
+                <th>PTS</th>
+                <th>FGM</th>
+                <th>FGA</th>
+                <th>3PM</th>
+                <th>3PA</th>
+                <th>FTM</th>
+                <th>FTA</th>
+                <th>OREB</th>
+                <th>DREB</th>
+                <th>AST</th>
+                <th>STL</th>
+                <th>BLK</th>
+                <th>TO</th>
+                <th>PF</th>
+                <th>MIN</th>
+              </>
+            ) : (
+              <>
+                <th>KILLS</th>
+                <th>KILL ERR</th>
+                <th>KILL ATT</th>
+                <th>AST</th>
+                <th>SERV ACE</th>
+                <th>SERV ERR</th>
+                <th>SERV ATT</th>
+                <th>DIGS</th>
+                <th>BLOCKS</th>
+                <th>BLOCK ERR</th>
+                <th>BLOCK ATT</th>
+                <th>REC ERR</th>
+                <th>REC ATT</th>
+                <th>MIN</th>
               </>
             )}
-            
-            <button className="adminstats-export-btn" onClick={exportToCSV}>
-              <FaDownload /> Export CSV
-            </button>
-          </div>
-        </div>
-        
-        <div className="adminstats-table-wrapper">
-          <table className="adminstats-table">
-            <thead>
-              <tr>
-                <th>Player</th>
-                <th>Jersey</th>
-                <th>GP</th>
-                
-                {isBasketball ? (
-                  <>
-                    <th>PTS</th>
-                    <th>FGM</th>
-                    <th>FGA</th>
-                    <th>3PM</th>
-                    <th>3PA</th>
-                    <th>FTM</th>
-                    <th>FTA</th>
-                    <th>OREB</th>
-                    <th>DREB</th>
-                    <th>AST</th>
-                    <th>STL</th>
-                    <th>BLK</th>
-                    <th>TO</th>
-                    <th>PF</th>
-                    <th>MIN</th>
-                  </>
-                ) : (
-                  <>
-                    <th>KILLS</th>
-                    <th>KILL ERR</th>
-                    <th>KILL ATT</th>
-                    <th>AST</th>
-                    <th>SERV ACE</th>
-                    <th>SERV ERR</th>
-                    <th>SERV ATT</th>
-                    <th>DIGS</th>
-                    <th>BLOCKS</th>
-                    <th>BLOCK ERR</th>
-                    <th>BLOCK ATT</th>
-                    <th>REC ERR</th>
-                    <th>REC ATT</th>
-                    <th>MIN</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPlayers.map((player) => (
-                <tr key={player.id}>
-                  <td className="adminstats-player-name">{player.name}</td>
-                  <td className="adminstats-jersey-number">{player.jersey}</td>
-                  <td>{player.games_played || 0}</td>
-                  
-                  {isBasketball ? (
-                    <>
-                      <td className="adminstats-highlight">{player.points || 0}</td>
-                      <td>{player.field_goals_made || 0}</td>
-                      <td>{player.field_goals_attempted || 0}</td>
-                      <td>{player.three_pointers_made || 0}</td>
-                      <td>{player.three_pointers_attempted || 0}</td>
-                      <td>{player.free_throws_made || 0}</td>
-                      <td>{player.free_throws_attempted || 0}</td>
-                      <td>{player.rebounds_offensive || 0}</td>
-                      <td>{player.rebounds_defensive || 0}</td>
-                      <td>{player.assists || 0}</td>
-                      <td>{player.steals || 0}</td>
-                      <td>{player.blocks || 0}</td>
-                      <td>{player.turnovers || 0}</td>
-                      <td>{player.fouls || 0}</td>
-                      <td>{player.minutes_played || 0}</td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="adminstats-highlight">{player.kills || 0}</td>
-                      <td>{player.kill_errors || 0}</td>
-                      <td>{player.kill_attempts || 0}</td>
-                      <td>{player.assists_volleyball || 0}</td>
-                      <td>{player.service_aces || 0}</td>
-                      <td>{player.service_errors || 0}</td>
-                      <td>{player.service_attempts || 0}</td>
-                      <td>{player.digs || 0}</td>
-                      <td>{player.blocks_volleyball || 0}</td>
-                      <td>{player.block_errors || 0}</td>
-                      <td>{player.block_attempts || 0}</td>
-                      <td>{player.reception_errors || 0}</td>
-                      <td>{player.reception_attempts || 0}</td>
-                      <td>{player.minutes_played || 0}</td>
-                    </>
-                  )}
-                </tr>
-              ))}
+          </tr>
+        </thead>
+        <tbody>
+          {filteredPlayers.map((player) => (
+            <tr key={player.id}>
+              <td className="adminstats-player-name">{player.name}</td>
+              <td className="adminstats-jersey-number">{player.jersey}</td>
+              <td>{player.games_played || 0}</td>
               
-              {/* Team Totals Row */}
-              {teamTotals && (
-                <tr className="adminstats-team-totals">
-                  <td colSpan="2">TEAM TOTALS</td>
-                  <td>{teamTotals.games_played || 0}</td>
-                  
-                  {isBasketball ? (
-                    <>
-                      <td className="adminstats-highlight">{teamTotals.points || 0}</td>
-                      <td>{teamTotals.field_goals_made || 0}</td>
-                      <td>{teamTotals.field_goals_attempted || 0}</td>
-                      <td>{teamTotals.three_pointers_made || 0}</td>
-                      <td>{teamTotals.three_pointers_attempted || 0}</td>
-                      <td>{teamTotals.free_throws_made || 0}</td>
-                      <td>{teamTotals.free_throws_attempted || 0}</td>
-                      <td>{teamTotals.rebounds_offensive || 0}</td>
-                      <td>{teamTotals.rebounds_defensive || 0}</td>
-                      <td>{teamTotals.assists || 0}</td>
-                      <td>{teamTotals.steals || 0}</td>
-                      <td>{teamTotals.blocks || 0}</td>
-                      <td>{teamTotals.turnovers || 0}</td>
-                      <td>{teamTotals.fouls || 0}</td>
-                      <td>{teamTotals.minutes_played || 0}</td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="adminstats-highlight">{teamTotals.kills || 0}</td>
-                      <td>{teamTotals.kill_errors || 0}</td>
-                      <td>{teamTotals.kill_attempts || 0}</td>
-                      <td>{teamTotals.assists_volleyball || 0}</td>
-                      <td>{teamTotals.service_aces || 0}</td>
-                      <td>{teamTotals.service_errors || 0}</td>
-                      <td>{teamTotals.service_attempts || 0}</td>
-                      <td>{teamTotals.digs || 0}</td>
-                      <td>{teamTotals.blocks_volleyball || 0}</td>
-                      <td>{teamTotals.block_errors || 0}</td>
-                      <td>{teamTotals.block_attempts || 0}</td>
-                      <td>{teamTotals.reception_errors || 0}</td>
-                      <td>{teamTotals.reception_attempts || 0}</td>
-                      <td>{teamTotals.minutes_played || 0}</td>
-                    </>
-                  )}
-                </tr>
+              {isBasketball ? (
+                <>
+                  <td className="adminstats-highlight">{player.points || 0}</td>
+                  <td>{player.field_goals_made || 0}</td>
+                  <td>{player.field_goals_attempted || 0}</td>
+                  <td>{player.three_pointers_made || 0}</td>
+                  <td>{player.three_pointers_attempted || 0}</td>
+                  <td>{player.free_throws_made || 0}</td>
+                  <td>{player.free_throws_attempted || 0}</td>
+                  <td>{player.rebounds_offensive || 0}</td>
+                  <td>{player.rebounds_defensive || 0}</td>
+                  <td>{player.assists || 0}</td>
+                  <td>{player.steals || 0}</td>
+                  <td>{player.blocks || 0}</td>
+                  <td>{player.turnovers || 0}</td>
+                  <td>{player.fouls || 0}</td>
+                  <td>{player.minutes_played || 0}</td>
+                </>
+              ) : (
+                <>
+                  <td className="adminstats-highlight">{player.kills || 0}</td>
+                  <td>{player.kill_errors || 0}</td>
+                  <td>{player.kill_attempts || 0}</td>
+                  <td>{player.assists_volleyball || 0}</td>
+                  <td>{player.service_aces || 0}</td>
+                  <td>{player.service_errors || 0}</td>
+                  <td>{player.service_attempts || 0}</td>
+                  <td>{player.digs || 0}</td>
+                  <td>{player.blocks_volleyball || 0}</td>
+                  <td>{player.block_errors || 0}</td>
+                  <td>{player.block_attempts || 0}</td>
+                  <td>{player.reception_errors || 0}</td>
+                  <td>{player.reception_attempts || 0}</td>
+                  <td>{player.minutes_played || 0}</td>
+                </>
               )}
-            </tbody>
-          </table>
-        </div>
-        
-        {filteredPlayers.length === 0 && (
-          <div className="adminstats-no-stats-message">
-            <FaChartLine />
-            <p>No player statistics found for this team.</p>
-          </div>
-        )}
-      </div>
-    );
+            </tr>
+          ))}
+          
+          {/* Team Totals Row */}
+          {teamTotals && (
+            <tr className="adminstats-team-totals">
+              <td colSpan="2">TEAM TOTALS</td>
+              <td>{teamTotals.games_played || 0}</td>
+              
+              {isBasketball ? (
+                <>
+                  <td className="adminstats-highlight">{teamTotals.points || 0}</td>
+                  <td>{teamTotals.field_goals_made || 0}</td>
+                  <td>{teamTotals.field_goals_attempted || 0}</td>
+                  <td>{teamTotals.three_pointers_made || 0}</td>
+                  <td>{teamTotals.three_pointers_attempted || 0}</td>
+                  <td>{teamTotals.free_throws_made || 0}</td>
+                  <td>{teamTotals.free_throws_attempted || 0}</td>
+                  <td>{teamTotals.rebounds_offensive || 0}</td>
+                  <td>{teamTotals.rebounds_defensive || 0}</td>
+                  <td>{teamTotals.assists || 极}</td>
+                  <td>{teamTotals.steals || 0}</td>
+                  <td>{teamTotals.blocks || 0}</td>
+                  <td>{teamTotals.turnovers || 0}</td>
+                  <td>{teamTotals.fouls || 0}</td>
+                  <td>{teamTotals.minutes_played || 0}</td>
+                </>
+              ) : (
+                <>
+                  <td className="adminstats-highlight">{teamTotals.kills || 0}</td>
+                  <td>{teamTotals.kill_errors || 0}</td>
+                  <td>{teamTotals.kill_attempts || 0}</td>
+                  <td>{teamTotals.assists_volleyball || 0}</td>
+                  <td>{teamTotals.service_aces || 0}</td>
+                  <td>{teamTotals.service_errors || 0}</td>
+                  <td>{teamTotals.service_attempts || 0}</td>
+                  <td>{teamTotals.digs || 0}</td>
+                  <td>{teamTotals.blocks_volleyball || 0}</td>
+                  <td>{teamTotals.block_errors || 0}</td>
+                  <td>{teamTotals.block_attempts || 0}</td>
+                  <td>{teamTotals.reception_errors || 0}</td>
+                  <td>{teamTotals.reception_attempts || 0}</td>
+                  <td>{teamTotals.minutes_played || 0}</td>
+                </>
+              )}
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
   };
 
   return (
-    <div className="adminstats-dashboard">
-      <div className={`adminstats-dashboard-content ${sidebarOpen ? "adminstats-sidebar-open" : ""}`}>
-        <div className="adminstats-dashboard-header">
-          <h1>Admin Stats</h1>
+    <div className="admin-dashboard">
+      <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
+        <div className="dashboard-header">
+          <h1>Admin Statistics</h1>
           <p>View and analyze team and player statistics</p>
         </div>
-        
-        <div className="adminstats-content">
-          {/* Team Selection */}
-          <div className="adminstats-section">
-            <h2>Select a Team</h2>
-            <div className="adminstats-teams-grid">
-              {teams.map(team => (
-                <div 
-                  key={team.id} 
-                  className={`adminstats-team-card ${selectedTeam?.id === team.id ? 'adminstats-selected' : ''}`}
-                  onClick={() => handleTeamSelect(team)}
+
+        <div className="dashboard-main">
+          <div className="bracket-content">
+            {/* Tabs */}
+            <div className="bracket-tabs">
+              <button
+                className={`bracket-tab-button ${activeTab === "teams" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("teams")}
+              >
+                Select Team
+              </button>
+              {selectedTeam && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "statistics" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("statistics")}
                 >
-                  <div className="adminstats-team-icon">
-                    <FaUsers />
+                  View Statistics
+                </button>
+              )}
+            </div>
+
+            {/* Select Team */}
+            {activeTab === "teams" && (
+              <div className="bracket-view-section">
+                <h2>All Teams</h2>
+                {teams.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No teams available.</p>
                   </div>
-                  <h3>{team.name}</h3>
-                  <p className="adminstats-team-sport">{team.sport}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Statistics Display */}
-          {selectedTeam && (
-            <div className="adminstats-section">
-              <div className="adminstats-section-header">
-                <h2>
-                  {selectedTeam.name} Statistics 
-                  <span className="adminstats-sport-badge">{selectedTeam.sport}</span>
-                </h2>
-                {loading && <div className="adminstats-loading-spinner">Loading...</div>}
+                ) : (
+                  <div className="bracket-grid">
+                    {teams.map((team) => (
+                      <div className="bracket-card" key={team.id} onClick={() => handleTeamSelect(team)}>
+                        <div className="bracket-card-header">
+                          <h3>{team.name}</h3>
+                          <span className={`bracket-sport-badge ${team.sport === "Basketball" ? "bracket-sport-basketball" : "bracket-sport-volleyball"}`}>
+                            {team.sport}
+                          </span>
+                        </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Status:</strong> 
+                            <span className={team.status === "active" ? "status-ongoing" : "status-completed"}>
+                              {team.status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button className="bracket-view-btn">
+                            View Stats
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              
-              {!loading && renderStatsTable()}
-            </div>
-          )}
+            )}
+
+            {/* View Statistics */}
+            {activeTab === "statistics" && selectedTeam && (
+              <div className="bracket-view-section">
+                <div className="event-details-header">
+                  <h2>
+                    {selectedTeam.name} Statistics
+                    <span className="adminstats-sport-badge">{selectedTeam.sport}</span>
+                  </h2>
+                  <div className="event-details-info">
+                    <span><strong>Sport:</strong> {selectedTeam.sport}</span>
+                    <span><strong>Status:</strong> {selectedTeam.status}</span>
+                  </div>
+                </div>
+
+                {loading ? (
+                  <p>Loading statistics...</p>
+                ) : (
+                  renderStatsTable()
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

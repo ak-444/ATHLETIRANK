@@ -81,9 +81,8 @@ const StaffStats = ({ sidebarOpen }) => {
     fetchEvents();
   }, []);
 
-  // Handle event selection - same as before
+  // Handle event selection
   const handleEventSelect = async (event) => {
-    // ... keep existing handleEventSelect logic ...
     console.log("Selected event:", event);
     setSelectedEvent(event);
     setSelectedGame(null);
@@ -172,7 +171,7 @@ const StaffStats = ({ sidebarOpen }) => {
     }
   };
 
-  // Initialize player stats with awards loading
+  // Initialize player stats with awards loading - FIXED: Get all players per team
   const initializePlayerStats = async (game) => {
     try {
       console.log("Initializing player stats for game:", game);
@@ -192,6 +191,7 @@ const StaffStats = ({ sidebarOpen }) => {
           ? basketballStatsTemplate
           : volleyballStatsTemplate;
 
+      // FIXED: Get all players from each team
       const initialStats = [
         ...team1Players.map((p) => ({
           player_id: p.id,
@@ -287,7 +287,7 @@ const StaffStats = ({ sidebarOpen }) => {
     setActiveTab("statistics");
   };
 
-  // Update player stat (same as before)
+  // Update player stat
   const updatePlayerStat = (playerIndex, statName, value) => {
     const newStats = [...playerStats];
     const newValue = Math.max(0, parseInt(value) || 0);
@@ -312,7 +312,7 @@ const StaffStats = ({ sidebarOpen }) => {
     setPlayerStats(newStats);
   };
 
-  // Adjust player stat (same as before)
+  // Adjust player stat
   const adjustPlayerStat = (playerIndex, statName, increment) => {
     const newStats = [...playerStats];
     const currentValue =
@@ -496,13 +496,27 @@ const StaffStats = ({ sidebarOpen }) => {
     }
   };
 
-  // Render stat inputs (same as before but with awards integration)
+  // Render stat inputs
   const renderStatInputs = (player, idx) => {
     const sport = selectedGame.sport_type;
     const playerAwards = matchAwards.filter(a => a.player_id === player.player_id);
     const availableAwards = getAwardTypes(sport).filter(
       awardType => !playerAwards.find(a => a.award_type === awardType)
     );
+
+    // Volleyball stat labels mapping
+    const volleyballStatLabels = {
+      kills: "Kills",
+      attack_attempts: "Att",
+      attack_errors: "Att Err",
+      serves: "Serve",
+      service_aces: "Ace",
+      serve_errors: "Serve Err",
+      receptions: "Rec",
+      reception_errors: "Rec Err",
+      digs: "Digs",
+      volleyball_assists: "Ast"
+    };
 
     return (
       <div className="player-stats-container">
@@ -546,19 +560,167 @@ const StaffStats = ({ sidebarOpen }) => {
 
         {/* Stats Section */}
         {sport === "basketball" ? (
-          <div className="stats-grid">
-            {[
-              "points",
-              "assists", 
-              "rebounds",
-              "three_points_made",
-              "steals",
-              "blocks",
-              "fouls",
-              "turnovers",
-            ].map((stat) => (
+          <div className="stats-grid basketball-stats">
+            {/* Row 1 */}
+            <div className="stat-group">
+              <label>Points</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "points", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.points[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "points", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "points", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            <div className="stat-group">
+              <label>Assists</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "assists", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.assists[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "assists", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "assists", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            <div className="stat-group">
+              <label>Rebounds</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "rebounds", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.rebounds[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "rebounds", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "rebounds", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            {/* Row 2 */}
+            <div className="stat-group">
+              <label>3-Pointers</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "three_points_made", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.three_points_made[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "three_points_made", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "three_points_made", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            <div className="stat-group">
+              <label>Steals</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "steals", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.steals[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "steals", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "steals", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            <div className="stat-group">
+              <label>Blocks</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "blocks", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.blocks[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "blocks", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "blocks", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            {/* Row 3 */}
+            <div className="stat-group">
+              <label>Fouls</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "fouls", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.fouls[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "fouls", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "fouls", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            <div className="stat-group">
+              <label>Turnovers</label>
+              <div className="stat-controls">
+                <button onClick={() => adjustPlayerStat(idx, "turnovers", false)}>
+                  <FaMinus />
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={player.turnovers[currentQuarter]}
+                  onChange={(e) => updatePlayerStat(idx, "turnovers", e.target.value)}
+                />
+                <button onClick={() => adjustPlayerStat(idx, "turnovers", true)}>
+                  <FaPlus />
+                </button>
+              </div>
+            </div>
+            
+            <div className="stat-group total-stats">
+              <label>Total Points</label>
+              <div className="total-display">
+                {player.points.reduce((a, b) => a + b, 0)}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="stats-grid volleyball-stats">
+            {/* Volleyball stats in a clean grid layout without section headers */}
+            {Object.entries(volleyballStatLabels).map(([stat, label]) => (
               <div className="stat-group" key={stat}>
-                <label>{stat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</label>
+                <label>{label}</label>
                 <div className="stat-controls">
                   <button onClick={() => adjustPlayerStat(idx, stat, false)}>
                     <FaMinus />
@@ -575,83 +737,12 @@ const StaffStats = ({ sidebarOpen }) => {
                 </div>
               </div>
             ))}
-          </div>
-        ) : (
-          <div className="volleyball-stats-container">
-            <div className="stats-grid">
-              {/* Attack Stats */}
-              <div className="stat-section">
-                <h4>Attack</h4>
-                {["kills", "attack_attempts", "attack_errors"].map((stat) => (
-                  <div className="stat-group" key={stat}>
-                    <label>{stat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</label>
-                    <div className="stat-controls">
-                      <button onClick={() => adjustPlayerStat(idx, stat, false)}>
-                        <FaMinus />
-                      </button>
-                      <input
-                        type="number"
-                        min="0"
-                        value={player[stat][currentQuarter]}
-                        onChange={(e) => updatePlayerStat(idx, stat, e.target.value)}
-                      />
-                      <button onClick={() => adjustPlayerStat(idx, stat, true)}>
-                        <FaPlus />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                <div className="hitting-percentage">
-                  <small>Hitting %: {calculateHittingPercentage(player)}</small>
-                </div>
-              </div>
-
-              {/* Serve Stats */}
-              <div className="stat-section">
-                <h4>Serve</h4>
-                {["serves", "service_aces", "serve_errors"].map((stat) => (
-                  <div className="stat-group" key={stat}>
-                    <label>{stat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</label>
-                    <div className="stat-controls">
-                      <button onClick={() => adjustPlayerStat(idx, stat, false)}>
-                        <FaMinus />
-                      </button>
-                      <input
-                        type="number"
-                        min="0"
-                        value={player[stat][currentQuarter]}
-                        onChange={(e) => updatePlayerStat(idx, stat, e.target.value)}
-                      />
-                      <button onClick={() => adjustPlayerStat(idx, stat, true)}>
-                        <FaPlus />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Reception & Other Stats */}
-              <div className="stat-section">
-                <h4>Defense & Other</h4>
-                {["receptions", "reception_errors", "digs", "volleyball_assists"].map((stat) => (
-                  <div className="stat-group" key={stat}>
-                    <label>{stat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</label>
-                    <div className="stat-controls">
-                      <button onClick={() => adjustPlayerStat(idx, stat, false)}>
-                        <FaMinus />
-                      </button>
-                      <input
-                        type="number"
-                        min="0"
-                        value={player[stat][currentQuarter]}
-                        onChange={(e) => updatePlayerStat(idx, stat, e.target.value)}
-                      />
-                      <button onClick={() => adjustPlayerStat(idx, stat, true)}>
-                        <FaPlus />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+            
+            {/* Hitting Percentage */}
+            <div className="stat-group total-stats">
+              <label>Hit%</label>
+              <div className="total-display">
+                {calculateHittingPercentage(player)}
               </div>
             </div>
           </div>
@@ -662,332 +753,333 @@ const StaffStats = ({ sidebarOpen }) => {
 
   return (
     <div className="admin-dashboard">
-      <div
-        className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}
-      >
+      <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="dashboard-header">
           <h1>Staff Statistics</h1>
           <p>Record player statistics and awards for matches</p>
         </div>
 
-        <div className="events-content">
-          {/* Tabs */}
-          <div className="events-tabs">
-            <button
-              className={`events-tab-button ${
-                activeTab === "select" ? "events-tab-active" : ""
-              }`}
-              onClick={() => setActiveTab("select")}
-            >
-              Select Event
-            </button>
-            {selectedEvent && (
+        <div className="dashboard-main">
+          <div className="bracket-content">
+            {/* Tabs */}
+            <div className="bracket-tabs">
               <button
-                className={`events-tab-button ${
-                  activeTab === "games" ? "events-tab-active" : ""
-                }`}
-                onClick={() => setActiveTab("games")}
+                className={`bracket-tab-button ${activeTab === "select" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("select")}
               >
-                Manage Games ({games.length})
+                Select Event
               </button>
-            )}
-            {selectedGame && (
-              <button
-                className={`events-tab-button ${
-                  activeTab === "statistics" ? "events-tab-active" : ""
-                }`}
-                onClick={() => setActiveTab("statistics")}
-              >
-                Record Statistics
-              </button>
-            )}
-          </div>
+              {selectedEvent && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "games" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("games")}
+                >
+                  Manage Games ({games.length})
+                </button>
+              )}
+              {selectedGame && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "statistics" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("statistics")}
+                >
+                  Record Statistics
+                </button>
+              )}
+            </div>
 
-          {/* Select Event - same as before */}
-          {activeTab === "select" && (
-            <div className="events-view-section">
-              {loading ? (
-                <div className="loading-container">
+            {/* Select Event */}
+            {activeTab === "select" && (
+              <div className="bracket-view-section">
+                <h2>All Events</h2>
+                {loading ? (
                   <p>Loading events...</p>
-                </div>
-              ) : error ? (
-                <div className="error-container">
-                  <p style={{ color: "red" }}>Error: {error}</p>
-                </div>
-              ) : events.length === 0 ? (
-                <div className="events-no-events">
-                  <p>No events available.</p>
-                </div>
-              ) : (
-                <div className="events-grid">
-                  {events.map((event) => (
-                    <div className="events-card" key={event.id}>
-                      <div className="events-card-header">
-                        <h3>{event.name}</h3>
-                      </div>
-                      <div className="events-info">
-                        <p>
-                          <strong>Start:</strong>{" "}
-                          {new Date(event.start_date).toLocaleDateString()}
-                        </p>
-                        <p>
-                          <strong>End:</strong>{" "}
-                          {new Date(event.end_date).toLocaleDateString()}
-                        </p>
-                        <p>
-                          <strong>Status:</strong>{" "}
-                          <span className={`status-${event.status}`}>
+                ) : error ? (
+                  <p className="bracket-error">Error: {error}</p>
+                ) : events.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No events available.</p>
+                  </div>
+                ) : (
+                  <div className="bracket-grid">
+                    {events.map((event) => (
+                      <div className="bracket-card" key={event.id}>
+                        <div className="bracket-card-header">
+                          <h3>{event.name}</h3>
+                          <span className={`bracket-sport-badge ${event.status === "ongoing" ? "bracket-sport-basketball" : "bracket-sport-volleyball"}`}>
                             {event.status}
                           </span>
-                        </p>
-                      </div>
-                      <div className="events-card-actions">
-                        <button
-                          className="events-submit-btn"
-                          onClick={() => handleEventSelect(event)}
-                        >
-                          Manage Games
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Manage Games - same as before */}
-          {activeTab === "games" && selectedEvent && (
-            <div className="events-view-section">
-              <div className="section-header">
-                <h2>Games for {selectedEvent.name}</h2>
-                <p>Found {brackets.length} bracket(s) with {games.length} match(es)</p>
-              </div>
-              
-              {error && (
-                <div className="error-container">
-                  <p style={{ color: "red" }}>{error}</p>
-                </div>
-              )}
-              
-              {loading ? (
-                <div className="loading-container">
-                  <p>Loading games...</p>
-                </div>
-              ) : games.length === 0 ? (
-                <div className="events-no-events">
-                  <p>No games found for this event.</p>
-                  <p>Make sure brackets have been created and matches have been generated.</p>
-                </div>
-              ) : (
-                <div className="events-grid">
-                  {games.map((game) => (
-                    <div className="events-card" key={game.id}>
-                      <div className="events-card-header">
-                        <h3>
-                          {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
-                        </h3>
-                        <span className="bracket-badge">{game.bracket_name}</span>
-                      </div>
-                      <div className="events-info">
-                        <p>
-                          <strong>Sport:</strong> {game.sport_type}
-                        </p>
-                        <p>
-                          <strong>Round:</strong> {game.round_number}
-                        </p>
-                        <p>
-                          <strong>Status:</strong>{" "}
-                          <span className={`status-${game.status}`}>
-                            {game.status}
-                          </span>
-                        </p>
-                        {game.status === "completed" && (
-                          <p>
-                            <strong>Score:</strong> {game.score_team1} - {game.score_team2}
-                          </p>
-                        )}
-                        {game.winner_name && (
-                          <p>
-                            <strong>Winner:</strong> {game.winner_name}
-                          </p>
-                        )}
-                      </div>
-                      <div className="events-card-actions">
-                        <button
-                          className="events-submit-btn"
-                          onClick={() => handleGameSelect(game)}
-                        >
-                          {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Record Statistics */}
-          {activeTab === "statistics" && selectedGame && (
-            <div className="events-view-section">
-              <div className="statistics-header">
-                <h2>
-                  Recording Statistics: {selectedGame.team1_name} vs {selectedGame.team2_name}
-                </h2>
-                <div className="game-info">
-                  <span><strong>Sport:</strong> {selectedGame.sport_type}</span>
-                  <span><strong>Bracket:</strong> {selectedGame.bracket_name}</span>
-                  <span><strong>Round:</strong> {selectedGame.round_number}</span>
-                </div>
-              </div>
-
-              {/* Awards Summary */}
-              {matchAwards.length > 0 && (
-                <div className="match-awards-summary">
-                  <h3><FaTrophy /> Match Awards ({matchAwards.length})</h3>
-                  <div className="awards-list">
-                    {matchAwards.map((award, idx) => (
-                      <div key={idx} className="award-item">
-                        <span className="award-type">{award.award_type}</span>
-                        <span className="award-player">{award.player_name} ({award.team_name})</span>
+                        </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</div>
+                          <div><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</div>
+                          <div><strong>Status:</strong> 
+                            <span className={event.status === "ongoing" ? "status-ongoing" : "status-completed"}>
+                              {event.status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button className="bracket-view-btn" onClick={() => handleEventSelect(event)}>
+                            Manage Games
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {/* Period Navigation */}
-              <div className="period-navigation">
-                <button
-                  onClick={() => changePeriod("prev")}
-                  disabled={currentQuarter === 0}
-                  className="period-nav-btn"
-                >
-                  <FaArrowLeft />
-                </button>
-                <div className="period-display">
-                  {selectedGame.sport_type === "basketball"
-                    ? `Quarter ${currentQuarter + 1}`
-                    : `Set ${currentQuarter + 1}`}
-                </div>
-                <button
-                  onClick={() => changePeriod("next")}
-                  disabled={
-                    currentQuarter ===
-                    (selectedGame.sport_type === "basketball" ? 3 : 4)
-                  }
-                  className="period-nav-btn"
-                >
-                  <FaArrowRight />
-                </button>
+                )}
               </div>
+            )}
 
-              {/* Team Scores */}
-              <div className="team-scores-container">
-                <div className="team-score">
-                  <h3>{selectedGame.team1_name}</h3>
-                  <div className="score-display">
-                    {teamScores.team1[currentQuarter]}
-                  </div>
-                  <div className="period-total">
-                    Total: {teamScores.team1.reduce((a, b) => a + b, 0)}
-                  </div>
-                </div>
-                <div className="score-separator">-</div>
-                <div className="team-score">
-                  <h3>{selectedGame.team2_name}</h3>
-                  <div className="score-display">
-                    {teamScores.team2[currentQuarter]}
-                  </div>
-                  <div className="period-total">
-                    Total: {teamScores.team2.reduce((a, b) => a + b, 0)}
+            {/* Manage Games */}
+            {activeTab === "games" && selectedEvent && (
+              <div className="bracket-view-section">
+                <div className="event-details-header">
+                  <h2>Games for {selectedEvent.name}</h2>
+                  <div className="event-details-info">
+                    <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
+                    <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
+                    <span><strong>Status:</strong> {selectedEvent.status}</span>
                   </div>
                 </div>
+                
+                {error && (
+                  <div className="bracket-error">
+                    {error}
+                  </div>
+                )}
+                
+                {loading ? (
+                  <p>Loading games...</p>
+                ) : games.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No games found for this event.</p>
+                    <p>Make sure brackets have been created and matches have been generated.</p>
+                  </div>
+                ) : (
+                  <div className="bracket-grid">
+                    {games.map((game) => (
+                      <div className="bracket-card" key={game.id}>
+                        <div className="bracket-card-header">
+                          <h3>
+                            {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
+                          </h3>
+                          <span className={`bracket-sport-badge bracket-sport-${game.sport_type}`}>
+                            {game.sport_type}
+                          </span>
+                        </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Bracket:</strong> {game.bracket_name}</div>
+                          <div><strong>Round:</strong> {game.round_number}</div>
+                          <div><strong>Status:</strong> 
+                            <span className={`status-${game.status}`}>
+                              {game.status}
+                            </span>
+                          </div>
+                          {game.status === "completed" && (
+                            <div><strong>Score:</strong> {game.score_team1} - {game.score_team2}</div>
+                          )}
+                          {game.winner_name && (
+                            <div><strong>Winner:</strong> {game.winner_name}</div>
+                          )}
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button className="bracket-view-btn" onClick={() => handleGameSelect(game)}>
+                            {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+            )}
 
-              {/* Actions */}
-              <div className="stats-actions">
-                <button
-                  className="events-cancel-btn"
-                  onClick={() => setActiveTab("games")}
-                >
-                  Back to Games
-                </button>
-                <div className="stats-action-buttons">
-                  <button className="events-delete-btn" onClick={resetStatistics}>
-                    <FaRedo /> Reset All
-                  </button>
+            {/* Record Statistics */}
+            {activeTab === "statistics" && selectedGame && (
+              <div className="bracket-view-section">
+                <div className="event-details-header">
+                  <h2>
+                    Recording Statistics: {selectedGame.team1_name} vs {selectedGame.team2_name}
+                  </h2>
+                  <div className="event-details-info">
+                    <span><strong>Sport:</strong> {selectedGame.sport_type}</span>
+                    <span><strong>Bracket:</strong> {selectedGame.bracket_name}</span>
+                    <span><strong>Round:</strong> {selectedGame.round_number}</span>
+                  </div>
+                </div>
+
+                {/* Awards Summary */}
+                {matchAwards.length > 0 && (
+                  <div className="match-awards-summary">
+                    <h3><FaTrophy /> Match Awards ({matchAwards.length})</h3>
+                    <div className="awards-list">
+                      {matchAwards.map((award, idx) => (
+                        <div key={idx} className="award-item">
+                          <span className="award-type">{award.award_type}</span>
+                          <span className="award-player">{award.player_name} ({award.team_name})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Period Navigation */}
+                <div className="period-navigation">
                   <button
-                    className="events-submit-btn"
-                    onClick={saveStatistics}
-                    disabled={loading}
+                    onClick={() => changePeriod("prev")}
+                    disabled={currentQuarter === 0}
+                    className="bracket-cancel-btn"
                   >
-                    {loading ? "Saving..." : <><FaSave /> Save Statistics & Awards</>}
+                    <FaArrowLeft />
+                  </button>
+                  <div className="period-display">
+                    {selectedGame.sport_type === "basketball"
+                      ? `Quarter ${currentQuarter + 1}`
+                      : `Set ${currentQuarter + 1}`}
+                  </div>
+                  <button
+                    onClick={() => changePeriod("next")}
+                    disabled={
+                      currentQuarter ===
+                      (selectedGame.sport_type === "basketball" ? 3 : 4)
+                    }
+                    className="bracket-submit-btn"
+                  >
+                    <FaArrowRight />
                   </button>
                 </div>
-              </div>
 
-              {/* Player Stats */}
-              {loading ? (
-                <div className="loading-container">
-                  <p>Loading player data...</p>
+                {/* Team Scores */}
+                <div className="team-scores-container">
+                  <div className="team-score">
+                    <h3>{selectedGame.team1_name}</h3>
+                    <div className="score-display">
+                      {teamScores.team1[currentQuarter]}
+                    </div>
+                    <div className="period-total">
+                      Total: {teamScores.team1.reduce((a, b) => a + b, 0)}
+                    </div>
+                  </div>
+                  <div className="score-separator">-</div>
+                  <div className="team-score">
+                    <h3>{selectedGame.team2_name}</h3>
+                    <div className="score-display">
+                      {teamScores.team2[currentQuarter]}
+                    </div>
+                    <div className="period-total">
+                      Total: {teamScores.team2.reduce((a, b) => a + b, 0)}
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div className="teams-stats">
-                  {[selectedGame.team1_id, selectedGame.team2_id].map((teamId) => {
-                    const teamPlayers = playerStats.filter(
-                      (p) => p.team_id === teamId
-                    );
-                    const teamName = teamId === selectedGame.team1_id 
-                      ? selectedGame.team1_name 
-                      : selectedGame.team2_name;
 
-                    return (
-                      <div key={teamId} className="team-section">
-                        <h3 className="team-title">{teamName}</h3>
-                        {teamPlayers.length === 0 ? (
-                          <p>No players found for this team.</p>
-                        ) : (
-                          <div className="players-stats">
-                            {teamPlayers.map((player, playerIndex) => {
-                              const globalIndex = playerStats.findIndex(
-                                (p) => p.player_id === player.player_id
-                              );
-                              return (
-                                <div
-                                  key={player.player_id}
-                                  className="events-card player-card"
-                                >
-                                  <div className="player-header">
-                                    <h4>{player.player_name}</h4>
-                                    <div className="player-stats-summary">
-                                      <span className="player-points">
-                                        {selectedGame.sport_type === "basketball" 
-                                          ? `Points: ${player.points ? player.points[currentQuarter] || 0 : 0}`
-                                          : `Kills: ${player.kills ? player.kills[currentQuarter] || 0 : 0}`
-                                        }
+                {/* Actions */}
+                <div className="bracket-form-actions">
+                  <button className="bracket-cancel-btn" onClick={() => setActiveTab("games")}>
+                    Back to Games
+                  </button>
+                  <div className="stats-action-buttons">
+                    <button className="bracket-delete-btn" onClick={resetStatistics}>
+                      <FaRedo /> Reset All
+                    </button>
+                    <button
+                      className="bracket-submit-btn"
+                      onClick={saveStatistics}
+                      disabled={loading}
+                    >
+                      {loading ? "Saving..." : <><FaSave /> Save Statistics & Awards</>}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Player Stats - FIXED: Two-column layout for all players */}
+                {loading ? (
+                  <p>Loading player data...</p>
+                ) : (
+                  <div className="teams-stats-container">
+                    {/* Team 1 Column */}
+                    <div className="team-column">
+                      <h3 className="team-title">{selectedGame.team1_name}</h3>
+                      <div className="players-container">
+                        {playerStats
+                          .filter(player => player.team_id === selectedGame.team1_id)
+                          .map((player, playerIndex) => {
+                            const globalIndex = playerStats.findIndex(
+                              p => p.player_id === player.player_id
+                            );
+                            return (
+                              <div
+                                key={player.player_id}
+                                className="bracket-card player-card"
+                              >
+                                <div className="bracket-card-header">
+                                  <h4>{player.player_name}</h4>
+                                  <div className="player-stats-summary">
+                                    <span className="player-points">
+                                      {selectedGame.sport_type === "basketball" 
+                                        ? `Points: ${player.points ? player.points[currentQuarter] || 0 : 0}`
+                                        : `Kills: ${player.kills ? player.kills[currentQuarter] || 0 : 0}`
+                                      }
+                                    </span>
+                                    {selectedGame.sport_type === "volleyball" && (
+                                      <span className="player-hitting-pct">
+                                        Hit%: {calculateHittingPercentage(player)}
                                       </span>
-                                      {selectedGame.sport_type === "volleyball" && (
-                                        <span className="player-hitting-pct">
-                                          Hit%: {calculateHittingPercentage(player)}
-                                        </span>
-                                      )}
-                                    </div>
+                                    )}
                                   </div>
+                                </div>
+                                <div className="bracket-card-info">
                                   {renderStatInputs(player, globalIndex)}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        )}
+                              </div>
+                            );
+                          })}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+                    </div>
+
+                    {/* Team 2 Column */}
+                    <div className="team-column">
+                      <h3 className="team-title">{selectedGame.team2_name}</h3>
+                      <div className="players-container">
+                        {playerStats
+                          .filter(player => player.team_id === selectedGame.team2_id)
+                          .map((player, playerIndex) => {
+                            const globalIndex = playerStats.findIndex(
+                              p => p.player_id === player.player_id
+                            );
+                            return (
+                              <div
+                                key={player.player_id}
+                                className="bracket-card player-card"
+                              >
+                                <div className="bracket-card-header">
+                                  <h4>{player.player_name}</h4>
+                                  <div className="player-stats-summary">
+                                    <span className="player-points">
+                                      {selectedGame.sport_type === "basketball" 
+                                        ? `Points: ${player.points ? player.points[currentQuarter] || 0 : 0}`
+                                        : `Kills: ${player.kills ? player.kills[currentQuarter] || 0 : 0}`
+                                      }
+                                    </span>
+                                    {selectedGame.sport_type === "volleyball" && (
+                                      <span className="player-hitting-pct">
+                                        Hit%: {calculateHittingPercentage(player)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="bracket-card-info">
+                                  {renderStatInputs(player, globalIndex)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

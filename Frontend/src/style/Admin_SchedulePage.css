@@ -1,80 +1,91 @@
-/* Admin_SchedulePage.css */
+/* Admin_SchedulePage.css - Matches Brackets Page Styling */
 
 /* Main content wrapper */
-.schedule-content {
+.dashboard-main {
   padding: 20px;
-  flex: 1;
-  
 }
 
-/* Tabs */
-.schedule-tabs {
+.bracket-content {
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+}
+
+/* Tab Navigation */
+.bracket-tabs {
   display: flex;
-  margin-bottom: 30px;
   border-bottom: 2px solid var(--border-color);
-  margin-left: -20px;
+  background: var(--background-secondary);
 }
 
-.schedule-tab-button {
+.bracket-tab-button {
   background: none;
   border: none;
   padding: 15px 30px;
   font-size: 16px;
-  font-weight: 500; /* ✅ match bracket tabs */
+  font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
 }
 
-.schedule-tab-button:hover {
+.bracket-tab-button:hover {
   color: var(--text-primary);
   background-color: rgba(59, 130, 246, 0.1);
 }
 
-.schedule-tab-active {
+.bracket-tab-button.bracket-tab-active {
   color: var(--primary-color);
   border-bottom-color: var(--primary-color);
-  font-weight: 600; /* ✅ consistent with bracket active tab */
+  font-weight: 600;
 }
 
-/* Form Card */
-.schedule-form-container {
+/* Form Section */
+.bracket-create-section {
   background: var(--background-card);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-medium);
-  border: 1px solid var(--border-color);
-  padding: 40px;
-  margin-left: -20px;
 }
 
-.schedule-form-container h2 {
-  font-size: 28px;
-  font-weight: 700; /* ✅ match bracket form heading */
+.bracket-form-container {
+  padding: 40px;
+}
+
+.bracket-form-container h2 {
   margin-bottom: 30px;
   color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 700;
 }
 
-.schedule-form {
+.bracket-form {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.schedule-form-group {
+.bracket-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.bracket-form-group {
   display: flex;
   flex-direction: column;
 }
 
-.schedule-form-group label {
-  font-weight: 500; /* ✅ same as bracket form labels */
+.bracket-form-group label {
+  font-weight: 500;
   margin-bottom: 8px;
   color: var(--text-primary);
+  font-size: 16px;
 }
 
-.schedule-form-group input,
-.schedule-form-group select,
-.schedule-form-group textarea {
+.bracket-form-group input,
+.bracket-form-group select,
+.bracket-form-group textarea {
   padding: 14px 16px;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
@@ -84,139 +95,243 @@
   transition: var(--transition);
 }
 
-.schedule-form-group input:focus,
-.schedule-form-group select:focus,
-.schedule-form-group textarea:focus {
-  border-color: var(--border-focus);
+.bracket-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.bracket-form-group input:focus,
+.bracket-form-group select:focus,
+.bracket-form-group textarea:focus {
   outline: none;
+  border-color: var(--border-focus);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.schedule-form-actions {
+.bracket-form-group input::placeholder,
+.bracket-form-group textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.bracket-form-actions {
   display: flex;
   gap: 16px;
   margin-top: 32px;
   justify-content: flex-end;
 }
 
-/* Buttons */
-.schedule-submit-btn {
+.bracket-submit-btn {
   background: var(--primary-color);
   color: white;
   border: none;
   padding: 14px 32px;
   border-radius: var(--border-radius);
   font-size: 16px;
-  font-weight: 600; /* ✅ match bracket buttons */
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
 }
 
-.schedule-submit-btn:hover {
+.bracket-submit-btn:hover {
   background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-medium);
 }
 
-.schedule-cancel-btn {
+.bracket-cancel-btn {
   background: var(--error-color);
   color: white;
   border: none;
   padding: 14px 32px;
   border-radius: var(--border-radius);
   font-size: 16px;
-  font-weight: 600; /* ✅ match bracket buttons */
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
 }
 
-.schedule-cancel-btn:hover {
+.bracket-cancel-btn:hover {
   background: #dc2626;
   transform: translateY(-2px);
-}
-
-.schedule-create-first-btn {
-  margin-top: 20px;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: var(--border-radius);
-  font-size: 16px;
-  font-weight: 600; /* ✅ consistent */
-  cursor: pointer;
-  transition: var(--transition);
 }
 
 /* View Section */
-.schedule-view-section h2 {
-  font-size: 28px;
-  font-weight: 700; /* ✅ match bracket view header */
-  margin-bottom: 20px;
-  color: var(--text-primary);
-}
-
-.schedule-no-schedules {
-  text-align: center;
+.bracket-view-section {
   background: var(--background-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-lg);
   padding: 40px;
-  box-shadow: var(--shadow-light);
 }
 
-.schedule-grid {
+.bracket-view-section h2 {
+  margin-bottom: 30px;
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.bracket-no-brackets {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.bracket-no-brackets p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.bracket-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 24px;
 }
 
-.schedule-card {
-  background: var(--background-card);
+.bracket-card {
+  background: var(--background-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
   padding: 24px;
-  box-shadow: var(--shadow-light);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.schedule-card-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.schedule-card-header h3 {
-  font-weight: 600; /* ✅ match bracket card titles */
-  color: var(--text-primary);
-}
-
-.schedule-card-info {
-  font-size: 14px;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-}
-
-.schedule-card-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.schedule-delete-btn {
-  background: var(--error-color);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600; /* ✅ match bracket delete button */
   transition: var(--transition);
 }
 
-.schedule-delete-btn:hover {
-  background: #dc2626;
+.bracket-card:hover {
+  box-shadow: var(--shadow-medium);
   transform: translateY(-2px);
+}
+
+.bracket-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.bracket-card-header h3 {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  margin-right: 12px;
+}
+
+.bracket-card-info {
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.bracket-card-info > div {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}
+
+.bracket-card-info strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.bracket-card-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.bracket-delete-btn {
+  background: var(--error-color);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bracket-delete-btn:hover {
+  background: #dc2626;
+}
+
+/* Sport badges */
+.bracket-sport-badge {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.bracket-sport-basketball {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+}
+
+.bracket-sport-volleyball {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  color: white;
+}
+
+.bracket-sport-default {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-content.sidebar-open {
+    margin-left: 0;
+  }
+  
+  .bracket-content {
+    padding: 0;
+  }
+  
+  .bracket-tabs {
+    flex-direction: column;
+  }
+  
+  .bracket-tab-button {
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    border-right: none;
+  }
+  
+  .bracket-tab-button.bracket-tab-active {
+    border-bottom-color: var(--border-color);
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .bracket-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .bracket-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .bracket-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* CSS Variables */
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --error-color: #ef4444;
+  --background-primary: #0a0f1c;
+  --background-secondary: #1a2332;
+  --background-card: #0f172a;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #2d3748;
+  --border-focus: #3b82f6;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

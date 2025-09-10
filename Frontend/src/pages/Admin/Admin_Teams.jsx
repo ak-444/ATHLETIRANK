@@ -4,6 +4,7 @@ import "../../style/Admin_TeamPage.css";
 const TeamsPage = ({ sidebarOpen }) => {
   const [activeTab, setActiveTab] = useState("create");
   const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     teamName: "",
     sport: "",
@@ -19,12 +20,15 @@ const TeamsPage = ({ sidebarOpen }) => {
   // Fetch teams
   useEffect(() => {
     const fetchTeams = async () => {
+      setLoading(true);
       try {
         const res = await fetch("http://localhost:5000/api/teams");
         const data = await res.json();
         setTeams(data);
       } catch (err) {
         console.error("Error fetching teams:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchTeams();
@@ -86,25 +90,43 @@ const TeamsPage = ({ sidebarOpen }) => {
           players: validPlayers,
         }),
       });
-      const newTeam = await res.json();
-      setTeams(prev => [...prev, newTeam]);
-
-      setFormData({ teamName: "", sport: "", players: [] });
-      setActiveTab("view");
+      
+      if (res.ok) {
+        const newTeam = await res.json();
+        setTeams(prev => [...prev, newTeam]);
+        setFormData({ teamName: "", sport: "", players: [] });
+        setActiveTab("view");
+        alert("Team created successfully!");
+      } else {
+        alert("Error creating team");
+      }
     } catch (err) {
       console.error("Error creating team:", err);
+      alert("Error creating team");
     }
   };
 
   // Delete team
   const handleDeleteTeam = async (id) => {
+    if (!confirm("Are you sure you want to delete this team?")) return;
+    
     try {
-      await fetch(`http://localhost:5000/api/teams/${id}`, { method: "DELETE" });
-      setTeams(prev => prev.filter(team => team.id !== id));
+      const res = await fetch(`http://localhost:5000/api/teams/${id}`, { method: "DELETE" });
+      
+      if (res.ok) {
+        setTeams(prev => prev.filter(team => team.id !== id));
+        alert("Team deleted successfully!");
+      } else {
+        alert("Error deleting team");
+      }
     } catch (err) {
       console.error("Error deleting team:", err);
+      alert("Error deleting team");
     }
   };
+
+  // Capitalize first letter
+  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
   return (
     <div className="admin-dashboard">
@@ -114,159 +136,175 @@ const TeamsPage = ({ sidebarOpen }) => {
           <p>Create and manage sports teams</p>
         </div>
 
-        <div className="team-content">
-          {/* Tabs */}
-          <div className="team-tabs">
-            <button
-              className={`team-tab-button ${activeTab === "create" ? "team-tab-active" : ""}`}
-              onClick={() => setActiveTab("create")}
-            >
-              Create Team
-            </button>
-            <button
-              className={`team-tab-button ${activeTab === "view" ? "team-tab-active" : ""}`}
-              onClick={() => setActiveTab("view")}
-            >
-              View Teams ({teams.length})
-            </button>
-          </div>
+        <div className="dashboard-main">
+          <div className="bracket-content">
+            {/* Tabs */}
+            <div className="bracket-tabs">
+              <button
+                className={`bracket-tab-button ${activeTab === "create" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("create")}
+              >
+                Create Team
+              </button>
+              <button
+                className={`bracket-tab-button ${activeTab === "view" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("view")}
+              >
+                View Teams ({teams.length})
+              </button>
+            </div>
 
-          {/* Create Team */}
-          {activeTab === "create" && (
-            <div className="team-form-container">
-              <form onSubmit={handleSubmit} className="team-form">
-                {/* Team Name & Sport */}
-                <div className="team-form-group">
-                  <label>Team Name *</label>
-                  <input
-                    type="text"
-                    name="teamName"
-                    value={formData.teamName}
-                    onChange={handleInputChange}
-                    placeholder="Enter team name"
-                    required
-                  />
-                </div>
+            {/* Create Team */}
+            {activeTab === "create" && (
+              <div className="bracket-create-section">
+                <div className="bracket-form-container">
+                  <h2>Create New Team</h2>
+                  <form className="bracket-form" onSubmit={handleSubmit}>
+                    {/* Team Name */}
+                    <div className="bracket-form-group">
+                      <label htmlFor="teamName">Team Name *</label>
+                      <input
+                        type="text"
+                        id="teamName"
+                        name="teamName"
+                        value={formData.teamName}
+                        onChange={handleInputChange}
+                        placeholder="Enter team name"
+                        required
+                      />
+                    </div>
 
-                <div className="team-form-group">
-                  <label>Sport *</label>
-                  <select
-                    name="sport"
-                    value={formData.sport}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select a sport</option>
-                    {Object.keys(positions).map((sport) => (
-                      <option key={sport} value={sport}>{sport}</option>
-                    ))}
-                  </select>
-                </div>
+                    {/* Sport Selection */}
+                    <div className="bracket-form-group">
+                      <label htmlFor="sport">Sport *</label>
+                      <select
+                        id="sport"
+                        name="sport"
+                        value={formData.sport}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Select a sport</option>
+                        {Object.keys(positions).map((sport) => (
+                          <option key={sport} value={sport}>{sport}</option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* Players */}
-                {formData.sport && (
-                  <div className="team-players-section">
-                    <div className="players-header">
-                      <h3>Players</h3>
+                    {/* Players Section */}
+                    {formData.sport && (
+                      <div className="team-players-section">
+                        <div className="players-header">
+                          <h3>Players</h3>
+                          <button
+                            type="button"
+                            className="bracket-submit-btn"
+                            onClick={addPlayer}
+                            disabled={formData.players.length >= 15}
+                          >
+                            Add Player
+                          </button>
+                        </div>
+
+                        {formData.players.map((player, index) => (
+                          <div key={index} className="player-card">
+                            <input
+                              type="text"
+                              placeholder="Enter player name"
+                              value={player.name}
+                              onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
+                              required
+                            />
+                            <select
+                              value={player.position}
+                              onChange={(e) => handlePlayerChange(index, "position", e.target.value)}
+                              required
+                            >
+                              <option value="">Select position</option>
+                              {positions[formData.sport].map(pos => (
+                                <option key={pos} value={pos}>{pos}</option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              className="bracket-delete-btn"
+                              onClick={() => removePlayer(index)}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="bracket-form-actions">
+                      <button type="submit" className="bracket-submit-btn">Create Team</button>
                       <button
                         type="button"
-                        className="add-player-btn"
-                        onClick={addPlayer}
-                        disabled={formData.players.length >= 15}
+                        className="bracket-cancel-btn"
+                        onClick={() => setFormData({ teamName: "", sport: "", players: [] })}
                       >
-                        Add Player
+                        Clear Form
                       </button>
                     </div>
+                  </form>
+                </div>
+              </div>
+            )}
 
-                    {formData.players.map((player, index) => (
-                      <div key={index} className="player-card">
-                        <input
-                          type="text"
-                          placeholder="Enter player name"
-                          value={player.name}
-                          onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
-                          required
-                        />
-                        <select
-                          value={player.position}
-                          onChange={(e) => handlePlayerChange(index, "position", e.target.value)}
-                          required
-                        >
-                          <option value="">Select position</option>
-                          {positions[formData.sport].map(pos => (
-                            <option key={pos} value={pos}>{pos}</option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          className="remove-player-btn"
-                          onClick={() => removePlayer(index)}
-                        >
-                          ×
-                        </button>
+            {/* View Teams */}
+            {activeTab === "view" && (
+              <div className="bracket-view-section">
+                <h2>All Teams</h2>
+                {loading ? (
+                  <p>Loading teams...</p>
+                ) : teams.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No teams created yet. Create your first team!</p>
+                    <button 
+                      className="bracket-submit-btn" 
+                      onClick={() => setActiveTab("create")}
+                    >
+                      Create Team
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bracket-grid">
+                    {teams.map(team => (
+                      <div key={team.id} className="bracket-card">
+                        <div className="bracket-card-header">
+                          <h3>{team.name}</h3>
+                          <span className={`bracket-sport-badge bracket-sport-${team.sport.toLowerCase()}`}>
+                            {capitalize(team.sport)}
+                          </span>
+                        </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Players:</strong> {team.players.length}</div>
+                          <div className="players-list">
+                            {team.players.slice(0, 3).map((player, i) => (
+                              <div key={i}>{player.name} - {player.position}</div>
+                            ))}
+                            {team.players.length > 3 && (
+                              <div>+{team.players.length - 3} more players</div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button
+                            className="bracket-delete-btn"
+                            onClick={() => handleDeleteTeam(team.id)}
+                          >
+                            Delete Team
+                          </button>
+                        </div>
                       </div>
-                     ))}
+                    ))}
                   </div>
                 )}
-
-                {/* Actions */}
-                <div className="team-form-actions">
-                  <button type="submit" className="team-submit-btn">Create Team</button>
-                  <button
-                    type="button"
-                    className="team-cancel-btn"
-                    onClick={() => setFormData({ teamName: "", sport: "", players: [] })}
-                  >
-                    Clear Form
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* View Teams */}
-          {activeTab === "view" && (
-            <div className="team-view-section">
-              {teams.length === 0 ? (
-                <div className="team-no-teams">
-                  <p>No teams created yet. Create your first team!</p>
-                  <button
-                    className="team-create-first-btn"
-                    onClick={() => setActiveTab("create")}
-                  >
-                    Create Team
-                  </button>
-                </div>
-              ) : (
-                <div className="team-grid">
-                  {teams.map(team => (
-                    <div key={team.id} className="team-card">
-                      <div className="team-card-header">
-                        <h3>{team.name}</h3>
-                        <span className="sport-badge">{team.sport}</span>
-                      </div>
-                      <div className="players-list">
-                        <strong>Players ({team.players.length})</strong>
-                        <ul>
-                          {team.players.map((player, i) => (
-                            <li key={i}>{player.name} - {player.position}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="team-card-actions">
-                        <button
-                          className="team-delete-btn"
-                          onClick={() => handleDeleteTeam(team.id)}
-                        >
-                          Delete Team
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

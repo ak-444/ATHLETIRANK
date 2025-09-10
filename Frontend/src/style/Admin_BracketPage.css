@@ -1,22 +1,18 @@
-/* Bracket Page Styles with Dark Theme - Updated to match Schedule Page */
-
+/* Bracket Page Styles with Dark Theme - Updated to match Admin Dashboard structure */
 
 .bracket-content {
-  padding: 20px;
-  width: 100%;
-  max-width: none;
-  margin: 0 auto;
-  overflow-x: auto;
-  border-radius: 12px;
-  box-shadow: var(--shadow-medium);
+  background: var(--background-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
 }
 
 /* Tab Navigation */
 .bracket-tabs {
   display: flex;
-  margin-bottom: 30px;
   border-bottom: 2px solid var(--border-color);
-  margin-left: -20px;
+  background: var(--background-secondary);
 }
 
 .bracket-tab-button {
@@ -45,10 +41,6 @@
 /* Form Section */
 .bracket-create-section {
   background: var(--background-card);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-medium);
-  border: 1px solid var(--border-color);
-  margin-left: -20px;
 }
 
 .bracket-form-container {
@@ -251,11 +243,7 @@
 /* View Section */
 .bracket-view-section {
   background: var(--background-card);
-  border-radius: var(--border-radius-lg);
   padding: 40px;
-  box-shadow: var(--shadow-medium);
-  border: 1px solid var(--border-color);
-  margin-left: -20px;
 }
 
 .bracket-view-section h2 {
@@ -384,12 +372,8 @@
 
 /* Bracket Display Section */
 .bracket-visualization-section {
-  padding: 32px;
+  padding: 40px;
   background: var(--background-card);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-medium);
-  border: 1px solid var(--border-color);
-  margin-left: -20px;
 }
 
 .bracket-visualization-section h2 {
@@ -705,7 +689,7 @@
   }
   
   .bracket-content {
-    padding: 15px;
+    padding: 0;
   }
   
   .bracket-tabs {

@@ -230,229 +230,231 @@ const BracketsPage = ({ sidebarOpen }) => {
           <p>Create and manage tournament brackets</p>
         </div>
 
-        <div className="bracket-content">
-          {/* Tabs */}
-          <div className="bracket-tabs">
-            <button 
-              className={`bracket-tab-button ${activeTab === "create" ? "bracket-tab-active" : ""}`} 
-              onClick={() => setActiveTab("create")}
-            >
-              Create Bracket
-            </button>
-            <button 
-              className={`bracket-tab-button ${activeTab === "view" ? "bracket-tab-active" : ""}`} 
-              onClick={() => setActiveTab("view")}
-            >
-              View Brackets ({brackets.length})
-            </button>
-            {selectedBracket && (
+        <div className="dashboard-main">
+          <div className="bracket-content">
+            {/* Tabs */}
+            <div className="bracket-tabs">
               <button 
-                className={`bracket-tab-button ${activeTab === "bracket" ? "bracket-tab-active" : ""}`} 
-                onClick={() => setActiveTab("bracket")}
+                className={`bracket-tab-button ${activeTab === "create" ? "bracket-tab-active" : ""}`} 
+                onClick={() => setActiveTab("create")}
               >
-                {selectedBracket.name}
+                Create Bracket
               </button>
-            )}
-          </div>
-
-          {/* Create Bracket */}
-          {activeTab === "create" && (
-            <div className="bracket-create-section">
-              <div className="bracket-form-container">
-                <h2>Create New Bracket</h2>
-                <form className="bracket-form" onSubmit={handleSubmit}>
-                  {/* Event Selection */}
-                  <div className="bracket-form-group">
-                    <label htmlFor="event">Select Event *</label>
-                    <select 
-                      id="event" 
-                      value={selectedEventId} 
-                      onChange={e => setSelectedEventId(e.target.value)} 
-                      required
-                    >
-                      <option value="">Choose an event</option>
-                      {events.map(ev => (
-                        <option key={ev.id} value={ev.id}>{ev.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Bracket Name */}
-                  <div className="bracket-form-group">
-                    <label htmlFor="bracketName">Bracket Name</label>
-                    <input
-                      type="text"
-                      id="bracketName"
-                      name="bracketName"
-                      value={formData.bracketName}
-                      onChange={handleInputChange}
-                      placeholder="Leave empty to auto-generate"
-                    />
-                  </div>
-
-                  {/* Sport Selection */}
-                  <div className="bracket-form-group">
-                    <label htmlFor="sport">Sport *</label>
-                    <select 
-                      id="sport" 
-                      name="sport" 
-                      value={formData.sport} 
-                      onChange={handleInputChange} 
-                      required
-                    >
-                      <option value="">Select sport</option>
-                      <option value="basketball">Basketball</option>
-                      <option value="volleyball">Volleyball</option>
-                    </select>
-                  </div>
-
-                  {/* Bracket Type */}
-                  <div className="bracket-form-group">
-                    <label htmlFor="bracketType">Bracket Type *</label>
-                    <select 
-                      id="bracketType" 
-                      name="bracketType" 
-                      value={formData.bracketType} 
-                      onChange={handleInputChange} 
-                      required
-                    >
-                      <option value="single">Single Elimination</option>
-                      <option value="double">Double Elimination</option>
-                    </select>
-                  </div>
-
-                  {/* Description */}
-                  <div className="bracket-form-group">
-                    <label htmlFor="description">Bracket Description</label>
-                    <textarea 
-                      id="description" 
-                      name="description" 
-                      value={formData.description} 
-                      onChange={handleInputChange} 
-                      placeholder="Enter bracket description" 
-                      rows="3"
-                    />
-                  </div>
-
-                  {/* Teams Selection */}
-                  <div className="bracket-form-group">
-                    <label>Select Teams * (Minimum 2 required)</label>
-                    <select onChange={handleTeamSelection} value="">
-                      <option value="">-- Pick a team --</option>
-                      {teams
-                        .filter(team => !selectedTeamIds.includes(team.id))
-                        .map(team => (
-                          <option key={team.id} value={team.id}>
-                            {team.name} ({capitalize(team.sport)})
-                          </option>
-                        ))}
-                    </select>
-
-                    <div className="bracket-teams-list">
-                      <p>Selected Teams ({selectedTeamIds.length}):</p>
-                      {selectedTeamIds.map(tid => {
-                        const team = teams.find(t => t.id === tid);
-                        return team ? (
-                          <div key={tid} className="bracket-team-tag">
-                            {team.name} ({capitalize(team.sport)})
-                            <button 
-                              type="button" 
-                              onClick={() => removeSelectedTeam(tid)} 
-                              className="bracket-remove-team-btn"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ) : null;
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="bracket-form-actions">
-                    <button 
-                      type="submit" 
-                      className="bracket-submit-btn"
-                      disabled={loading}
-                    >
-                      {loading ? "Creating..." : "Generate Bracket"}
-                    </button>
-                    <button 
-                      type="button" 
-                      className="bracket-cancel-btn" 
-                      onClick={() => {
-                        setFormData({ bracketName: "", bracketType: "single", sport: "", description: "" });
-                        setSelectedEventId("");
-                        setSelectedTeamIds([]);
-                      }}
-                    >
-                      Clear Form
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* View Brackets */}
-          {activeTab === "view" && (
-            <div className="bracket-view-section">
-              <h2>All Brackets</h2>
-              {loading ? (
-                <p>Loading brackets...</p>
-              ) : brackets.length === 0 ? (
-                <p>No brackets created yet. Create your first bracket!</p>
-              ) : (
-                <div className="bracket-grid">
-                  {brackets.map(b => {
-                    const eventName = events.find(e => e.id === b.event_id)?.name || `Event ${b.event_id}`;
-                    return (
-                      <div key={b.id} className="bracket-card">
-                        <div className="bracket-card-header">
-                          <h3>{b.name}</h3>
-                          <span className={`bracket-sport-badge bracket-sport-${b.sport_type}`}>
-                            {capitalize(b.sport_type)}
-                          </span>
-                        </div>
-                        <div className="bracket-card-info">
-                          <div><strong>Event:</strong> {eventName}</div>
-                          <div><strong>Type:</strong> {b.elimination_type === "single" ? "Single" : "Double"} Elimination</div>
-                          <div><strong>Teams:</strong> {b.team_count || 0}</div>
-                          <div><strong>Created:</strong> {new Date(b.created_at).toLocaleDateString()}</div>
-                        </div>
-                        <div className="bracket-card-actions">
-                          <button 
-                            className="bracket-view-btn" 
-                            onClick={() => handleViewBracket(b)}
-                          >
-                            View Bracket
-                          </button>
-                          <button 
-                            className="bracket-delete-btn" 
-                            onClick={() => deleteBracket(b.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+              <button 
+                className={`bracket-tab-button ${activeTab === "view" ? "bracket-tab-active" : ""}`} 
+                onClick={() => setActiveTab("view")}
+              >
+                View Brackets ({brackets.length})
+              </button>
+              {selectedBracket && (
+                <button 
+                  className={`bracket-tab-button ${activeTab === "bracket" ? "bracket-tab-active" : ""}`} 
+                  onClick={() => setActiveTab("bracket")}
+                >
+                  {selectedBracket.name}
+                </button>
               )}
             </div>
-          )}
 
-          {/* Bracket Visualization */}
-          {activeTab === "bracket" && selectedBracket && (
-            <div className="bracket-visualization-section">
-              <h2>{selectedBracket.name} - Tournament Bracket</h2>
-              <div className="bracket-info">
-                <p><strong>Sport:</strong> {capitalize(selectedBracket.sport_type)}</p>
-                <p><strong>Type:</strong> {selectedBracket.elimination_type === "single" ? "Single" : "Double"} Elimination</p>
-                <p><strong>Teams:</strong> {selectedBracket.team_count || 0}</p>
+            {/* Create Bracket */}
+            {activeTab === "create" && (
+              <div className="bracket-create-section">
+                <div className="bracket-form-container">
+                  <h2>Create New Bracket</h2>
+                  <form className="bracket-form" onSubmit={handleSubmit}>
+                    {/* Event Selection */}
+                    <div className="bracket-form-group">
+                      <label htmlFor="event">Select Event *</label>
+                      <select 
+                        id="event" 
+                        value={selectedEventId} 
+                        onChange={e => setSelectedEventId(e.target.value)} 
+                        required
+                      >
+                        <option value="">Choose an event</option>
+                        {events.map(ev => (
+                          <option key={ev.id} value={ev.id}>{ev.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Bracket Name */}
+                    <div className="bracket-form-group">
+                      <label htmlFor="bracketName">Bracket Name</label>
+                      <input
+                        type="text"
+                        id="bracketName"
+                        name="bracketName"
+                        value={formData.bracketName}
+                        onChange={handleInputChange}
+                        placeholder="Leave empty to auto-generate"
+                      />
+                    </div>
+
+                    {/* Sport Selection */}
+                    <div className="bracket-form-group">
+                      <label htmlFor="sport">Sport *</label>
+                      <select 
+                        id="sport" 
+                        name="sport" 
+                        value={formData.sport} 
+                        onChange={handleInputChange} 
+                        required
+                      >
+                        <option value="">Select sport</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="volleyball">Volleyball</option>
+                      </select>
+                    </div>
+
+                    {/* Bracket Type */}
+                    <div className="bracket-form-group">
+                      <label htmlFor="bracketType">Bracket Type *</label>
+                      <select 
+                        id="bracketType" 
+                        name="bracketType" 
+                        value={formData.bracketType} 
+                        onChange={handleInputChange} 
+                        required
+                      >
+                        <option value="single">Single Elimination</option>
+                        <option value="double">Double Elimination</option>
+                      </select>
+                    </div>
+
+                    {/* Description */}
+                    <div className="bracket-form-group">
+                      <label htmlFor="description">Bracket Description</label>
+                      <textarea 
+                        id="description" 
+                        name="description" 
+                        value={formData.description} 
+                        onChange={handleInputChange} 
+                        placeholder="Enter bracket description" 
+                        rows="3"
+                      />
+                    </div>
+
+                    {/* Teams Selection */}
+                    <div className="bracket-form-group">
+                      <label>Select Teams * (Minimum 2 required)</label>
+                      <select onChange={handleTeamSelection} value="">
+                        <option value="">-- Pick a team --</option>
+                        {teams
+                          .filter(team => !selectedTeamIds.includes(team.id))
+                          .map(team => (
+                            <option key={team.id} value={team.id}>
+                              {team.name} ({capitalize(team.sport)})
+                            </option>
+                          ))}
+                      </select>
+
+                      <div className="bracket-teams-list">
+                        <p>Selected Teams ({selectedTeamIds.length}):</p>
+                        {selectedTeamIds.map(tid => {
+                          const team = teams.find(t => t.id === tid);
+                          return team ? (
+                            <div key={tid} className="bracket-team-tag">
+                              {team.name} ({capitalize(team.sport)})
+                              <button 
+                                type="button" 
+                                onClick={() => removeSelectedTeam(tid)} 
+                                className="bracket-remove-team-btn"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="bracket-form-actions">
+                      <button 
+                        type="submit" 
+                        className="bracket-submit-btn"
+                        disabled={loading}
+                      >
+                        {loading ? "Creating..." : "Generate Bracket"}
+                      </button>
+                      <button 
+                        type="button" 
+                        className="bracket-cancel-btn" 
+                        onClick={() => {
+                          setFormData({ bracketName: "", bracketType: "single", sport: "", description: "" });
+                          setSelectedEventId("");
+                          setSelectedTeamIds([]);
+                        }}
+                      >
+                        Clear Form
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-              <CustomBracket matches={bracketMatches} />
-            </div>
-          )}
+            )}
+
+            {/* View Brackets */}
+            {activeTab === "view" && (
+              <div className="bracket-view-section">
+                <h2>All Brackets</h2>
+                {loading ? (
+                  <p>Loading brackets...</p>
+                ) : brackets.length === 0 ? (
+                  <p>No brackets created yet. Create your first bracket!</p>
+                ) : (
+                  <div className="bracket-grid">
+                    {brackets.map(b => {
+                      const eventName = events.find(e => e.id === b.event_id)?.name || `Event ${b.event_id}`;
+                      return (
+                        <div key={b.id} className="bracket-card">
+                          <div className="bracket-card-header">
+                            <h3>{b.name}</h3>
+                            <span className={`bracket-sport-badge bracket-sport-${b.sport_type}`}>
+                              {capitalize(b.sport_type)}
+                            </span>
+                          </div>
+                          <div className="bracket-card-info">
+                            <div><strong>Event:</strong> {eventName}</div>
+                            <div><strong>Type:</strong> {b.elimination_type === "single" ? "Single" : "Double"} Elimination</div>
+                            <div><strong>Teams:</strong> {b.team_count || 0}</div>
+                            <div><strong>Created:</strong> {new Date(b.created_at).toLocaleDateString()}</div>
+                          </div>
+                          <div className="bracket-card-actions">
+                            <button 
+                              className="bracket-view-btn" 
+                              onClick={() => handleViewBracket(b)}
+                            >
+                              View Bracket
+                            </button>
+                            <button 
+                              className="bracket-delete-btn" 
+                              onClick={() => deleteBracket(b.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Bracket Visualization */}
+            {activeTab === "bracket" && selectedBracket && (
+              <div className="bracket-visualization-section">
+                <h2>{selectedBracket.name} - Tournament Bracket</h2>
+                <div className="bracket-info">
+                  <p><strong>Sport:</strong> {capitalize(selectedBracket.sport_type)}</p>
+                  <p><strong>Type:</strong> {selectedBracket.elimination_type === "single" ? "Single" : "Double"} Elimination</p>
+                  <p><strong>Teams:</strong> {selectedBracket.team_count || 0}</p>
+                </div>
+                <CustomBracket matches={bracketMatches} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

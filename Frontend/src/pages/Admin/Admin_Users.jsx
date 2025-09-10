@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import API from '../../services/api';
 import '../../style/admin_Users.css';
-import { FaEye, FaCheck, FaTimes, FaTrash, FaDownload, FaBars, FaSearch } from 'react-icons/fa';
+import { FaEye, FaCheck, FaTimes, FaTrash, FaSearch } from 'react-icons/fa';
 
 const AdminUsers = ({ sidebarOpen }) => {
   const { user } = useAuth();
@@ -113,191 +113,127 @@ const AdminUsers = ({ sidebarOpen }) => {
         </div>
         
         <div className="dashboard-main">
-          {error && (
-            <div className="alert alert-danger">
-              {error}
-              <button onClick={() => setError('')} className="close-btn">&times;</button>
-            </div>
-          )}
-          
-          {success && (
-            <div className="alert alert-success">
-              {success}
-              <button onClick={() => setSuccess('')} className="close-btn">&times;</button>
-            </div>
-          )}
+          <div className="bracket-content">
+            {/* Alerts */}
+            {error && (
+              <div className="bracket-error">
+                {error}
+                <button onClick={() => setError('')} className="bracket-alert-close">&times;</button>
+              </div>
+            )}
+            
+            {success && (
+              <div className="bracket-success">
+                {success}
+                <button onClick={() => setSuccess('')} className="bracket-alert-close">&times;</button>
+              </div>
+            )}
 
-          <div className="user-management-toolbar">
-            <div className="filter-controls">
-              <select 
-                value={filter} 
-                onChange={(e) => setFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">All Users</option>
-                <option value="pending">Pending Approval</option>
-                <option value="approved">Approved</option>
-                <option value="staff">Staff Only</option>
-                <option value="admin">Admins Only</option>
-              </select>
+            {/* Filter and Search Controls */}
+            <div className="bracket-view-section">
               
-              {isMobile ? (
-                <div className="mobile-search-container">
-                  <button 
-                    className="mobile-search-toggle"
-                    onClick={() => setShowSearch(!showSearch)}
+            {/* Filter and Search Controls */}
+              <div className="user-management-toolbar">
+                <div className="filter-controls">
+                  <select 
+                    value={filter} 
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="bracket-form-group select-filter"
                   >
-                    <FaSearch />
-                  </button>
-                  {showSearch && (
-                    <input
-                      type="text"
-                      placeholder="Search users..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="search-input mobile-search-input"
-                    />
-                  )}
-                </div>
-              ) : (
-                <input
-                  type="text"
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="search-input"
-                />
-              )}
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-              <p>Loading users...</p>
-            </div>
-          ) : (
-            <div className="users-table-container">
-              {isMobile ? (
-                <div className="users-cards">
-                  {filteredUsers.length > 0 ? (
-                    filteredUsers.map(user => (
-                      <div key={user.id} className="user-card">
-                        <div className="user-card-header">
-                          <h3>{user.username}</h3>
-                          <span className={`role-badge ${user.role}`}>
-                            {user.role}
-                          </span>
+                    <option value="all">All Users</option>
+                    <option value="pending">Pending Approval</option>
+                    <option value="approved">Approved</option>
+                    <option value="staff">Staff Only</option>
+                    <option value="admin">Admins Only</option>
+                  </select>
+                  
+                  {isMobile ? (
+                    <div className="mobile-search-container">
+                      <button 
+                        className="bracket-submit-btn search-toggle-btn"
+                        onClick={() => setShowSearch(!showSearch)}
+                      >
+                        <FaSearch />
+                      </button>
+                      {showSearch && (
+                        <div className="search-container">
+                          <FaSearch className="search-icon" />
+                          <input
+                            type="text"
+                            placeholder="Search users..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                          />
                         </div>
-                        <div className="user-card-details">
-                          <p className="user-email">{user.email}</p>
-                          <div className="user-status">
-                            <span className={`status-badge ${user.is_approved ? 'approved' : 'pending'}`}>
-                              {user.is_approved ? 'Approved' : 'Pending'}
-                            </span>
-                          </div>
-                          <div className="user-id-verification">
-                            {user.university_id_image ? (
-                              <button 
-                                onClick={() => downloadId(user.university_id_image)}
-                                className="view-id-btn"
-                              >
-                                <FaEye /> View ID
-                              </button>
-                            ) : (
-                              <span className="no-id">No ID uploaded</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="user-card-actions">
-                          {!user.is_approved && (
-                            <>
-                              <button 
-                                onClick={() => approveUser(user.id)}
-                                className="approve-btn"
-                                title="Approve"
-                              >
-                                <FaCheck />
-                              </button>
-                              <button 
-                                onClick={() => rejectUser(user.id)}
-                                className="reject-btn"
-                                title="Reject"
-                              >
-                                <FaTimes />
-                              </button>
-                            </>
-                          )}
-                          <button 
-                            onClick={() => deleteUser(user.id)}
-                            className="delete-btn"
-                            title="Delete"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      )}
+                    </div>
                   ) : (
-                    <div className="no-users">
-                      No users found matching your criteria
+                    <div className="search-container">
+                      <FaSearch className="search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
+                      />
                     </div>
                   )}
                 </div>
+              </div>
+
+              {loading ? (
+                <div className="bracket-loading">
+                  <div className="bracket-spinner"></div>
+                  <p>Loading users...</p>
+                </div>
               ) : (
-                <table className="users-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Status</th>
-                      <th>ID Verification</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.length > 0 ? (
-                      filteredUsers.map(user => (
-                        <tr key={user.id}>
-                          <td>{user.username}</td>
-                          <td>{user.email}</td>
-                          <td>
-                            <span className={`role-badge ${user.role}`}>
-                              {user.role}
-                            </span>
-                          </td>
-                          <td>
-                            <span className={`status-badge ${user.is_approved ? 'approved' : 'pending'}`}>
-                              {user.is_approved ? 'Approved' : 'Pending'}
-                            </span>
-                          </td>
-                          <td>
-                            {user.university_id_image ? (
-                              <button 
-                                onClick={() => downloadId(user.university_id_image)}
-                                className="view-id-btn"
-                              >
-                                <FaEye /> View ID
-                              </button>
-                            ) : (
-                              <span className="no-id">No ID uploaded</span>
-                            )}
-                          </td>
-                          <td>
-                            <div className="action-buttons">
+                <div className="users-table-container">
+                  {isMobile ? (
+                    <div className="bracket-grid">
+                      {filteredUsers.length > 0 ? (
+                        filteredUsers.map(user => (
+                          <div key={user.id} className="bracket-card user-card">
+                            <div className="bracket-card-header">
+                              <h3>{user.username}</h3>
+                              <span className={`bracket-sport-badge ${user.role}`}>
+                                {user.role}
+                              </span>
+                            </div>
+                            <div className="bracket-card-info">
+                              <div className="user-email">{user.email}</div>
+                              <div className="user-status">
+                                <span className={`status-badge ${user.is_approved ? 'approved' : 'pending'}`}>
+                                  {user.is_approved ? 'Approved' : 'Pending'}
+                                </span>
+                              </div>
+                              <div className="user-id-verification">
+                                {user.university_id_image ? (
+                                  <button 
+                                    onClick={() => downloadId(user.university_id_image)}
+                                    className="bracket-view-btn"
+                                  >
+                                    <FaEye /> View ID
+                                  </button>
+                                ) : (
+                                  <span className="no-id">No ID uploaded</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="bracket-card-actions">
                               {!user.is_approved && (
                                 <>
                                   <button 
                                     onClick={() => approveUser(user.id)}
-                                    className="approve-btn"
+                                    className="bracket-submit-btn"
                                     title="Approve"
                                   >
                                     <FaCheck />
                                   </button>
                                   <button 
                                     onClick={() => rejectUser(user.id)}
-                                    className="reject-btn"
+                                    className="bracket-cancel-btn"
                                     title="Reject"
                                   >
                                     <FaTimes />
@@ -306,27 +242,105 @@ const AdminUsers = ({ sidebarOpen }) => {
                               )}
                               <button 
                                 onClick={() => deleteUser(user.id)}
-                                className="delete-btn"
+                                className="bracket-delete-btn"
                                 title="Delete"
                               >
                                 <FaTrash />
                               </button>
                             </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="no-users">
+                          </div>
+                        ))
+                      ) : (
+                        <div className="bracket-no-brackets">
                           No users found matching your criteria
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <table className="users-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Status</th>
+                          <th>ID Verification</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredUsers.length > 0 ? (
+                          filteredUsers.map(user => (
+                            <tr key={user.id}>
+                              <td>{user.username}</td>
+                              <td>{user.email}</td>
+                              <td>
+                                <span className={`bracket-sport-badge ${user.role}`}>
+                                  {user.role}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`status-badge ${user.is_approved ? 'approved' : 'pending'}`}>
+                                  {user.is_approved ? 'Approved' : 'Pending'}
+                                </span>
+                              </td>
+                              <td>
+                                {user.university_id_image ? (
+                                  <button 
+                                    onClick={() => downloadId(user.university_id_image)}
+                                    className="bracket-view-btn"
+                                  >
+                                    <FaEye /> View ID
+                                  </button>
+                                ) : (
+                                  <span className="no-id">No ID uploaded</span>
+                                )}
+                              </td>
+                              <td>
+                                <div className="bracket-card-actions">
+                                  {!user.is_approved && (
+                                    <>
+                                      <button 
+                                        onClick={() => approveUser(user.id)}
+                                        className="bracket-submit-btn"
+                                        title="Approve"
+                                      >
+                                        <FaCheck />
+                                      </button>
+                                      <button 
+                                        onClick={() => rejectUser(user.id)}
+                                        className="bracket-cancel-btn"
+                                        title="Reject"
+                                      >
+                                        <FaTimes />
+                                      </button>
+                                    </>
+                                  )}
+                                  <button 
+                                    onClick={() => deleteUser(user.id)}
+                                    className="bracket-delete-btn"
+                                    title="Delete"
+                                  >
+                                    <FaTrash />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="6" className="bracket-no-brackets">
+                              No users found matching your criteria
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

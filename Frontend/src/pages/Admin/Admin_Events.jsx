@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "../../style/Admin_Events.css";
 
 const AdminEvents = ({ sidebarOpen }) => {
@@ -145,216 +145,228 @@ const AdminEvents = ({ sidebarOpen }) => {
           <p>Create and manage sports events</p>
         </div>
 
-        <div className="events-content">
-          {/* Tabs */}
-          <div className="events-tabs">
-            <button
-              className={`events-tab-button ${activeTab === "create" ? "events-tab-active" : ""}`}
-              onClick={() => setActiveTab("create")}
-            >
-              Create Event
-            </button>
-            <button
-              className={`events-tab-button ${activeTab === "view" ? "events-tab-active" : ""}`}
-              onClick={() => setActiveTab("view")}
-            >
-              View Events ({events.length})
-            </button>
-            {selectedEvent && (
+        <div className="dashboard-main">
+          <div className="bracket-content">
+            {/* Tabs */}
+            <div className="bracket-tabs">
               <button
-                className={`events-tab-button ${activeTab === "details" ? "events-tab-active" : ""}`}
-                onClick={() => setActiveTab("details")}
+                className={`bracket-tab-button ${activeTab === "create" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("create")}
               >
-                {selectedEvent.name} Details
+                Create Event
               </button>
-            )}
-          </div>
-
-          {/* Create Event */}
-          {activeTab === "create" && (
-            <div className="events-form-container">
-              <form onSubmit={handleCreateEvent} className="events-form">
-                <div className="events-form-group">
-                  <label>Event Name *</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter event name"
-                    required
-                  />
-                </div>
-
-                <div className="events-form-group">
-                  <label>Start Date *</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="events-form-group">
-                  <label>End Date *</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="events-form-actions">
-                  <button type="submit" className="events-submit-btn">Create Event</button>
-                  <button
-                    type="button"
-                    className="events-cancel-btn"
-                    onClick={() => {
-                      setName("");
-                      setStartDate("");
-                      setEndDate("");
-                    }}
-                  >
-                    Clear Form
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* View Events */}
-          {activeTab === "view" && (
-            <div className="events-view-section">
-              {loading ? (
-                <p>Loading events...</p>
-              ) : error ? (
-                <p style={{ color: "red" }}>Error: {error}</p>
-              ) : events.length === 0 ? (
-                <div className="events-no-events">
-                  <p>No events created yet.</p>
-                  <button className="events-submit-btn" onClick={() => setActiveTab("create")}>
-                    Create Event
-                  </button>
-                </div>
-              ) : (
-                <div className="events-grid">
-                  {events.map((event) => (
-                    <div className="events-card" key={event.id}>
-                      <div className="events-card-header">
-                        <h3>{event.name}</h3>
-                      </div>
-                      <div className="events-info">
-                        <p><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</p>
-                        <p><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</p>
-                        <p><strong>Status:</strong> 
-                          <span className={event.status === "ongoing" ? "status-ongoing" : "status-completed"}>
-                            {event.status}
-                          </span>
-                        </p>
-                        <p><strong>Archived:</strong> 
-                          <span className={event.archived === "no" ? "archived-no" : "archived-yes"}>
-                            {event.archived}
-                          </span>
-                        </p>
-                      </div>
-                      <div className="events-card-actions">
-                        <button className="events-submit-btn" onClick={() => handleViewEvent(event)}>View</button>
-                        <button className="events-cancel-btn" onClick={() => handleEditEvent(event)}>Edit</button>
-                        <button className="events-delete-btn" onClick={() => handleDeleteEvent(event.id)}>Delete</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <button
+                className={`bracket-tab-button ${activeTab === "view" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("view")}
+              >
+                View Events ({events.length})
+              </button>
+              {selectedEvent && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "details" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("details")}
+                >
+                  {selectedEvent.name} Details
+                </button>
               )}
             </div>
-          )}
 
-          {/* Event Details - Brackets and Matches */}
-          {activeTab === "details" && selectedEvent && (
-            <div className="event-details-section">
-              <div className="event-details-header">
-                <h2>{selectedEvent.name} - Event Details</h2>
-                <div className="event-details-info">
-                  <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
-                  <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
-                  <span><strong>Status:</strong> {selectedEvent.status}</span>
+            {/* Create Event */}
+            {activeTab === "create" && (
+              <div className="bracket-create-section">
+                <div className="bracket-form-container">
+                  <h2>Create New Event</h2>
+                  <form className="bracket-form" onSubmit={handleCreateEvent}>
+                    <div className="bracket-form-group">
+                      <label htmlFor="eventName">Event Name *</label>
+                      <input
+                        type="text"
+                        id="eventName"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter event name"
+                        required
+                      />
+                    </div>
+
+                    <div className="bracket-form-group">
+                      <label htmlFor="startDate">Start Date *</label>
+                      <input
+                        type="date"
+                        id="startDate"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="bracket-form-group">
+                      <label htmlFor="endDate">End Date *</label>
+                      <input
+                        type="date"
+                        id="endDate"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="bracket-form-actions">
+                      <button type="submit" className="bracket-submit-btn">Create Event</button>
+                      <button
+                        type="button"
+                        className="bracket-cancel-btn"
+                        onClick={() => {
+                          setName("");
+                          setStartDate("");
+                          setEndDate("");
+                        }}
+                      >
+                        Clear Form
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
+            )}
 
-              {loadingDetails ? (
-                <p>Loading event details...</p>
-              ) : (
-                <div className="event-details-content">
-                  {/* Brackets Section */}
-                  <div className="event-brackets-section">
-                    <h3>Brackets ({eventBrackets.length})</h3>
-                    {eventBrackets.length === 0 ? (
-                      <p className="no-data">No brackets created for this event yet.</p>
-                    ) : (
-                      <div className="brackets-grid">
-                        {eventBrackets.map((bracket) => (
-                          <div key={bracket.id} className="bracket-card">
-                            <div className="bracket-card-header">
-                              <h4>{bracket.name}</h4>
-                              <span className={`sport-badge sport-${bracket.sport_type}`}>
-                                {bracket.sport_type.charAt(0).toUpperCase() + bracket.sport_type.slice(1)}
-                              </span>
-                            </div>
-                            <div className="bracket-info">
-                              <p><strong>Type:</strong> {bracket.elimination_type === "single" ? "Single" : "Double"} Elimination</p>
-                              <p><strong>Teams:</strong> {bracket.team_count || 0}</p>
-                              <p><strong>Created:</strong> {new Date(bracket.created_at).toLocaleDateString()}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+            {/* View Events */}
+            {activeTab === "view" && (
+              <div className="bracket-view-section">
+                <h2>All Events</h2>
+                {loading ? (
+                  <p>Loading events...</p>
+                ) : error ? (
+                  <p className="bracket-error">Error: {error}</p>
+                ) : events.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No events created yet.</p>
+                    <button className="bracket-submit-btn" onClick={() => setActiveTab("create")}>
+                      Create Event
+                    </button>
                   </div>
-
-                  {/* Matches Section */}
-                  <div className="event-matches-section">
-                    <h3>Matches ({eventMatches.length})</h3>
-                    {eventMatches.length === 0 ? (
-                      <p className="no-data">No matches scheduled for this event yet.</p>
-                    ) : (
-                      <div className="matches-list">
-                        {eventMatches.map((match) => (
-                          <div key={match.id} className="match-card">
-                            <div className="match-header">
-                              <div className="match-teams">
-                                <h4>{formatMatchTeams(match)}</h4>
-                                {match.status === "completed" && (
-                                  <div className="match-score">
-                                    {match.score_team1} - {match.score_team2}
-                                  </div>
-                                )}
-                              </div>
-                              {getMatchStatusBadge(match.status)}
-                            </div>
-                            <div className="match-info">
-                              <p><strong>Bracket:</strong> {match.bracket_name}</p>
-                              <p><strong>Sport:</strong> {match.sport_type?.charAt(0).toUpperCase() + match.sport_type?.slice(1)}</p>
-                              <p><strong>Round:</strong> {match.round_number}</p>
-                              {match.scheduled_at && (
-                                <p><strong>Scheduled:</strong> {new Date(match.scheduled_at).toLocaleString()}</p>
-                              )}
-                              {match.winner_name && (
-                                <p><strong>Winner:</strong> {match.winner_name}</p>
-                              )}
-                              {match.mvp_name && (
-                                <p><strong>MVP:</strong> {match.mvp_name}</p>
-                              )}
-                            </div>
+                ) : (
+                  <div className="bracket-grid">
+                    {events.map((event) => (
+                      <div className="bracket-card" key={event.id}>
+                        <div className="bracket-card-header">
+                          <h3>{event.name}</h3>
+                          <span className={`bracket-sport-badge ${event.status === "ongoing" ? "bracket-sport-basketball" : "bracket-sport-volleyball"}`}>
+                            {event.status}
+                          </span>
+                        </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</div>
+                          <div><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</div>
+                          <div><strong>Status:</strong> 
+                            <span className={event.status === "ongoing" ? "status-ongoing" : "status-completed"}>
+                              {event.status}
+                            </span>
                           </div>
-                        ))}
+                          <div><strong>Archived:</strong> 
+                            <span className={event.archived === "no" ? "archived-no" : "archived-yes"}>
+                              {event.archived}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button className="bracket-view-btn" onClick={() => handleViewEvent(event)}>View</button>
+                          <button className="bracket-cancel-btn" onClick={() => handleEditEvent(event)}>Edit</button>
+                          <button className="bracket-delete-btn" onClick={() => handleDeleteEvent(event.id)}>Delete</button>
+                        </div>
                       </div>
-                    )}
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Event Details - Brackets and Matches */}
+            {activeTab === "details" && selectedEvent && (
+              <div className="bracket-visualization-section">
+                <div className="event-details-header">
+                  <h2>{selectedEvent.name} - Event Details</h2>
+                  <div className="event-details-info">
+                    <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
+                    <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
+                    <span><strong>Status:</strong> {selectedEvent.status}</span>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
+
+                {loadingDetails ? (
+                  <p>Loading event details...</p>
+                ) : (
+                  <div className="event-details-content">
+                    {/* Brackets Section */}
+                    <div className="event-brackets-section">
+                      <h3>Brackets ({eventBrackets.length})</h3>
+                      {eventBrackets.length === 0 ? (
+                        <p className="no-data">No brackets created for this event yet.</p>
+                      ) : (
+                        <div className="bracket-grid">
+                          {eventBrackets.map((bracket) => (
+                            <div key={bracket.id} className="bracket-card">
+                              <div className="bracket-card-header">
+                                <h4>{bracket.name}</h4>
+                                <span className={`bracket-sport-badge bracket-sport-${bracket.sport_type}`}>
+                                  {bracket.sport_type.charAt(0).toUpperCase() + bracket.sport_type.slice(1)}
+                                </span>
+                              </div>
+                              <div className="bracket-card-info">
+                                <div><strong>Type:</strong> {bracket.elimination_type === "single" ? "Single" : "Double"} Elimination</div>
+                                <div><strong>Teams:</strong> {bracket.team_count || 0}</div>
+                                <div><strong>Created:</strong> {new Date(bracket.created_at).toLocaleDateString()}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Matches Section */}
+                    <div className="event-matches-section">
+                      <h3>Matches ({eventMatches.length})</h3>
+                      {eventMatches.length === 0 ? (
+                        <p className="no-data">No matches scheduled for this event yet.</p>
+                      ) : (
+                        <div className="matches-grid">
+                          {eventMatches.map((match) => (
+                            <div key={match.id} className="match-card">
+                              <div className="match-header">
+                                <div className="match-teams">
+                                  <h4>{formatMatchTeams(match)}</h4>
+                                  {match.status === "completed" && (
+                                    <div className="match-score">
+                                      {match.score_team1} - {match.score_team2}
+                                    </div>
+                                  )}
+                                </div>
+                                {getMatchStatusBadge(match.status)}
+                              </div>
+                              <div className="match-info">
+                                <p><strong>Bracket:</strong> {match.bracket_name}</p>
+                                <p><strong>Sport:</strong> {match.sport_type?.charAt(0).toUpperCase() + match.sport_type?.slice(1)}</p>
+                                <p><strong>Round:</strong> {match.round_number}</p>
+                                {match.scheduled_at && (
+                                  <p><strong>Scheduled:</strong> {new Date(match.scheduled_at).toLocaleString()}</p>
+                                )}
+                                {match.winner_name && (
+                                  <p><strong>Winner:</strong> {match.winner_name}</p>
+                                )}
+                                {match.mvp_name && (
+                                  <p><strong>MVP:</strong> {match.mvp_name}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
