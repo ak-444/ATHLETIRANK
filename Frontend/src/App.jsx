@@ -19,7 +19,8 @@ import StaffStats from "./pages/Staff/Staff_Stats";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EventDetails from "./pages/Admin/Admin_EventDetails";
 // ✅ new page for viewing event details
-
+import UserTeamsPage from "./pages/Users/User_TeamPage";
+import UserStatsPage from "./pages/Users/User_StatsPage";
 
 import "./style/app.css";
 
@@ -34,6 +35,9 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Homepage />} />
           <Route path="/Register&Login" element={<RegisterAndLoginPage />} />
+
+          <Route path="/teams" element={<UserTeamsPage />} />
+          <Route path="/stats" element={<UserStatsPage />} />
 
           {/* Admin protected routes */}
          {/* Admin protected routes */}
@@ -80,7 +84,7 @@ function App() {
             }
           />
 
-          {/* ✅ Bracket details page */}
+          {/*  Bracket details page */}
           <Route
             path="/AdminDashboard/brackets/:id"
             element={
@@ -175,6 +179,9 @@ function App() {
               }
             />
           </Route>
+
+
+
         </Routes>
       </Router>
     </AuthProvider>

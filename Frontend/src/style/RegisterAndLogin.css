@@ -124,6 +124,52 @@
 }
 
 /* Navigation Tabs  */
+/* Back to Home Button */
+.back-to-home-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 16px;
+    background: var(--background-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    z-index: 10;
+    box-shadow: var(--shadow-light);
+}
+
+.back-to-home-btn:hover {
+    background: var(--background-secondary);
+    border-color: var(--border-focus);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-medium);
+}
+
+@media (max-width: 480px) {
+    .back-to-home-btn {
+        top: 15px;
+        left: 15px;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .back-to-home-btn {
+        top: 10px;
+        left: 10px;
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
 .auth-tabs {
   display: flex;
   background: var(--background-secondary);
