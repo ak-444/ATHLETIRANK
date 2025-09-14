@@ -4,6 +4,27 @@ import "../style/CustomBrackets.css";
 const CustomBracket = ({ matches }) => {
   const bracketRef = useRef(null);
   const [connectionPoints, setConnectionPoints] = useState([]);
+  const [matchDisplayNumbers, setMatchDisplayNumbers] = useState({});
+
+  useEffect(() => {
+    if (!matches || matches.length === 0) return;
+
+    // Sort matches by round and then by id to get the correct order
+    const sortedMatches = [...matches].sort((a, b) => {
+      if (a.round_number !== b.round_number) {
+        return a.round_number - b.round_number;
+      }
+      return a.id - b.id;
+    });
+
+    // Create a mapping of match ID to display number
+    const displayNumbers = {};
+    sortedMatches.forEach((match, index) => {
+      displayNumbers[match.id] = index + 1;
+    });
+
+    setMatchDisplayNumbers(displayNumbers);
+  }, [matches]);
 
   if (!matches || matches.length === 0) {
     return (
@@ -128,7 +149,7 @@ const CustomBracket = ({ matches }) => {
                     data-match={matchIndex}
                   >
                     <div className="match-header">
-                      <span className="match-id">Game #{match.id}</span>
+                      <span className="match-id">Game #{matchDisplayNumbers[match.id]}</span>
                       <span className={`match-status ${match.status}`}>
                         {match.status === 'completed' ? '✓' : 
                          match.status === 'ongoing' ? '⏱️' : '📅'}
