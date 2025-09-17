@@ -15,6 +15,7 @@ const AdminStats = ({ sidebarOpen }) => {
   const [activeTab, setActiveTab] = useState("events");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -93,24 +94,115 @@ const AdminStats = ({ sidebarOpen }) => {
   };
 
   // Handle match selection to view player stats
-  const handleMatchSelect = async (match) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`http://localhost:5000/api/stats/matches/${match.id}/summary`);
-      const data = await res.json();
-      setPlayerStats(data);
-      setActiveTab("statistics");
-    } catch (err) {
-      console.error("Error fetching player stats:", err);
-      // Mock data for demonstration
-      setPlayerStats([
-        { player_id: 1, player_name: "John Doe", team_name: "Team A", points: 25, assists: 8, rebounds: 10, jersey_number: 10 },
-        { player_id: 2, player_name: "Jane Smith", team_name: "Team A", points: 20, assists: 12, rebounds: 5, jersey_number: 5 },
-        { player_id: 3, player_name: "Mike Johnson", team_name: "Team D", points: 30, assists: 5, rebounds: 8, jersey_number: 7 },
-        { player_id: 4, player_name: "Sarah Wilson", team_name: "Team D", points: 18, assists: 7, rebounds: 6, jersey_number: 12 }
-      ]);
-    } finally {
-      setLoading(false);
+  
+const handleMatchSelect = async (match) => {
+  setSelectedMatch(match);
+  setLoading(true);
+  try {
+    // Get player stats with player names already included
+    const res = await fetch(`http://localhost:5000/api/stats/matches/${match.id}/stats`);
+    const data = await res.json();
+    
+    // The data now already includes player_name and team_name from the enhanced backend query
+    const playersWithDetails = data.map((stat) => ({
+      ...stat,
+      // Use the data that now comes directly from the backend
+      player_name: stat.player_name || "Unknown Player",
+      jersey_number: stat.jersey_number || "N/A",
+      team_name: stat.team_name || "Unknown Team"
+    }));
+    
+    setPlayerStats(playersWithDetails);
+    setActiveTab("statistics");
+  } catch (err) {
+    console.error("Error fetching player stats:", err);
+    // Mock data for demonstration based on your database schema
+    setPlayerStats([
+      { 
+        player_id: 1, 
+        player_name: "John Doe", 
+        team_name: "Team A", 
+        jersey_number: 10,
+        points: 25, 
+        assists: 8, 
+        rebounds: 10, 
+        three_points_made: 3,
+        steals: 2, 
+        blocks: 1, 
+        fouls: 3, 
+        turnovers: 2,
+        serves: 0,
+        service_aces: 0,
+        serve_errors: 0,
+        receptions: 0,
+        reception_errors: 0,
+        digs: 0,
+        kills: 0,
+        attack_attempts: 0,
+        attack_errors: 0,
+        volleyball_assists: 0
+      },
+      { 
+        player_id: 2, 
+        player_name: "Jane Smith", 
+        team_name: "Team A", 
+        jersey_number: 5,
+        points: 20, 
+        assists: 12, 
+        rebounds: 5, 
+        three_points_made: 2,
+        steals: 3, 
+        blocks: 0, 
+        fouls: 2, 
+        turnovers: 1,
+        serves: 0,
+        service_aces: 0,
+        serve_errors: 0,
+        receptions: 0,
+        reception_errors: 0,
+        digs: 0,
+        kills: 0,
+        attack_attempts: 0,
+        attack_errors: 0,
+        volleyball_assists: 0
+      }
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Calculate percentages for display
+  const calculatePercentages = (player) => {
+    const isBasketball = selectedMatch?.sport_type === "basketball";
+    
+    if (isBasketball) {
+      // For basketball, calculate FG%, 3P%, FT%
+      // These would normally be calculated from more detailed stats
+      return {
+        field_goal_percentage: "45.0%",
+        three_point_percentage: "36.0%",
+        free_throw_percentage: "78.0%"
+      };
+    } else {
+      // For volleyball, calculate hitting percentage, service percentage, reception percentage
+      const hittingPercentage = player.attack_attempts > 0 
+        ? ((player.kills - player.attack_errors) / player.attack_attempts * 100).toFixed(1) + "%"
+        : "0.0%";
+        
+      const servicePercentage = (player.serves + player.serve_errors) > 0
+        ? (player.serves / (player.serves + player.serve_errors) * 100).toFixed(1) + "%"
+        : "0.0%";
+        
+      const receptionPercentage = (player.receptions + player.reception_errors) > 0
+        ? (player.receptions / (player.receptions + player.reception_errors) * 100).toFixed(1) + "%"
+        : "0.0%";
+        
+      return {
+        hitting_percentage: hittingPercentage,
+        service_percentage: servicePercentage,
+        reception_percentage: receptionPercentage
+      };
     }
   };
 
@@ -146,7 +238,7 @@ const AdminStats = ({ sidebarOpen }) => {
   const renderStatsTable = () => {
     if (playerStats.length === 0) return <p>No statistics available for this match.</p>;
     
-    const isBasketball = playerStats[0].sport_type === "basketball";
+    const isBasketball = selectedMatch?.sport_type === "basketball";
     
     return (
       <div className="adminstats-table-container">
@@ -245,9 +337,9 @@ const AdminStats = ({ sidebarOpen }) => {
                     <th>REB</th>
                     <th>STL</th>
                     <th>BLK</th>
-                    <th>FG%</th>
-                    <th>3P%</th>
-                    <th>FT%</th>
+                    <th>3PM</th>
+                    <th>Fouls</th>
+                    <th>TO</th>
                   </>
                 ) : (
                   <>
@@ -256,45 +348,48 @@ const AdminStats = ({ sidebarOpen }) => {
                     <th>Digs</th>
                     <th>Blocks</th>
                     <th>Aces</th>
-                    <th>Hit%</th>
-                    <th>Serve%</th>
-                    <th>Pass%</th>
+                    <th>Serve Err</th>
+                    <th>Att Err</th>
+                    <th>Rec Err</th>
                   </>
                 )}
               </tr>
             </thead>
             <tbody>
-              {filteredPlayerStats.map((player) => (
-                <tr key={player.player_id}>
-                  <td className="adminstats-player-name">{player.player_name}</td>
-                  <td>{player.team_name}</td>
-                  <td className="adminstats-jersey-number">{player.jersey_number}</td>
-                  
-                  {isBasketball ? (
-                    <>
-                      <td className="adminstats-highlight">{player.points || 0}</td>
-                      <td>{player.assists || 0}</td>
-                      <td>{player.rebounds || 0}</td>
-                      <td>{player.steals || 0}</td>
-                      <td>{player.blocks || 0}</td>
-                      <td>{player.field_goal_percentage || "0.0%"}</td>
-                      <td>{player.three_point_percentage || "0.0%"}</td>
-                      <td>{player.free_throw_percentage || "0.0%"}</td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="adminstats-highlight">{player.kills || 0}</td>
-                      <td>{player.volleyball_assists || 0}</td>
-                      <td>{player.digs || 0}</td>
-                      <td>{player.blocks_volleyball || 0}</td>
-                      <td>{player.service_aces || 0}</td>
-                      <td>{player.hitting_percentage || "0.0%"}</td>
-                      <td>{player.service_percentage || "0.0%"}</td>
-                      <td>{player.reception_percentage || "0.0%"}</td>
-                    </>
-                  )}
-                </tr>
-              ))}
+              {filteredPlayerStats.map((player) => {
+                const percentages = calculatePercentages(player);
+                return (
+                  <tr key={player.player_id}>
+                    <td className="adminstats-player-name">{player.player_name}</td>
+                    <td>{player.team_name}</td>
+                    <td className="adminstats-jersey-number">{player.jersey_number}</td>
+                    
+                    {isBasketball ? (
+                      <>
+                        <td className="adminstats-highlight">{player.points || 0}</td>
+                        <td>{player.assists || 0}</td>
+                        <td>{player.rebounds || 0}</td>
+                        <td>{player.steals || 0}</td>
+                        <td>{player.blocks || 0}</td>
+                        <td>{player.three_points_made || 0}</td>
+                        <td>{player.fouls || 0}</td>
+                        <td>{player.turnovers || 0}</td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="adminstats-highlight">{player.kills || 0}</td>
+                        <td>{player.volleyball_assists || 0}</td>
+                        <td>{player.digs || 0}</td>
+                        <td>{player.blocks || 0}</td>
+                        <td>{player.service_aces || 0}</td>
+                        <td>{player.serve_errors || 0}</td>
+                        <td>{player.attack_errors || 0}</td>
+                        <td>{player.reception_errors || 0}</td>
+                      </>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -306,22 +401,22 @@ const AdminStats = ({ sidebarOpen }) => {
   const exportToCSV = () => {
     if (playerStats.length === 0) return;
     
-    const isBasketball = playerStats[0].sport_type === "basketball";
+    const isBasketball = selectedMatch?.sport_type === "basketball";
     let csvContent = "data:text/csv;charset=utf-8,";
     
     // Headers
     if (isBasketball) {
-      csvContent += "Player,Team,Jersey,PTS,AST,REB,STL,BLK,FG%,3P%,FT%\n";
+      csvContent += "Player,Team,Jersey,PTS,AST,REB,STL,BLK,3PM,Fouls,TO\n";
     } else {
-      csvContent += "Player,Team,Jersey,Kills,Assists,Digs,Blocks,Aces,Hit%,Serve%,Pass%\n";
+      csvContent += "Player,Team,Jersey,Kills,Assists,Digs,Blocks,Aces,Serve Err,Att Err,Rec Err\n";
     }
     
     // Rows
     playerStats.forEach(player => {
       if (isBasketball) {
-        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.points || 0},${player.assists || 0},${player.rebounds || 0},${player.steals || 0},${player.blocks || 0},${player.field_goal_percentage || "0.0%"},${player.three_point_percentage || "0.0%"},${player.free_throw_percentage || "0.0%"}\n`;
+        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.points || 0},${player.assists || 0},${player.rebounds || 0},${player.steals || 0},${player.blocks || 0},${player.three_points_made || 0},${player.fouls || 0},${player.turnovers || 0}\n`;
       } else {
-        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.kills || 0},${player.volleyball_assists || 0},${player.digs || 0},${player.blocks_volleyball || 0},${player.service_aces || 0},${player.hitting_percentage || "0.0%"},${player.service_percentage || "0.0%"},${player.reception_percentage || "0.0%"}\n`;
+        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.kills || 0},${player.volleyball_assists || 0},${player.digs || 0},${player.blocks || 0},${player.service_aces || 0},${player.serve_errors || 0},${player.attack_errors || 0},${player.reception_errors || 0}\n`;
       }
     });
     

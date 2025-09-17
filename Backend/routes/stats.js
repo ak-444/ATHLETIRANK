@@ -106,14 +106,23 @@ router.get("/teams/:teamId/players", async (req, res) => {
   }
 });
 
-// Get existing stats for a match
+// Replace your existing "Get existing stats for a match" route with this enhanced version:
 router.get("/matches/:matchId/stats", async (req, res) => {
   try {
-    const [rows] = await db.pool.query(
-      "SELECT * FROM player_stats WHERE match_id = ?",
-      [req.params.matchId]
-    );
-    console.log(`Stats for match ${req.params.matchId}:`, rows);
+    const query = `
+      SELECT 
+        ps.*,
+        p.name as player_name,
+        p.position as player_position,
+        t.name as team_name
+      FROM player_stats ps
+      JOIN players p ON ps.player_id = p.id
+      JOIN teams t ON p.team_id = t.id
+      WHERE ps.match_id = ?
+      ORDER BY t.name, p.name
+    `;
+    const [rows] = await db.pool.query(query, [req.params.matchId]);
+    console.log(`Enhanced stats for match ${req.params.matchId}:`, rows);
     res.json(rows);
   } catch (err) {
     console.error("Error fetching match stats:", err);
