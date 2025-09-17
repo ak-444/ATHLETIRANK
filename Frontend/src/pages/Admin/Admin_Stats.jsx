@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaFilter, FaDownload, FaUsers, FaChartLine, FaTrophy } from "react-icons/fa";
+import { FaSearch, FaFilter, FaDownload, FaTrophy, FaUsers, FaChartLine } from "react-icons/fa";
 import "../../style/Admin_Stats.css";
 
 const AdminStats = ({ sidebarOpen }) => {
-  const [teams, setTeams] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [players, setPlayers] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [brackets, setBrackets] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [playerStats, setPlayerStats] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sportFilter, setSportFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("teams");
+  const [activeTab, setActiveTab] = useState("events");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -27,307 +28,182 @@ const AdminStats = ({ sidebarOpen }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Mock data for demonstration
-  const mockTeams = [
-    { id: 1, name: "Team A", sport: "Basketball", status: "active" },
-    { id: 2, name: "Team B", sport: "Basketball", status: "active" },
-    { id: 3, name: "Team C", sport: "Volleyball", status: "active" },
-    { id: 4, name: "Team D", sport: "Volleyball", status: "inactive" }
-  ];
-
-  const mockPlayers = [
-    { id: 1, name: "Player A1", jersey: "1", team_id: 1 },
-    { id: 2, name: "Player A2", jersey: "2", team_id: 1 },
-    { id: 3, name: "Player A3", jersey: "3", team_id: 1 },
-    { id: 4, name: "Player B1", jersey: "4", team_id: 2 },
-    { id: 5, name: "Player B2", jersey: "5", team_id: 2 },
-    { id: 6, name: "Player B3", jersey: "6", team_id: 2 },
-    { id: 7, name: "Player C1", jersey: "7", team_id: 3 },
-    { id: 8, name: "Player C2", jersey: "8", team_id: 3 },
-    { id: 9, name: "Player C3", jersey: "9", team_id: 3 },
-    { id: 10, name: "Player D1", jersey: "10", team_id: 4 },
-    { id: 11, name: "Player D2", jersey: "11", team_id: 4 },
-    { id: 12, name: "Player D3", jersey: "12", team_id: 4 }
-  ];
-
-  // Mock player statistics data
-  const mockPlayerStats = [
-    // Basketball players
-    { 
-      player_id: 1, 
-      games_played: 5, 
-      points: 85, 
-      field_goals_made: 35, 
-      field_goals_attempted: 70, 
-      three_pointers_made: 15, 
-      three_pointers_attempted: 30, 
-      free_throws_made: 20, 
-      free_throws_attempted: 25, 
-      rebounds_offensive: 10, 
-      rebounds_defensive: 25, 
-      assists: 22, 
-      steals: 8, 
-      blocks: 5, 
-      turnovers: 12, 
-      fouls: 15, 
-      minutes_played: 150 
-    },
-    { 
-      player_id: 2, 
-      games_played: 5, 
-      points: 65, 
-      field_goals_made: 25, 
-      field_goals_attempted: 55, 
-      three_pointers_made: 10, 
-      three_pointers_attempted: 25, 
-      free_throws_made: 15, 
-      free_throws_attempted: 20, 
-      rebounds_offensive: 8, 
-      rebounds_defensive: 20, 
-      assists: 30, 
-      steals: 12, 
-      blocks: 2, 
-      turnovers: 10, 
-      fouls: 12, 
-      minutes_played: 145 
-    },
-    { 
-      player_id: 3, 
-      games_played: 5, 
-      points: 45, 
-      field_goals_made: 18, 
-      field_goals_attempted: 40, 
-      three_pointers_made: 5, 
-      three_pointers_attempted: 15, 
-      free_throws_made: 10, 
-      free_throws_attempted: 12, 
-      rebounds_offensive: 15, 
-      rebounds_defensive: 30, 
-      assists: 8, 
-      steals: 5, 
-      blocks: 10, 
-      turnovers: 8, 
-      fouls: 10, 
-      minutes_played: 140 
-    },
-    // Volleyball players
-    { 
-      player_id: 7, 
-      games_played: 4, 
-      kills: 25, 
-      kill_errors: 8, 
-      kill_attempts: 60, 
-      assists_volleyball: 15, 
-      service_aces: 5, 
-      service_errors: 3, 
-      service_attempts: 20, 
-      digs: 18, 
-      blocks_volleyball: 6, 
-      block_errors: 2, 
-      block_attempts: 12, 
-      reception_errors: 4, 
-      reception_attempts: 30, 
-      minutes_played: 120 
-    },
-    { 
-      player_id: 8, 
-      games_played: 4, 
-      kills: 18, 
-      kill_errors: 6, 
-      kill_attempts: 45, 
-      assists_volleyball: 30, 
-      service_aces: 3, 
-      service_errors: 2, 
-      service_attempts: 15, 
-      digs: 12, 
-      blocks_volleyball: 4, 
-      block_errors: 1, 
-      block_attempts: 10, 
-      reception_errors: 3, 
-      reception_attempts: 25, 
-      minutes_played: 125 
-    },
-    { 
-      player_id: 9, 
-      games_played: 4, 
-      kills: 15, 
-      kill_errors: 5, 
-      kill_attempts: 40, 
-      assists_volleyball: 10, 
-      service_aces: 2, 
-      service_errors: 4, 
-      service_attempts: 18, 
-      digs: 20, 
-      blocks_volleyball: 3, 
-      block_errors: 2, 
-      block_attempts: 8, 
-      reception_errors: 2, 
-      reception_attempts: 22, 
-      minutes_played: 115 
-    }
-  ];
-
-  // Fetch teams - using mock data
+  // Fetch events
   useEffect(() => {
-    setTeams(mockTeams);
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/stats/events");
+        const data = await res.json();
+        setEvents(data);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+        // Mock data for demonstration
+        setEvents([
+          { id: 1, name: "Basketball Tournament", status: "completed", start_date: "2023-10-01", end_date: "2023-10-05" },
+          { id: 2, name: "Volleyball Championship", status: "completed", start_date: "2023-11-01", end_date: "2023-11-03" }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
   }, []);
 
-  // Handle team selection
-  const handleTeamSelect = async (team) => {
-    setSelectedTeam(team);
+  // Handle event selection
+  const handleEventSelect = async (event) => {
+    setSelectedEvent(event);
     setLoading(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      // Filter players by team
-      const teamPlayers = mockPlayers.filter(player => player.team_id === team.id);
-      setPlayers(teamPlayers);
-      
-      // Get stats for these players
-      const stats = teamPlayers.map(player => {
-        const playerStat = mockPlayerStats.find(stat => stat.player_id === player.id);
-        return { ...player, ...playerStat };
-      });
-      
-      setPlayerStats(stats);
+    try {
+      // Fetch brackets for the event
+      const bracketRes = await fetch(`http://localhost:5000/api/stats/events/${event.id}/brackets`);
+      const bracketData = await bracketRes.json();
+      setBrackets(bracketData);
+
+      // Fetch matches for all brackets
+      const allMatches = [];
+      for (const bracket of bracketData) {
+        const matchRes = await fetch(`http://localhost:5000/api/stats/${bracket.id}/matches`);
+        const matchData = await matchRes.json();
+        const matchesWithBracket = matchData.map(match => ({
+          ...match,
+          bracket_name: bracket.name,
+          sport_type: bracket.sport_type
+        }));
+        allMatches.push(...matchesWithBracket);
+      }
+      setMatches(allMatches);
+      setActiveTab("brackets");
+    } catch (err) {
+      console.error("Error fetching event data:", err);
+      // Mock data for demonstration
+      setBrackets([
+        { id: 1, name: "Men's Basketball Bracket", sport_type: "basketball", event_id: 1 },
+        { id: 2, name: "Women's Volleyball Bracket", sport_type: "volleyball", event_id: 2 }
+      ]);
+      setMatches([
+        { id: 1, bracket_id: 1, team1_name: "Team A", team2_name: "Team B", winner_name: "Team A", score_team1: 85, score_team2: 70, status: "completed", round_number: 1, bracket_name: "Men's Basketball Bracket", sport_type: "basketball" },
+        { id: 2, bracket_id: 1, team1_name: "Team C", team2_name: "Team D", winner_name: "Team D", score_team1: 65, score_team2: 75, status: "completed", round_number: 1, bracket_name: "Men's Basketball Bracket", sport_type: "basketball" },
+        { id: 3, bracket_id: 1, team1_name: "Team A", team2_name: "Team D", winner_name: "Team A", score_team1: 90, score_team2: 80, status: "completed", round_number: 2, bracket_name: "Men's Basketball Bracket", sport_type: "basketball" },
+        { id: 4, bracket_id: 2, team1_name: "Team X", team2_name: "Team Y", winner_name: "Team X", score_team1: 3, score_team2: 1, status: "completed", round_number: 1, bracket_name: "Women's Volleyball Bracket", sport_type: "volleyball" }
+      ]);
+    } finally {
       setLoading(false);
-      setActiveTab("statistics");
-    }, 500);
+    }
   };
 
-  // Filter players based on search term
-  const filteredPlayers = playerStats.filter(player => 
-    player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    player.jersey.includes(searchTerm)
+  // Handle match selection to view player stats
+  const handleMatchSelect = async (match) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/stats/matches/${match.id}/summary`);
+      const data = await res.json();
+      setPlayerStats(data);
+      setActiveTab("statistics");
+    } catch (err) {
+      console.error("Error fetching player stats:", err);
+      // Mock data for demonstration
+      setPlayerStats([
+        { player_id: 1, player_name: "John Doe", team_name: "Team A", points: 25, assists: 8, rebounds: 10, jersey_number: 10 },
+        { player_id: 2, player_name: "Jane Smith", team_name: "Team A", points: 20, assists: 12, rebounds: 5, jersey_number: 5 },
+        { player_id: 3, player_name: "Mike Johnson", team_name: "Team D", points: 30, assists: 5, rebounds: 8, jersey_number: 7 },
+        { player_id: 4, player_name: "Sarah Wilson", team_name: "Team D", points: 18, assists: 7, rebounds: 6, jersey_number: 12 }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter player stats based on search term
+  const filteredPlayerStats = playerStats.filter(player => 
+    player.player_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    player.jersey_number.toString().includes(searchTerm)
   );
 
-  // Calculate team totals
-  const calculateTeamTotals = () => {
-    if (playerStats.length === 0) return null;
-    
-    const isBasketball = selectedTeam.sport === "Basketball";
-    
-    if (isBasketball) {
-      return {
-        games_played: Math.max(...playerStats.map(p => p.games_played || 0)),
-        points: playerStats.reduce((sum, player) => sum + (player.points || 0), 0),
-        field_goals_made: playerStats.reduce((sum, player) => sum + (player.field_goals_made || 0), 0),
-        field_goals_attempted: playerStats.reduce((sum, player) => sum + (player.field_goals_attempted || 0), 0),
-        three_pointers_made: playerStats.reduce((sum, player) => sum + (player.three_pointers_made || 0), 0),
-        three_pointers_attempted: playerStats.reduce((sum, player) => sum + (player.three_pointers_attempted || 0), 0),
-        free_throws_made: playerStats.reduce((sum, player) => sum + (player.free_throws_made || 0), 0),
-        free_throws_attempted: playerStats.reduce((sum, player) => sum + (player.free_throws_attempted || 0), 0),
-        rebounds_offensive: playerStats.reduce((sum, player) => sum + (player.rebounds_offensive || 0), 0),
-        rebounds_defensive: playerStats.reduce((sum, player) => sum + (player.rebounds_defensive || 0), 0),
-        assists: playerStats.reduce((sum, player) => sum + (player.assists || 0), 0),
-        steals: playerStats.reduce((sum, player) => sum + (player.steals || 0), 0),
-        blocks: playerStats.reduce((sum, player) => sum + (player.blocks || 0), 0),
-        turnovers: playerStats.reduce((sum, player) => sum + (player.turnovers || 0), 0),
-        fouls: playerStats.reduce((sum, player) => sum + (player.fouls || 0), 0),
-        minutes_played: playerStats.reduce((sum, player) => sum + (player.minutes_played || 0), 0),
-      };
-    } else {
-      return {
-        games_played: Math.max(...playerStats.map(p => p.games_played || 0)),
-        kills: playerStats.reduce((sum, player) => sum + (player.kills || 0), 0),
-        kill_errors: playerStats.reduce((sum, player) => sum + (player.kill_errors || 0), 0),
-        kill_attempts: playerStats.reduce((sum, player) => sum + (player.kill_attempts || 0), 0),
-        assists_volleyball: playerStats.reduce((sum, player) => sum + (player.assists_volleyball || 0), 0),
-        service_aces: playerStats.reduce((sum, player) => sum + (player.service_aces || 0), 0),
-        service_errors: playerStats.reduce((sum, player) => sum + (player.service_errors || 0), 0),
-        service_attempts: playerStats.reduce((sum, player) => sum + (player.service_attempts || 0), 0),
-        digs: playerStats.reduce((sum, player) => sum + (player.digs || 0), 0),
-        blocks_volleyball: playerStats.reduce((sum, player) => sum + (player.blocks_volleyball || 0), 0),
-        block_errors: playerStats.reduce((sum, player) => sum + (player.block_errors || 0), 0),
-        block_attempts: playerStats.reduce((sum, player) => sum + (player.block_attempts || 0), 0),
-        reception_errors: playerStats.reduce((sum, player) => sum + (player.reception_errors || 0), 0),
-        reception_attempts: playerStats.reduce((sum, player) => sum + (player.reception_attempts || 0), 0),
-        minutes_played: playerStats.reduce((sum, player) => sum + (player.minutes_played || 极), 0),
-      };
+  // Group matches by bracket
+  const matchesByBracket = {};
+  matches.forEach(match => {
+    if (!matchesByBracket[match.bracket_id]) {
+      matchesByBracket[match.bracket_id] = [];
     }
-  };
+    matchesByBracket[match.bracket_id].push(match);
+  });
 
-  const teamTotals = selectedTeam ? calculateTeamTotals() : null;
-
-  // Export data as CSV
-  const exportToCSV = () => {
-    if (playerStats.length === 0) return;
-    
-    const isBasketball = selectedTeam.sport === "Basketball";
-    let csvContent = "data:text/csv;charset=utf-8,";
-    
-    // Headers
-    if (isBasketball) {
-      csvContent += "Player,Jersey,GP,PTS,FGM,FGA,3PM,3PA,FTM,FTA,OREB,DREB,AST,STL,BLK,TO,PF,MIN\n";
-    } else {
-      csvContent += "Player,Jersey,GP,KILLS,KILL ERRORS,KILL ATTEMPTS,ASSISTS,SERVICE ACES,SERVICE ERRORS,SERVICE ATTEMPTS,DIGS,BLOCKS,BLOCK ERRORS,BLOCK ATTEMPTS,RECEPTION ERRORS,RECEPTION ATTEMPTS,MIN\n";
-    }
-    
-    // Rows
-    playerStats.forEach(player => {
-      if (isBasketball) {
-        csvContent += `${player.name},${player.jersey},${player.games_played || 0},${player.points || 0},${player.field_goals_made || 0},${player.field_goals_attempted || 0},${player.three_pointers_made || 0},${player.three_pointers_attempted || 极},${player.free_throws_made || 0},${player.free_throws_attempted || 0},${player.rebounds_offensive || 0},${player.rebounds_defensive || 0},${player.assists || 0},${player.steals || 0},${player.blocks || 0},${极.player.turnovers || 0},${player.fouls || 0},${player.minutes_played || 0}\n`;
-      } else {
-        csvContent += `${player.name},${player.jersey},${player.games_played || 0},${player.kills || 0},${player.kill_errors || 0},${player.kill_attempts || 0},${player.assists_volleyball || 0},${player.service_aces || 0},${player.service_errors || 0},${player.service_attempts || 0},${player.digs || 0},${player.blocks_volleyball || 0},${player.block_errors || 0},${player.block_attempts || 0},${player.reception_errors || 0},${player.reception_attempts || 0},${player.minutes_played || 0}\n`;
-      }
-    });
-    
-    // Team totals row
-    if (teamTotals) {
-      csvContent += "TOTALS,,";
-      if (isBasketball) {
-        csvContent += `${teamTotals.games_played || 0},${teamTotals.points || 0},${teamTotals.field_goals_made || 0},${teamTotals.field_goals_attempted || 0},${teamTotals.three_pointers_made || 0},${teamTotals.three_pointers_attempted || 0},${teamTotals.free_throws_made || 0},${teamTotals.free_throws_attempted || 0},${teamTotals.rebounds_offensive || 0},${team极als.rebounds_defensive || 0},${teamTotals.assists || 0},${teamTotals.steals || 0},${teamTotals.blocks || 0},${teamTotals.turnovers || 0},${teamTotals.fouls || 0},${teamTot极.minutes_played || 0}\n`;
-      } else {
-        csvContent += `${teamTotals.games_played || 0},${teamTotals.kills || 0},${teamTotals.kill_errors || 0},${teamTotals.kill_attempts || 0},${teamTotals.assists_volleyball || 0},${teamTotals.service_aces || 0},${teamTotals.service_errors || 0},${teamTotals.service_attempts || 0},${teamTotals.digs || 0},${teamTotals.blocks_volleyball || 0},${teamTotals.block_errors || 0},${teamTotals.block_attempts || 0},${teamTotals.reception_errors || 0},${teamTotals.reception_attempts || 0},${teamTotals.minutes_played || 0}\n`;
+  // Find bracket winners (teams that won the final round)
+  const bracketWinners = {};
+  brackets.forEach(bracket => {
+    if (matchesByBracket[bracket.id]) {
+      const finalMatches = matchesByBracket[bracket.id].filter(m => 
+        Math.max(...matchesByBracket[bracket.id].map(m => m.round_number)) === m.round_number
+      );
+      if (finalMatches.length > 0) {
+        bracketWinners[bracket.id] = finalMatches[0].winner_name;
       }
     }
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${selectedTeam.name}_stats.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  });
 
-  // Render stats table based on sport
+  // Render player statistics table
   const renderStatsTable = () => {
-    if (!selectedTeam) return null;
+    if (playerStats.length === 0) return <p>No statistics available for this match.</p>;
     
-    const isBasketball = selectedTeam.sport === "Basketball";
+    const isBasketball = playerStats[0].sport_type === "basketball";
     
-
-      return (
-  <div className="adminstats-table-container">
-    <div className="adminstats-table-controls">
-      <div className="adminstats-search-box">
-        <FaSearch />
-        <input
-          type="text"
-          placeholder="Search players..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      
-      <div className="adminstats-filter-controls">
-        {isMobile ? (
-          <>
-            <button 
-              className="adminstats-filter-toggle-btn"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <FaFilter /> Filters
-            </button>
-            
-            {showFilters && (
-              <div className="adminstats-mobile-filters">
+    return (
+      <div className="adminstats-table-container">
+        <div className="adminstats-table-controls">
+          <div className="adminstats-search-box">
+            <FaSearch />
+            <input
+              type="text"
+              placeholder="Search players..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div className="adminstats-filter-controls">
+            {isMobile ? (
+              <>
+                <button 
+                  className="adminstats-filter-toggle-btn"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <FaFilter /> Filters
+                </button>
+                
+                {showFilters && (
+                  <div className="adminstats-mobile-filters">
+                    <div className="adminstats-filter-group">
+                      <select 
+                        value={sportFilter} 
+                        onChange={(e) => setSportFilter(e.target.value)}
+                      >
+                        <option value="all">All Sports</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="volleyball">Volleyball</option>
+                      </select>
+                    </div>
+                    
+                    <div className="adminstats-filter-group">
+                      <select 
+                        value={timeFilter} 
+                        onChange={(e) => setTimeFilter(e.target.value)}
+                      >
+                        <option value="all">All Time</option>
+                        <option value="season">This Season</option>
+                        <option value="month">This Month</option>
+                        <option value="week">This Week</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
                 <div className="adminstats-filter-group">
                   <select 
                     value={sportFilter} 
                     onChange={(e) => setSportFilter(e.target.value)}
-                    disabled
                   >
                     <option value="all">All Sports</option>
                     <option value="basketball">Basketball</option>
@@ -346,184 +222,116 @@ const AdminStats = ({ sidebarOpen }) => {
                     <option value="week">This Week</option>
                   </select>
                 </div>
-              </div>
+              </>
             )}
-          </>
-        ) : (
-          <>
-            <div className="adminstats-filter-group">
-              <select 
-                value={sportFilter} 
-                onChange={(e) => setSportFilter(e.target.value)}
-                disabled
-              >
-                <option value="all">All Sports</option>
-                <option value="basketball">Basketball</option>
-                <option value="volleyball">Volleyball</option>
-              </select>
-            </div>
             
-            <div className="adminstats-filter-group">
-              <select 
-                value={timeFilter} 
-                onChange={(e) => setTimeFilter(e.target.value)}
-              >
-                <option value="all">All Time</option>
-                <option value="season">This Season</option>
-                <option value="month">This Month</option>
-                <option value="week">This Week</option>
-              </select>
-            </div>
-          </>
-        )}
+            <button className="adminstats-export-btn" onClick={exportToCSV}>
+              <FaDownload /> Export CSV
+            </button>
+          </div>
+        </div>
         
-        <button className="adminstats-export-btn" onClick={exportToCSV}>
-          <FaDownload /> Export CSV
-        </button>
+        <div className="adminstats-table-wrapper">
+          <table className="adminstats-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Team</th>
+                <th>Jersey</th>
+                {isBasketball ? (
+                  <>
+                    <th>PTS</th>
+                    <th>AST</th>
+                    <th>REB</th>
+                    <th>STL</th>
+                    <th>BLK</th>
+                    <th>FG%</th>
+                    <th>3P%</th>
+                    <th>FT%</th>
+                  </>
+                ) : (
+                  <>
+                    <th>Kills</th>
+                    <th>Assists</th>
+                    <th>Digs</th>
+                    <th>Blocks</th>
+                    <th>Aces</th>
+                    <th>Hit%</th>
+                    <th>Serve%</th>
+                    <th>Pass%</th>
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPlayerStats.map((player) => (
+                <tr key={player.player_id}>
+                  <td className="adminstats-player-name">{player.player_name}</td>
+                  <td>{player.team_name}</td>
+                  <td className="adminstats-jersey-number">{player.jersey_number}</td>
+                  
+                  {isBasketball ? (
+                    <>
+                      <td className="adminstats-highlight">{player.points || 0}</td>
+                      <td>{player.assists || 0}</td>
+                      <td>{player.rebounds || 0}</td>
+                      <td>{player.steals || 0}</td>
+                      <td>{player.blocks || 0}</td>
+                      <td>{player.field_goal_percentage || "0.0%"}</td>
+                      <td>{player.three_point_percentage || "0.0%"}</td>
+                      <td>{player.free_throw_percentage || "0.0%"}</td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="adminstats-highlight">{player.kills || 0}</td>
+                      <td>{player.volleyball_assists || 0}</td>
+                      <td>{player.digs || 0}</td>
+                      <td>{player.blocks_volleyball || 0}</td>
+                      <td>{player.service_aces || 0}</td>
+                      <td>{player.hitting_percentage || "0.0%"}</td>
+                      <td>{player.service_percentage || "0.0%"}</td>
+                      <td>{player.reception_percentage || "0.0%"}</td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    );
+  };
+
+  // Export data as CSV
+  const exportToCSV = () => {
+    if (playerStats.length === 0) return;
     
-    <div className="adminstats-table-wrapper">
-      <table className="adminstats-table">
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Jersey</th>
-            <th>GP</th>
-            
-            {isBasketball ? (
-              <>
-                <th>PTS</th>
-                <th>FGM</th>
-                <th>FGA</th>
-                <th>3PM</th>
-                <th>3PA</th>
-                <th>FTM</th>
-                <th>FTA</th>
-                <th>OREB</th>
-                <th>DREB</th>
-                <th>AST</th>
-                <th>STL</th>
-                <th>BLK</th>
-                <th>TO</th>
-                <th>PF</th>
-                <th>MIN</th>
-              </>
-            ) : (
-              <>
-                <th>KILLS</th>
-                <th>KILL ERR</th>
-                <th>KILL ATT</th>
-                <th>AST</th>
-                <th>SERV ACE</th>
-                <th>SERV ERR</th>
-                <th>SERV ATT</th>
-                <th>DIGS</th>
-                <th>BLOCKS</th>
-                <th>BLOCK ERR</th>
-                <th>BLOCK ATT</th>
-                <th>REC ERR</th>
-                <th>REC ATT</th>
-                <th>MIN</th>
-              </>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {filteredPlayers.map((player) => (
-            <tr key={player.id}>
-              <td className="adminstats-player-name">{player.name}</td>
-              <td className="adminstats-jersey-number">{player.jersey}</td>
-              <td>{player.games_played || 0}</td>
-              
-              {isBasketball ? (
-                <>
-                  <td className="adminstats-highlight">{player.points || 0}</td>
-                  <td>{player.field_goals_made || 0}</td>
-                  <td>{player.field_goals_attempted || 0}</td>
-                  <td>{player.three_pointers_made || 0}</td>
-                  <td>{player.three_pointers_attempted || 0}</td>
-                  <td>{player.free_throws_made || 0}</td>
-                  <td>{player.free_throws_attempted || 0}</td>
-                  <td>{player.rebounds_offensive || 0}</td>
-                  <td>{player.rebounds_defensive || 0}</td>
-                  <td>{player.assists || 0}</td>
-                  <td>{player.steals || 0}</td>
-                  <td>{player.blocks || 0}</td>
-                  <td>{player.turnovers || 0}</td>
-                  <td>{player.fouls || 0}</td>
-                  <td>{player.minutes_played || 0}</td>
-                </>
-              ) : (
-                <>
-                  <td className="adminstats-highlight">{player.kills || 0}</td>
-                  <td>{player.kill_errors || 0}</td>
-                  <td>{player.kill_attempts || 0}</td>
-                  <td>{player.assists_volleyball || 0}</td>
-                  <td>{player.service_aces || 0}</td>
-                  <td>{player.service_errors || 0}</td>
-                  <td>{player.service_attempts || 0}</td>
-                  <td>{player.digs || 0}</td>
-                  <td>{player.blocks_volleyball || 0}</td>
-                  <td>{player.block_errors || 0}</td>
-                  <td>{player.block_attempts || 0}</td>
-                  <td>{player.reception_errors || 0}</td>
-                  <td>{player.reception_attempts || 0}</td>
-                  <td>{player.minutes_played || 0}</td>
-                </>
-              )}
-            </tr>
-          ))}
-          
-          {/* Team Totals Row */}
-          {teamTotals && (
-            <tr className="adminstats-team-totals">
-              <td colSpan="2">TEAM TOTALS</td>
-              <td>{teamTotals.games_played || 0}</td>
-              
-              {isBasketball ? (
-                <>
-                  <td className="adminstats-highlight">{teamTotals.points || 0}</td>
-                  <td>{teamTotals.field_goals_made || 0}</td>
-                  <td>{teamTotals.field_goals_attempted || 0}</td>
-                  <td>{teamTotals.three_pointers_made || 0}</td>
-                  <td>{teamTotals.three_pointers_attempted || 0}</td>
-                  <td>{teamTotals.free_throws_made || 0}</td>
-                  <td>{teamTotals.free_throws_attempted || 0}</td>
-                  <td>{teamTotals.rebounds_offensive || 0}</td>
-                  <td>{teamTotals.rebounds_defensive || 0}</td>
-                  <td>{teamTotals.assists || 极}</td>
-                  <td>{teamTotals.steals || 0}</td>
-                  <td>{teamTotals.blocks || 0}</td>
-                  <td>{teamTotals.turnovers || 0}</td>
-                  <td>{teamTotals.fouls || 0}</td>
-                  <td>{teamTotals.minutes_played || 0}</td>
-                </>
-              ) : (
-                <>
-                  <td className="adminstats-highlight">{teamTotals.kills || 0}</td>
-                  <td>{teamTotals.kill_errors || 0}</td>
-                  <td>{teamTotals.kill_attempts || 0}</td>
-                  <td>{teamTotals.assists_volleyball || 0}</td>
-                  <td>{teamTotals.service_aces || 0}</td>
-                  <td>{teamTotals.service_errors || 0}</td>
-                  <td>{teamTotals.service_attempts || 0}</td>
-                  <td>{teamTotals.digs || 0}</td>
-                  <td>{teamTotals.blocks_volleyball || 0}</td>
-                  <td>{teamTotals.block_errors || 0}</td>
-                  <td>{teamTotals.block_attempts || 0}</td>
-                  <td>{teamTotals.reception_errors || 0}</td>
-                  <td>{teamTotals.reception_attempts || 0}</td>
-                  <td>{teamTotals.minutes_played || 0}</td>
-                </>
-              )}
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+    const isBasketball = playerStats[0].sport_type === "basketball";
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Headers
+    if (isBasketball) {
+      csvContent += "Player,Team,Jersey,PTS,AST,REB,STL,BLK,FG%,3P%,FT%\n";
+    } else {
+      csvContent += "Player,Team,Jersey,Kills,Assists,Digs,Blocks,Aces,Hit%,Serve%,Pass%\n";
+    }
+    
+    // Rows
+    playerStats.forEach(player => {
+      if (isBasketball) {
+        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.points || 0},${player.assists || 0},${player.rebounds || 0},${player.steals || 0},${player.blocks || 0},${player.field_goal_percentage || "0.0%"},${player.three_point_percentage || "0.0%"},${player.free_throw_percentage || "0.0%"}\n`;
+      } else {
+        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.kills || 0},${player.volleyball_assists || 0},${player.digs || 0},${player.blocks_volleyball || 0},${player.service_aces || 0},${player.hitting_percentage || "0.0%"},${player.service_percentage || "0.0%"},${player.reception_percentage || "0.0%"}\n`;
+      }
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `match_stats.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -531,7 +339,7 @@ const AdminStats = ({ sidebarOpen }) => {
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="dashboard-header">
           <h1>Admin Statistics</h1>
-          <p>View and analyze team and player statistics</p>
+          <p>View match results and player statistics</p>
         </div>
 
         <div className="dashboard-main">
@@ -539,49 +347,61 @@ const AdminStats = ({ sidebarOpen }) => {
             {/* Tabs */}
             <div className="bracket-tabs">
               <button
-                className={`bracket-tab-button ${activeTab === "teams" ? "bracket-tab-active" : ""}`}
-                onClick={() => setActiveTab("teams")}
+                className={`bracket-tab-button ${activeTab === "events" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("events")}
               >
-                Select Team
+                Events
               </button>
-              {selectedTeam && (
+              {selectedEvent && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "brackets" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("brackets")}
+                >
+                  Brackets & Matches
+                </button>
+              )}
+              {playerStats.length > 0 && (
                 <button
                   className={`bracket-tab-button ${activeTab === "statistics" ? "bracket-tab-active" : ""}`}
                   onClick={() => setActiveTab("statistics")}
                 >
-                  View Statistics
+                  Player Statistics
                 </button>
               )}
             </div>
 
-            {/* Select Team */}
-            {activeTab === "teams" && (
+            {/* Events Tab */}
+            {activeTab === "events" && (
               <div className="bracket-view-section">
-                <h2>All Teams</h2>
-                {teams.length === 0 ? (
+                <h2>All Events</h2>
+                {loading ? (
+                  <p>Loading events...</p>
+                ) : events.length === 0 ? (
                   <div className="bracket-no-brackets">
-                    <p>No teams available.</p>
+                    <p>No events available.</p>
                   </div>
                 ) : (
                   <div className="bracket-grid">
-                    {teams.map((team) => (
-                      <div className="bracket-card" key={team.id} onClick={() => handleTeamSelect(team)}>
+                    {events.map((event) => (
+                      <div className="bracket-card" key={event.id} onClick={() => handleEventSelect(event)}>
                         <div className="bracket-card-header">
-                          <h3>{team.name}</h3>
-                          <span className={`bracket-sport-badge ${team.sport === "Basketball" ? "bracket-sport-basketball" : "bracket-sport-volleyball"}`}>
-                            {team.sport}
+                          <h3>{event.name}</h3>
+                          <span className={`bracket-sport-badge ${event.status === "completed" ? "status-completed" : "status-ongoing"}`}>
+                            {event.status}
                           </span>
                         </div>
                         <div className="bracket-card-info">
+                          <div><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</div>
+                          <div><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</div>
                           <div><strong>Status:</strong> 
-                            <span className={team.status === "active" ? "status-ongoing" : "status-completed"}>
-                              {team.status}
+                            <span className={event.status === "completed" ? "status-completed" : "status-ongoing"}>
+                              {event.status}
                             </span>
                           </div>
                         </div>
                         <div className="bracket-card-actions">
                           <button className="bracket-view-btn">
-                            View Stats
+                            View Results
                           </button>
                         </div>
                       </div>
@@ -591,18 +411,91 @@ const AdminStats = ({ sidebarOpen }) => {
               </div>
             )}
 
-            {/* View Statistics */}
-            {activeTab === "statistics" && selectedTeam && (
+            {/* Brackets & Matches Tab */}
+            {activeTab === "brackets" && selectedEvent && (
               <div className="bracket-view-section">
                 <div className="event-details-header">
                   <h2>
-                    {selectedTeam.name} Statistics
-                    <span className="adminstats-sport-badge">{selectedTeam.sport}</span>
+                    {selectedEvent.name} - Results
                   </h2>
                   <div className="event-details-info">
-                    <span><strong>Sport:</strong> {selectedTeam.sport}</span>
-                    <span><strong>Status:</strong> {selectedTeam.status}</span>
+                    <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
+                    <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
+                    <span><strong>Status:</strong> {selectedEvent.status}</span>
                   </div>
+                </div>
+
+                {loading ? (
+                  <p>Loading brackets and matches...</p>
+                ) : brackets.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No brackets available for this event.</p>
+                  </div>
+                ) : (
+                  <div>
+                    {brackets.map((bracket) => (
+                      <div key={bracket.id} className="bracket-section">
+                        <div className="bracket-header">
+                          <h3>{bracket.name}</h3>
+                          {bracketWinners[bracket.id] && (
+                            <div className="bracket-winner">
+                              <FaTrophy /> Winner: {bracketWinners[bracket.id]}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {matchesByBracket[bracket.id] && matchesByBracket[bracket.id].length > 0 ? (
+                          <div className="matches-grid">
+                            {matchesByBracket[bracket.id].map((match) => (
+                              <div 
+                                key={match.id} 
+                                className="match-card"
+                                onClick={() => handleMatchSelect(match)}
+                              >
+                                <div className="match-teams">
+                                  <div className={`match-team ${match.winner_id === match.team1_id ? "match-winner" : ""}`}>
+                                    {match.team1_name}
+                                  </div>
+                                  <div className="match-vs">vs</div>
+                                  <div className={`match-team ${match.winner_id === match.team2_id ? "match-winner" : ""}`}>
+                                    {match.team2_name}
+                                  </div>
+                                </div>
+                                <div className="match-score">
+                                  {match.score_team1} - {match.score_team2}
+                                </div>
+                                <div className="match-info">
+                                  <span>Round {match.round_number}</span>
+                                  {match.winner_name && (
+                                    <span className="match-winner-tag">
+                                      Winner: {match.winner_name}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="match-actions">
+                                  <button className="bracket-view-btn">
+                                    View Stats
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>No matches available for this bracket.</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Player Statistics Tab */}
+            {activeTab === "statistics" && (
+              <div className="bracket-view-section">
+                <div className="event-details-header">
+                  <h2>Player Statistics</h2>
+                  <p>Detailed player performance data from the selected match</p>
                 </div>
 
                 {loading ? (

@@ -329,73 +329,6 @@
   height: 100%;
 }
 
-.player-awards-section {
-  background: rgba(255, 215, 0, 0.1);
-  padding: 1rem;
-  border-radius: 8px;
-  border-left: 4px solid #ffd700;
-  flex-shrink: 0;
-}
-
-.player-awards-section h5 {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.current-awards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.award-badge {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #333;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
-}
-
-.remove-award-btn {
-  background: none;
-  border: none;
-  color: #666;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s;
-}
-
-.remove-award-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: #000;
-}
-
-.add-award-section select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 0.875rem;
-  background: var(--background-secondary);
-  color: var(--text-primary);
-}
-
 /* Stats Grid - Fixed Layout */
 .stats-grid {
   display: grid;
@@ -575,128 +508,6 @@
   min-height: auto;
 }
 
-/* Player Stats Summary */
-.player-stats-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.player-points {
-  font-weight: 600;
-  color: var(--primary-color);
-  font-size: 1rem;
-}
-
-.player-hitting-pct {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-/* Match Awards Summary */
-.match-awards-summary {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  border-left: 4px solid #ffd700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.match-awards-summary h3 {
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.awards-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.award-item {
-  background: var(--background-card);
-  padding: 1rem;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.award-type {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #333;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.award-player {
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-/* Volleyball specific styles */
-.volleyball-stats-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  height: 100%;
-}
-
-.volleyball-stats-container .stat-section {
-  background: var(--background-primary);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-}
-
-.volleyball-stats-container .stat-section h4 {
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-align: center;
-}
-
-.volleyball-stats-container .stats-grid {
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.5rem;
-}
-
-.volleyball-stats-container .stat-group {
-  min-height: 70px;
-  padding: 0.5rem;
-}
-
-.volleyball-stats-container .stat-group label {
-  font-size: 0.75rem;
-}
-
-.hitting-percentage {
-  text-align: center;
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(40, 167, 69, 0.1);
-  border-radius: 4px;
-}
-
-.hitting-percentage small {
-  font-weight: 600;
-  color: #28a745;
-  font-size: 0.8rem;
-}
-
 /* Basketball stats grid layout */
 .basketball-stats {
   grid-template-columns: repeat(3, 1fr) !important;
@@ -796,57 +607,9 @@
 }
 
 /* Volleyball stats improvements */
-.volleyball-stats-container .stat-section {
-  background: var(--background-primary);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 0.8rem;
-  border-left: 3px solid var(--primary-color);
-}
-
-.volleyball-stats-container .stat-section h4 {
-  margin: 0 0 0.8rem 0;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-align: center;
-}
-
-.volleyball-stats-container .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.hitting-percentage {
-  text-align: center;
-  margin-top: 0.8rem;
-  padding: 0.5rem;
-  background: rgba(40, 167, 69, 0.1);
-  border-radius: 4px;
-  grid-column: 1 / -1;
-}
-
-.hitting-percentage small {
-  font-weight: 600;
-  color: #28a745;
-  font-size: 0.85rem;
-}
-
-/* Volleyball stats grid layout - matches basketball */
 .volleyball-stats {
   grid-template-columns: repeat(3, 1fr) !important;
   gap: 0.8rem;
-}
-
-/* Remove the old volleyball container styles */
-.volleyball-stats-container,
-.volleyball-stats-container .stat-section,
-.volleyball-stats-container .stat-section h4,
-.hitting-percentage {
-  display: none;
 }
 
 /* Responsive Design */
@@ -935,22 +698,9 @@
     grid-template-columns: 1fr !important;
   }
   
-  .awards-list {
-    grid-template-columns: 1fr;
-  }
-  
   .player-card .bracket-card-header {
     flex-direction: column;
     gap: 0.5rem;
-  }
-  
-  .player-stats-summary {
-    align-self: stretch;
-    text-align: left;
-  }
-  
-  .current-awards {
-    flex-direction: column;
   }
   
   .volleyball-stats {
@@ -965,6 +715,12 @@
   .stat-controls input {
     width: 45px;
     font-size: 0.9rem;
+  }
+  
+  .stat-controls button {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
   }
 }
 
@@ -1046,84 +802,6 @@
   color: var(--text-primary);
 }
 
-.player-total-stats {
-  display: flex;
-  gap: 1rem;
-}
-
-.stat-total {
-  background: var(--primary-color);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--border-radius);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-/* Attack, Defense, and Serve sections styling */
-.stat-category {
-  margin-bottom: 1.5rem;
-}
-
-.stat-category h4 {
-  font-size: 1rem;
-  color: var(--text-primary);
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-/* Back to Games button styling */
-.back-to-games-btn {
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.back-to-games-btn:hover {
-  background: var(--background-primary);
-  border-color: var(--primary-color);
-}
-
-/* Hitting percentage styling */
-.hitting-percentage-display {
-  background: rgba(40, 167, 69, 0.1);
-  color: #28a745;
-  padding: 0.5rem;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  text-align: center;
-  margin-top: 0.5rem;
-}
-
 /* Team score styling enhancements */
 .team-score-display {
   display: flex;
@@ -1160,4 +838,29 @@
 
 .bracket-view-section > *:last-child {
   margin-bottom: 0;
+}
+
+/* Remove number input spinners */
+.stat-input::-webkit-outer-spin-button,
+.stat-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stat-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Adjust input width for better appearance */
+.stat-input {
+  width: 60px;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  -webkit-appearance: none; /* Removes inner shadow on iOS */
 }

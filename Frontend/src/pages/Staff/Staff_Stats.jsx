@@ -5,8 +5,7 @@ import {
   FaRedo,
   FaSave,
   FaArrowLeft,
-  FaArrowRight,
-  FaTrophy
+  FaArrowRight
 } from "react-icons/fa";
 import "../../style/Staff_Stats.css";
 
@@ -19,7 +18,6 @@ const StaffStats = ({ sidebarOpen }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
   const [playerStats, setPlayerStats] = useState([]);
-  const [matchAwards, setMatchAwards] = useState([]);
   const [teamScores, setTeamScores] = useState({
     team1: [0, 0, 0, 0],
     team2: [0, 0, 0, 0],
@@ -27,16 +25,6 @@ const StaffStats = ({ sidebarOpen }) => {
   const [currentQuarter, setCurrentQuarter] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Award types based on sport
-  const getAwardTypes = (sportType) => {
-    if (sportType === 'basketball') {
-      return ['MVP', 'BestDefender', 'MostAssists', 'BestRebounder', 'Best3PointShooter'];
-    } else if (sportType === 'volleyball') {
-      return ['MVP', 'BestServer', 'BestBlocker', 'BestReceiver', 'BestLibero'];
-    }
-    return ['MVP'];
-  };
 
   // Basketball template
   const basketballStatsTemplate = {
@@ -81,13 +69,39 @@ const StaffStats = ({ sidebarOpen }) => {
     fetchEvents();
   }, []);
 
+  // Calculate team scores from player stats - FIXED: Added sportType parameter
+  const calculateTeamScores = (stats, team1Id, team2Id, sportType) => {
+    const team1Scores = sportType === "basketball" 
+      ? [0, 0, 0, 0] 
+      : [0, 0, 0, 0, 0];
+    const team2Scores = sportType === "basketball" 
+      ? [0, 0, 0, 0] 
+      : [0, 0, 0, 0, 0];
+
+    stats.forEach(player => {
+      const scoringStat = sportType === "basketball" ? "points" : "kills";
+      const playerTeamId = player.team_id;
+      
+      if (playerTeamId === team1Id) {
+        for (let i = 0; i < team1Scores.length; i++) {
+          team1Scores[i] += player[scoringStat][i] || 0;
+        }
+      } else if (playerTeamId === team2Id) {
+        for (let i = 0; i < team2Scores.length; i++) {
+          team2Scores[i] += player[scoringStat][i] || 0;
+        }
+      }
+    });
+
+    return { team1: team1Scores, team2: team2Scores };
+  };
+
   // Handle event selection
   const handleEventSelect = async (event) => {
     console.log("Selected event:", event);
     setSelectedEvent(event);
     setSelectedGame(null);
     setPlayerStats([]);
-    setMatchAwards([]);
     setTeamScores({ team1: [0, 0, 0, 0], team2: [0, 0, 0, 0] });
     setCurrentQuarter(0);
     setLoading(true);
@@ -171,7 +185,7 @@ const StaffStats = ({ sidebarOpen }) => {
     }
   };
 
-  // Initialize player stats with awards loading - FIXED: Get all players per team
+  // Initialize player stats
   const initializePlayerStats = async (game) => {
     try {
       console.log("Initializing player stats for game:", game);
@@ -191,7 +205,6 @@ const StaffStats = ({ sidebarOpen }) => {
           ? basketballStatsTemplate
           : volleyballStatsTemplate;
 
-      // FIXED: Get all players from each team
       const initialStats = [
         ...team1Players.map((p) => ({
           player_id: p.id,
@@ -211,15 +224,14 @@ const StaffStats = ({ sidebarOpen }) => {
       
       setPlayerStats(initialStats);
 
-      // Load existing stats and awards
+      // Calculate initial team scores - FIXED: Pass sport_type directly
+      const scores = calculateTeamScores(initialStats, game.team1_id, game.team2_id, game.sport_type);
+      setTeamScores(scores);
+
+      // Load existing stats
       try {
-        const [resStats, resAwards] = await Promise.all([
-          fetch(`http://localhost:5000/api/stats/matches/${game.id}/stats`),
-          fetch(`http://localhost:5000/api/stats/matches/${game.id}/awards`)
-        ]);
-        
+        const resStats = await fetch(`http://localhost:5000/api/stats/matches/${game.id}/stats`);
         const existingStats = await resStats.json();
-        const existingAwards = await resAwards.json();
         
         if (existingStats.length > 0) {
           const merged = initialStats.map((p) => {
@@ -253,15 +265,16 @@ const StaffStats = ({ sidebarOpen }) => {
             }
             return p;
           });
+          
           setPlayerStats(merged);
+          
+          // Recalculate team scores with loaded stats - FIXED: Pass sport_type directly
+          const loadedScores = calculateTeamScores(merged, game.team1_id, game.team2_id, game.sport_type);
+          setTeamScores(loadedScores);
         }
-
-        // Set existing awards
-        setMatchAwards(existingAwards);
         
       } catch (statsErr) {
-        console.log("No existing stats/awards found or error loading:", statsErr);
-        setMatchAwards([]);
+        console.log("No existing stats found or error loading:", statsErr);
       }
     } catch (err) {
       console.error("Error initializing player stats:", err);
@@ -287,83 +300,34 @@ const StaffStats = ({ sidebarOpen }) => {
     setActiveTab("statistics");
   };
 
-  // Update player stat
+  // Update player stat - FIXED: Check if selectedGame exists
   const updatePlayerStat = (playerIndex, statName, value) => {
     const newStats = [...playerStats];
     const newValue = Math.max(0, parseInt(value) || 0);
+    
     newStats[playerIndex][statName][currentQuarter] = newValue;
-
-    if ((statName === "points" || statName === "kills") && selectedGame) {
-      const playerTeamId = newStats[playerIndex].team_id;
-      const oldValue = playerStats[playerIndex][statName][currentQuarter] || 0;
-      const diff = newValue - oldValue;
-
-      if (diff !== 0) {
-        const teamKey =
-          playerTeamId === selectedGame.team1_id ? "team1" : "team2";
-        setTeamScores((prev) => {
-          const copy = { ...prev };
-          copy[teamKey][currentQuarter] += diff;
-          return copy;
-        });
-      }
-    }
-
     setPlayerStats(newStats);
+
+    // Recalculate team scores from all player stats
+    if ((statName === "points" || statName === "kills") && selectedGame) {
+      const scores = calculateTeamScores(newStats, selectedGame.team1_id, selectedGame.team2_id, selectedGame.sport_type);
+      setTeamScores(scores);
+    }
   };
 
-  // Adjust player stat
+  // Adjust player stat - FIXED: Check if selectedGame exists
   const adjustPlayerStat = (playerIndex, statName, increment) => {
     const newStats = [...playerStats];
-    const currentValue =
-      newStats[playerIndex][statName][currentQuarter] || 0;
+    const currentValue = newStats[playerIndex][statName][currentQuarter] || 0;
     const newValue = Math.max(0, currentValue + (increment ? 1 : -1));
     newStats[playerIndex][statName][currentQuarter] = newValue;
-
-    if ((statName === "points" || statName === "kills") && selectedGame) {
-      const playerTeamId = newStats[playerIndex].team_id;
-      const diff = increment ? 1 : -1;
-      const teamKey =
-        playerTeamId === selectedGame.team1_id ? "team1" : "team2";
-      setTeamScores((prev) => {
-        const copy = { ...prev };
-        copy[teamKey][currentQuarter] += diff;
-        return copy;
-      });
-    }
-
     setPlayerStats(newStats);
-  };
 
-  // Award management functions
-  const addAward = (playerId, awardType) => {
-    // Check if award already exists for this player
-    const existingAward = matchAwards.find(
-      a => a.player_id === playerId && a.award_type === awardType
-    );
-    
-    if (existingAward) {
-      alert("This player already has this award for this match.");
-      return;
+    // Recalculate team scores from all player stats
+    if ((statName === "points" || statName === "kills") && selectedGame) {
+      const scores = calculateTeamScores(newStats, selectedGame.team1_id, selectedGame.team2_id, selectedGame.sport_type);
+      setTeamScores(scores);
     }
-
-    const player = playerStats.find(p => p.player_id === playerId);
-    if (!player) return;
-
-    const newAward = {
-      player_id: playerId,
-      player_name: player.player_name,
-      team_name: player.team_name,
-      award_type: awardType
-    };
-
-    setMatchAwards(prev => [...prev, newAward]);
-  };
-
-  const removeAward = (playerId, awardType) => {
-    setMatchAwards(prev => 
-      prev.filter(a => !(a.player_id === playerId && a.award_type === awardType))
-    );
   };
 
   // Calculate hitting percentage for volleyball
@@ -376,7 +340,7 @@ const StaffStats = ({ sidebarOpen }) => {
     return (((kills - errors) / attempts) * 100).toFixed(2) + "%";
   };
 
-  // Save statistics with awards
+  // Save statistics
   const saveStatistics = async () => {
     if (!selectedGame) return;
     setLoading(true);
@@ -430,10 +394,6 @@ const StaffStats = ({ sidebarOpen }) => {
               volleyball_assists: p.volleyball_assists
                 ? p.volleyball_assists.reduce((a, b) => a + b, 0)
                 : 0,
-            })),
-            awards: matchAwards.map(award => ({
-              player_id: award.player_id,
-              award_type: award.award_type
             }))
           }),
         }
@@ -474,7 +434,7 @@ const StaffStats = ({ sidebarOpen }) => {
 
   // Reset stats
   const resetStatistics = () => {
-    if (window.confirm("Are you sure you want to reset all statistics and awards?")) {
+    if (window.confirm("Are you sure you want to reset all statistics?")) {
       initializePlayerStats(selectedGame);
       const initialScores =
         selectedGame.sport_type === "basketball"
@@ -482,7 +442,6 @@ const StaffStats = ({ sidebarOpen }) => {
           : { team1: [0, 0, 0, 0, 0], team2: [0, 0, 0, 0, 0] };
       setTeamScores(initialScores);
       setCurrentQuarter(0);
-      setMatchAwards([]);
     }
   };
 
@@ -499,10 +458,6 @@ const StaffStats = ({ sidebarOpen }) => {
   // Render stat inputs
   const renderStatInputs = (player, idx) => {
     const sport = selectedGame.sport_type;
-    const playerAwards = matchAwards.filter(a => a.player_id === player.player_id);
-    const availableAwards = getAwardTypes(sport).filter(
-      awardType => !playerAwards.find(a => a.award_type === awardType)
-    );
 
     // Volleyball stat labels mapping
     const volleyballStatLabels = {
@@ -520,44 +475,6 @@ const StaffStats = ({ sidebarOpen }) => {
 
     return (
       <div className="player-stats-container">
-        {/* Award Section */}
-        <div className="player-awards-section">
-          <h5><FaTrophy /> Awards</h5>
-          <div className="current-awards">
-            {playerAwards.map((award, awardIdx) => (
-              <span key={awardIdx} className="award-badge">
-                {award.award_type}
-                <button 
-                  type="button"
-                  onClick={() => removeAward(player.player_id, award.award_type)}
-                  className="remove-award-btn"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-          
-          {availableAwards.length > 0 && (
-            <div className="add-award-section">
-              <select 
-                onChange={(e) => {
-                  if (e.target.value) {
-                    addAward(player.player_id, e.target.value);
-                    e.target.value = '';
-                  }
-                }}
-                value=""
-              >
-                <option value="">Add Award...</option>
-                {availableAwards.map(award => (
-                  <option key={award} value={award}>{award}</option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-
         {/* Stats Section */}
         {sport === "basketball" ? (
           <div className="stats-grid basketball-stats">
@@ -565,16 +482,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>Points</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "points", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "points", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.points[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "points", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "points", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "points", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -583,16 +507,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>Assists</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "assists", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "assists", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.assists[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "assists", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "assists", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "assists", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -601,16 +532,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>Rebounds</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "rebounds", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "rebounds", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.rebounds[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "rebounds", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "rebounds", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "rebounds", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -620,16 +558,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>3-Pointers</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "three_points_made", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "three_points_made", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.three_points_made[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "three_points_made", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "three_points_made", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "three_points_made", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -638,16 +583,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>Steals</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "steals", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "steals", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.steals[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "steals", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "steals", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "steals", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -656,16 +608,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>Blocks</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "blocks", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "blocks", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.blocks[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "blocks", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "blocks", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "blocks", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -675,16 +634,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>Fouls</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "fouls", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "fouls", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.fouls[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "fouls", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "fouls", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "fouls", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -693,16 +659,23 @@ const StaffStats = ({ sidebarOpen }) => {
             <div className="stat-group">
               <label>Turnovers</label>
               <div className="stat-controls">
-                <button onClick={() => adjustPlayerStat(idx, "turnovers", false)}>
+                <button 
+                  className="stat-button stat-button-minus"
+                  onClick={() => adjustPlayerStat(idx, "turnovers", false)}
+                >
                   <FaMinus />
                 </button>
                 <input
                   type="number"
                   min="0"
+                  className="stat-input"
                   value={player.turnovers[currentQuarter]}
                   onChange={(e) => updatePlayerStat(idx, "turnovers", e.target.value)}
                 />
-                <button onClick={() => adjustPlayerStat(idx, "turnovers", true)}>
+                <button 
+                  className="stat-button stat-button-plus"
+                  onClick={() => adjustPlayerStat(idx, "turnovers", true)}
+                >
                   <FaPlus />
                 </button>
               </div>
@@ -717,21 +690,28 @@ const StaffStats = ({ sidebarOpen }) => {
           </div>
         ) : (
           <div className="stats-grid volleyball-stats">
-            {/* Volleyball stats in a clean grid layout without section headers */}
+            {/* Volleyball stats in a clean grid layout */}
             {Object.entries(volleyballStatLabels).map(([stat, label]) => (
               <div className="stat-group" key={stat}>
                 <label>{label}</label>
                 <div className="stat-controls">
-                  <button onClick={() => adjustPlayerStat(idx, stat, false)}>
+                  <button 
+                    className="stat-button stat-button-minus"
+                    onClick={() => adjustPlayerStat(idx, stat, false)}
+                  >
                     <FaMinus />
                   </button>
                   <input
                     type="number"
                     min="0"
+                    className="stat-input"
                     value={player[stat][currentQuarter]}
                     onChange={(e) => updatePlayerStat(idx, stat, e.target.value)}
                   />
-                  <button onClick={() => adjustPlayerStat(idx, stat, true)}>
+                  <button 
+                    className="stat-button stat-button-plus"
+                    onClick={() => adjustPlayerStat(idx, stat, true)}
+                  >
                     <FaPlus />
                   </button>
                 </div>
@@ -756,7 +736,7 @@ const StaffStats = ({ sidebarOpen }) => {
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="dashboard-header">
           <h1>Staff Statistics</h1>
-          <p>Record player statistics and awards for matches</p>
+          <p>Record player statistics for matches</p>
         </div>
 
         <div className="dashboard-main">
@@ -908,21 +888,6 @@ const StaffStats = ({ sidebarOpen }) => {
                   </div>
                 </div>
 
-                {/* Awards Summary */}
-                {matchAwards.length > 0 && (
-                  <div className="match-awards-summary">
-                    <h3><FaTrophy /> Match Awards ({matchAwards.length})</h3>
-                    <div className="awards-list">
-                      {matchAwards.map((award, idx) => (
-                        <div key={idx} className="award-item">
-                          <span className="award-type">{award.award_type}</span>
-                          <span className="award-player">{award.player_name} ({award.team_name})</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Period Navigation */}
                 <div className="period-navigation">
                   <button
@@ -986,7 +951,7 @@ const StaffStats = ({ sidebarOpen }) => {
                       onClick={saveStatistics}
                       disabled={loading}
                     >
-                      {loading ? "Saving..." : <><FaSave /> Save Statistics & Awards</>}
+                      {loading ? "Saving..." : <><FaSave /> Save Statistics</>}
                     </button>
                   </div>
                 </div>
@@ -1013,19 +978,6 @@ const StaffStats = ({ sidebarOpen }) => {
                               >
                                 <div className="bracket-card-header">
                                   <h4>{player.player_name}</h4>
-                                  <div className="player-stats-summary">
-                                    <span className="player-points">
-                                      {selectedGame.sport_type === "basketball" 
-                                        ? `Points: ${player.points ? player.points[currentQuarter] || 0 : 0}`
-                                        : `Kills: ${player.kills ? player.kills[currentQuarter] || 0 : 0}`
-                                      }
-                                    </span>
-                                    {selectedGame.sport_type === "volleyball" && (
-                                      <span className="player-hitting-pct">
-                                        Hit%: {calculateHittingPercentage(player)}
-                                      </span>
-                                    )}
-                                  </div>
                                 </div>
                                 <div className="bracket-card-info">
                                   {renderStatInputs(player, globalIndex)}
@@ -1053,19 +1005,6 @@ const StaffStats = ({ sidebarOpen }) => {
                               >
                                 <div className="bracket-card-header">
                                   <h4>{player.player_name}</h4>
-                                  <div className="player-stats-summary">
-                                    <span className="player-points">
-                                      {selectedGame.sport_type === "basketball" 
-                                        ? `Points: ${player.points ? player.points[currentQuarter] || 0 : 0}`
-                                        : `Kills: ${player.kills ? player.kills[currentQuarter] || 0 : 0}`
-                                      }
-                                    </span>
-                                    {selectedGame.sport_type === "volleyball" && (
-                                      <span className="player-hitting-pct">
-                                        Hit%: {calculateHittingPercentage(player)}
-                                      </span>
-                                    )}
-                                  </div>
                                 </div>
                                 <div className="bracket-card-info">
                                   {renderStatInputs(player, globalIndex)}
