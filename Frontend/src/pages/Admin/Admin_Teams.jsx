@@ -10,6 +10,7 @@ const TeamsPage = ({ sidebarOpen }) => {
     sport: "",
     players: [],
   });
+  const [expandedTeams, setExpandedTeams] = useState([]);
 
   // Position options
   const positions = {
@@ -43,7 +44,7 @@ const TeamsPage = ({ sidebarOpen }) => {
     if (name === "sport") {
       setFormData(prev => ({
         ...prev,
-        players: value ? [{ name: "", position: "" }] : [],
+        players: value ? [{ name: "", position: "", jerseyNumber: "" }] : [],
       }));
     }
   };
@@ -53,7 +54,7 @@ const TeamsPage = ({ sidebarOpen }) => {
     if (formData.sport && formData.players.length < 15) {
       setFormData(prev => ({
         ...prev,
-        players: [...prev.players, { name: "", position: "" }],
+        players: [...prev.players, { name: "", position: "", jerseyNumber: "" }],
       }));
     }
   };
@@ -74,10 +75,10 @@ const TeamsPage = ({ sidebarOpen }) => {
   // Submit team
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validPlayers = formData.players.filter(p => p.name.trim() && p.position);
+    const validPlayers = formData.players.filter(p => p.name.trim() && p.position && p.jerseyNumber);
 
     if (!formData.teamName || !formData.sport || validPlayers.length === 0) {
-      return alert("Please fill in all required fields and add at least one player.");
+      return alert("Please fill in all required fields and add at least one player with all details.");
     }
 
     try {
@@ -115,6 +116,8 @@ const TeamsPage = ({ sidebarOpen }) => {
       
       if (res.ok) {
         setTeams(prev => prev.filter(team => team.id !== id));
+        // Remove from expanded teams if it was expanded
+        setExpandedTeams(prev => prev.filter(teamId => teamId !== id));
         alert("Team deleted successfully!");
       } else {
         alert("Error deleting team");
@@ -122,6 +125,15 @@ const TeamsPage = ({ sidebarOpen }) => {
     } catch (err) {
       console.error("Error deleting team:", err);
       alert("Error deleting team");
+    }
+  };
+
+  // Toggle team expansion
+  const toggleTeamExpansion = (teamId) => {
+    if (expandedTeams.includes(teamId)) {
+      setExpandedTeams(expandedTeams.filter(id => id !== teamId));
+    } else {
+      setExpandedTeams([...expandedTeams, teamId]);
     }
   };
 
@@ -208,30 +220,43 @@ const TeamsPage = ({ sidebarOpen }) => {
 
                         {formData.players.map((player, index) => (
                           <div key={index} className="player-card">
-                            <input
-                              type="text"
-                              placeholder="Enter player name"
-                              value={player.name}
-                              onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
-                              required
-                            />
-                            <select
-                              value={player.position}
-                              onChange={(e) => handlePlayerChange(index, "position", e.target.value)}
-                              required
-                            >
-                              <option value="">Select position</option>
-                              {positions[formData.sport].map(pos => (
-                                <option key={pos} value={pos}>{pos}</option>
-                              ))}
-                            </select>
-                            <button
-                              type="button"
-                              className="bracket-delete-btn"
-                              onClick={() => removePlayer(index)}
-                            >
-                              Remove
-                            </button>
+                            <div className="player-input-row">
+                              <input
+                                type="text"
+                                placeholder="Player name"
+                                value={player.name}
+                                onChange={(e) => handlePlayerChange(index, "name", e.target.value)}
+                                required
+                                className="player-name-input"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Jersey #"
+                                value={player.jerseyNumber}
+                                onChange={(e) => handlePlayerChange(index, "jerseyNumber", e.target.value)}
+                                required
+                                className="jersey-input"
+                                maxLength="10"
+                              />
+                              <select
+                                value={player.position}
+                                onChange={(e) => handlePlayerChange(index, "position", e.target.value)}
+                                required
+                                className="position-select"
+                              >
+                                <option value="">Select position</option>
+                                {positions[formData.sport].map(pos => (
+                                  <option key={pos} value={pos}>{pos}</option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                className="bracket-delete-btn"
+                                onClick={() => removePlayer(index)}
+                              >
+                                Remove
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -271,35 +296,48 @@ const TeamsPage = ({ sidebarOpen }) => {
                   </div>
                 ) : (
                   <div className="bracket-grid">
-                    {teams.map(team => (
-                      <div key={team.id} className="bracket-card">
-                        <div className="bracket-card-header">
-                          <h3>{team.name}</h3>
-                          <span className={`bracket-sport-badge bracket-sport-${team.sport.toLowerCase()}`}>
-                            {capitalize(team.sport)}
-                          </span>
-                        </div>
-                        <div className="bracket-card-info">
-                          <div><strong>Players:</strong> {team.players.length}</div>
-                          <div className="players-list">
-                            {team.players.slice(0, 3).map((player, i) => (
-                              <div key={i}>{player.name} - {player.position}</div>
-                            ))}
-                            {team.players.length > 3 && (
-                              <div>+{team.players.length - 3} more players</div>
-                            )}
+                    {teams.map(team => {
+                      const isExpanded = expandedTeams.includes(team.id);
+                      return (
+                        <div key={team.id} className="bracket-card">
+                          <div className="bracket-card-header">
+                            <h3>{team.name}</h3>
+                            <span className={`bracket-sport-badge bracket-sport-${team.sport.toLowerCase()}`}>
+                              {capitalize(team.sport)}
+                            </span>
+                          </div>
+                          <div className="bracket-card-info">
+                            <div><strong>Players:</strong> {team.players.length}</div>
+                            <div className="players-list">
+                              {team.players.slice(0, isExpanded ? team.players.length : 3).map((player, i) => (
+                                <div key={i} className="player-item">
+                                  <span className="jersey-number">#{player.jersey_number || player.jerseyNumber}</span>
+                                  <span className="player-name">{player.name}</span>
+                                  <span className="player-position">({player.position})</span>
+                                </div>
+                              ))}
+                              {!isExpanded && team.players.length > 3 && (
+                                <div className="more-players">+{team.players.length - 3} more players</div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="bracket-card-actions">
+                            <button
+                              className="bracket-view-btn"
+                              onClick={() => toggleTeamExpansion(team.id)}
+                            >
+                              {isExpanded ? 'Show Less' : 'View All Players'}
+                            </button>
+                            <button
+                              className="bracket-delete-btn"
+                              onClick={() => handleDeleteTeam(team.id)}
+                            >
+                              Delete Team
+                            </button>
                           </div>
                         </div>
-                        <div className="bracket-card-actions">
-                          <button
-                            className="bracket-delete-btn"
-                            onClick={() => handleDeleteTeam(team.id)}
-                          >
-                            Delete Team
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

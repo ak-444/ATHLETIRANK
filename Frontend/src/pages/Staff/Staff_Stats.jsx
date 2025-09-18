@@ -209,6 +209,7 @@ const StaffStats = ({ sidebarOpen }) => {
         ...team1Players.map((p) => ({
           player_id: p.id,
           player_name: p.name,
+          jersey_number: p.jersey_number || p.jerseyNumber || "N/A", // Added jersey number
           team_id: game.team1_id,
           team_name: teams.find((t) => t.id === game.team1_id)?.name,
           ...JSON.parse(JSON.stringify(template)),
@@ -216,6 +217,7 @@ const StaffStats = ({ sidebarOpen }) => {
         ...team2Players.map((p) => ({
           player_id: p.id,
           player_name: p.name,
+          jersey_number: p.jersey_number || p.jerseyNumber || "N/A", // Added jersey number
           team_id: game.team2_id,
           team_name: teams.find((t) => t.id === game.team2_id)?.name,
           ...JSON.parse(JSON.stringify(template)),
@@ -978,6 +980,7 @@ const StaffStats = ({ sidebarOpen }) => {
                               >
                                 <div className="bracket-card-header">
                                   <h4>{player.player_name}</h4>
+                                  <span className="player-jersey">#{player.jersey_number}</span>
                                 </div>
                                 <div className="bracket-card-info">
                                   {renderStatInputs(player, globalIndex)}
@@ -1005,6 +1008,7 @@ const StaffStats = ({ sidebarOpen }) => {
                               >
                                 <div className="bracket-card-header">
                                   <h4>{player.player_name}</h4>
+                                  <span className="player-jersey">#{player.jersey_number}</span>
                                 </div>
                                 <div className="bracket-card-info">
                                   {renderStatInputs(player, globalIndex)}

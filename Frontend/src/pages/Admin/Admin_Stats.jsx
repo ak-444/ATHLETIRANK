@@ -94,83 +94,82 @@ const AdminStats = ({ sidebarOpen }) => {
   };
 
   // Handle match selection to view player stats
-  
-const handleMatchSelect = async (match) => {
-  setSelectedMatch(match);
-  setLoading(true);
-  try {
-    // Get player stats with player names already included
-    const res = await fetch(`http://localhost:5000/api/stats/matches/${match.id}/stats`);
-    const data = await res.json();
-    
-    // The data now already includes player_name and team_name from the enhanced backend query
-    const playersWithDetails = data.map((stat) => ({
-      ...stat,
-      // Use the data that now comes directly from the backend
-      player_name: stat.player_name || "Unknown Player",
-      jersey_number: stat.jersey_number || "N/A",
-      team_name: stat.team_name || "Unknown Team"
-    }));
-    
-    setPlayerStats(playersWithDetails);
-    setActiveTab("statistics");
-  } catch (err) {
-    console.error("Error fetching player stats:", err);
-    // Mock data for demonstration based on your database schema
-    setPlayerStats([
-      { 
-        player_id: 1, 
-        player_name: "John Doe", 
-        team_name: "Team A", 
-        jersey_number: 10,
-        points: 25, 
-        assists: 8, 
-        rebounds: 10, 
-        three_points_made: 3,
-        steals: 2, 
-        blocks: 1, 
-        fouls: 3, 
-        turnovers: 2,
-        serves: 0,
-        service_aces: 0,
-        serve_errors: 0,
-        receptions: 0,
-        reception_errors: 0,
-        digs: 0,
-        kills: 0,
-        attack_attempts: 0,
-        attack_errors: 0,
-        volleyball_assists: 0
-      },
-      { 
-        player_id: 2, 
-        player_name: "Jane Smith", 
-        team_name: "Team A", 
-        jersey_number: 5,
-        points: 20, 
-        assists: 12, 
-        rebounds: 5, 
-        three_points_made: 2,
-        steals: 3, 
-        blocks: 0, 
-        fouls: 2, 
-        turnovers: 1,
-        serves: 0,
-        service_aces: 0,
-        serve_errors: 0,
-        receptions: 0,
-        reception_errors: 0,
-        digs: 0,
-        kills: 0,
-        attack_attempts: 0,
-        attack_errors: 0,
-        volleyball_assists: 0
-      }
-    ]);
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleMatchSelect = async (match) => {
+    setSelectedMatch(match);
+    setLoading(true);
+    try {
+      // Get player stats with player names already included
+      const res = await fetch(`http://localhost:5000/api/stats/matches/${match.id}/stats`);
+      const data = await res.json();
+      
+      // The data now already includes player_name and team_name from the enhanced backend query
+      const playersWithDetails = data.map((stat) => ({
+        ...stat,
+        // Use the data that now comes directly from the backend
+        player_name: stat.player_name || "Unknown Player",
+        jersey_number: stat.jersey_number || stat.jerseyNumber || "N/A",
+        team_name: stat.team_name || "Unknown Team"
+      }));
+      
+      setPlayerStats(playersWithDetails);
+      setActiveTab("statistics");
+    } catch (err) {
+      console.error("Error fetching player stats:", err);
+      // Mock data for demonstration based on your database schema
+      setPlayerStats([
+        { 
+          player_id: 1, 
+          player_name: "John Doe", 
+          team_name: "Team A", 
+          jersey_number: 10,
+          points: 25, 
+          assists: 8, 
+          rebounds: 10, 
+          three_points_made: 3,
+          steals: 2, 
+          blocks: 1, 
+          fouls: 3, 
+          turnovers: 2,
+          serves: 0,
+          service_aces: 0,
+          serve_errors: 0,
+          receptions: 0,
+          reception_errors: 0,
+          digs: 0,
+          kills: 0,
+          attack_attempts: 0,
+          attack_errors: 0,
+          volleyball_assists: 0
+        },
+        { 
+          player_id: 2, 
+          player_name: "Jane Smith", 
+          team_name: "Team A", 
+          jersey_number: 5,
+          points: 20, 
+          assists: 12, 
+          rebounds: 5, 
+          three_points_made: 2,
+          steals: 3, 
+          blocks: 0, 
+          fouls: 2, 
+          turnovers: 1,
+          serves: 0,
+          service_aces: 0,
+          serve_errors: 0,
+          receptions: 0,
+          reception_errors: 0,
+          digs: 0,
+          kills: 0,
+          attack_attempts: 0,
+          attack_errors: 0,
+          volleyball_assists: 0
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate percentages for display
   const calculatePercentages = (player) => {
@@ -209,7 +208,8 @@ const handleMatchSelect = async (match) => {
   // Filter player stats based on search term
   const filteredPlayerStats = playerStats.filter(player => 
     player.player_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    player.jersey_number.toString().includes(searchTerm)
+    (player.jersey_number && player.jersey_number.toString().includes(searchTerm)) ||
+    (player.jerseyNumber && player.jerseyNumber.toString().includes(searchTerm))
   );
 
   // Group matches by bracket
@@ -247,7 +247,7 @@ const handleMatchSelect = async (match) => {
             <FaSearch />
             <input
               type="text"
-              placeholder="Search players..."
+              placeholder="Search players or jersey numbers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -358,11 +358,13 @@ const handleMatchSelect = async (match) => {
             <tbody>
               {filteredPlayerStats.map((player) => {
                 const percentages = calculatePercentages(player);
+                const jerseyNumber = player.jersey_number || player.jerseyNumber || "N/A";
+                
                 return (
                   <tr key={player.player_id}>
                     <td className="adminstats-player-name">{player.player_name}</td>
                     <td>{player.team_name}</td>
-                    <td className="adminstats-jersey-number">{player.jersey_number}</td>
+                    <td className="adminstats-jersey-number">{jerseyNumber}</td>
                     
                     {isBasketball ? (
                       <>
@@ -413,10 +415,11 @@ const handleMatchSelect = async (match) => {
     
     // Rows
     playerStats.forEach(player => {
+      const jerseyNumber = player.jersey_number || player.jerseyNumber || "N/A";
       if (isBasketball) {
-        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.points || 0},${player.assists || 0},${player.rebounds || 0},${player.steals || 0},${player.blocks || 0},${player.three_points_made || 0},${player.fouls || 0},${player.turnovers || 0}\n`;
+        csvContent += `${player.player_name},${player.team_name},${jerseyNumber},${player.points || 0},${player.assists || 0},${player.rebounds || 0},${player.steals || 0},${player.blocks || 0},${player.three_points_made || 0},${player.fouls || 0},${player.turnovers || 0}\n`;
       } else {
-        csvContent += `${player.player_name},${player.team_name},${player.jersey_number},${player.kills || 0},${player.volleyball_assists || 0},${player.digs || 0},${player.blocks || 0},${player.service_aces || 0},${player.serve_errors || 0},${player.attack_errors || 0},${player.reception_errors || 0}\n`;
+        csvContent += `${player.player_name},${player.team_name},${jerseyNumber},${player.kills || 0},${player.volleyball_assists || 0},${player.digs || 0},${player.blocks || 0},${player.service_aces || 0},${player.serve_errors || 0},${player.attack_errors || 0},${player.reception_errors || 0}\n`;
       }
     });
     

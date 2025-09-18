@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ CREATE new team with players
+// ✅ CREATE new team with players (updated for jersey_number)
 router.post("/", async (req, res) => {
   const { name, sport, players } = req.body;
 
@@ -39,15 +39,22 @@ router.post("/", async (req, res) => {
     );
     const teamId = result.insertId;
 
-    const playerValues = players.map(p => [teamId, p.name, p.position]);
+    // Updated to include jersey_number
+    const playerValues = players.map(p => [teamId, p.name, p.position, p.jerseyNumber]);
     await conn.query(
-      "INSERT INTO players (team_id, name, position) VALUES ?",
+      "INSERT INTO players (team_id, name, position, jersey_number) VALUES ?",
       [playerValues]
     );
 
     await conn.commit();
 
-    res.json({ id: teamId, name, sport, players });
+    // Return the created team with players including jersey numbers
+    const [createdPlayers] = await conn.query(
+      "SELECT * FROM players WHERE team_id = ?",
+      [teamId]
+    );
+    
+    res.json({ id: teamId, name, sport, players: createdPlayers });
   } catch (err) {
     await conn.rollback();
     console.error("Error creating team:", err);
@@ -57,14 +64,26 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ DELETE team
+// ✅ DELETE team (and associated players due to ON DELETE CASCADE)
 router.delete("/:id", async (req, res) => {
+  const conn = await db.pool.getConnection();
   try {
-    await db.pool.query("DELETE FROM teams WHERE id = ?", [req.params.id]);
-    res.json({ message: "Team deleted" });
+    await conn.beginTransaction();
+    
+    // First delete players to maintain referential integrity if no CASCADE
+    await conn.query("DELETE FROM players WHERE team_id = ?", [req.params.id]);
+    
+    // Then delete the team
+    await conn.query("DELETE FROM teams WHERE id = ?", [req.params.id]);
+    
+    await conn.commit();
+    res.json({ message: "Team and associated players deleted successfully" });
   } catch (err) {
+    await conn.rollback();
     console.error("Error deleting team:", err);
     res.status(500).json({ error: "Database error" });
+  } finally {
+    conn.release();
   }
 });
 
