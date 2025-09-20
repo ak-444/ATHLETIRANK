@@ -1,4 +1,4 @@
-/* Staff_Stats.css - Staff Statistics Page Styling */
+/* Staff_Stats.css - Staff Statistics Page Styling with Round Organization */
 
 /* CSS Variables */
 :root {
@@ -355,6 +355,198 @@
   color: white;
 }
 
+/* Bracket type badges */
+.bracket-type-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.bracket-type-winner {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  color: white;
+}
+
+.bracket-type-loser {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+  color: white;
+}
+
+.bracket-type-championship {
+  background: linear-gradient(135deg, #ff9800 0%, #ef6c00 100%);
+  color: white;
+}
+
+/* Championship round special styling */
+.championship-round .round-header {
+  background: linear-gradient(135deg, #ff9800, #ef6c00);
+  border: none;
+}
+
+.championship-round .round-header h3 {
+  color: white;
+}
+
+.championship-round .round-header .round-progress {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.championship-round .round-toggle-btn {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Elimination type indicators */
+.elimination-type-single {
+  color: #2196f3;
+  font-weight: bold;
+}
+
+.elimination-type-double {
+  color: #9c27b0;
+  font-weight: bold;
+}
+
+/* Bracket type display in statistics view */
+.bracket-type-winner, .bracket-type-loser {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.bracket-type-winner {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.bracket-type-loser {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* NEW: Round Organization Styles */
+.rounds-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.round-section {
+  background: var(--background-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.round-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: var(--background-primary);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.round-header:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.round-header-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+}
+
+.round-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.round-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.round-progress {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.round-progress-bar {
+  width: 120px;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.round-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--success-color) 0%, var(--primary-color) 100%);
+  transition: width 0.3s ease;
+}
+
+.round-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.round-toggle-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary-color);
+}
+
+.round-content {
+  padding: 24px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bracket-section {
+  margin-bottom: 32px;
+}
+
+.bracket-section:last-child {
+  margin-bottom: 0;
+}
+
+.bracket-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-color);
+  display: inline-block;
+}
+
 /* Stats Section */
 .player-stats-container {
   display: flex;
@@ -647,6 +839,31 @@
   gap: 0.8rem;
 }
 
+/* Remove number input spinners */
+.stat-input::-webkit-outer-spin-button,
+.stat-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stat-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Adjust input width for better appearance */
+.stat-input {
+  width: 60px;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  -webkit-appearance: none; /* Removes inner shadow on iOS */
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .teams-stats-container {
@@ -660,6 +877,18 @@
   
   .basketball-stats {
     grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .round-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .round-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 
@@ -757,6 +986,27 @@
     height: 24px;
     font-size: 10px;
   }
+
+  /* Round header responsive */
+  .round-header {
+    padding: 16px 20px;
+  }
+  
+  .round-header h3 {
+    font-size: 20px;
+  }
+  
+  .round-content {
+    padding: 16px;
+  }
+  
+  .bracket-section {
+    margin-bottom: 24px;
+  }
+  
+  .bracket-section-title {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -778,104 +1028,20 @@
     height: 24px;
     font-size: 10px;
   }
-}
-
-/* Additional styles for the screenshot-like layout */
-.team-column-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.team-column-header h3 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: var(--text-primary);
-}
-
-.player-stat-card {
-  background: var(--background-primary);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: var(--shadow-light);
-}
-
-.player-stat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.player-name {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-/* Team score styling enhancements */
-.team-score-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.team-name {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.set-scores {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.set-score {
-  background: var(--background-primary);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--border-radius);
-  font-size: 0.875rem;
-  color: var(--text-primary);
-}
-
-/* Add some spacing improvements */
-.bracket-view-section > * {
-  margin-bottom: 1.5rem;
-}
-
-.bracket-view-section > *:last-child {
-  margin-bottom: 0;
-}
-
-/* Remove number input spinners */
-.stat-input::-webkit-outer-spin-button,
-.stat-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.stat-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-/* Adjust input width for better appearance */
-.stat-input {
-  width: 60px;
-  text-align: center;
-  padding: 6px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  background: var(--background-secondary);
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 600;
-  -webkit-appearance: none; /* Removes inner shadow on iOS */
+  
+  .round-header {
+    padding: 12px 16px;
+  }
+  
+  .round-header h3 {
+    font-size: 18px;
+  }
+  
+  .round-content {
+    padding: 12px;
+  }
+  
+  .round-progress-bar {
+    width: 80px;
+  }
 }

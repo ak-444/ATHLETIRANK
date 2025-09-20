@@ -5,7 +5,9 @@ import {
   FaRedo,
   FaSave,
   FaArrowLeft,
-  FaArrowRight
+  FaArrowRight,
+  FaChevronDown,
+  FaChevronUp
 } from "react-icons/fa";
 import "../../style/Staff_Stats.css";
 
@@ -25,6 +27,7 @@ const StaffStats = ({ sidebarOpen }) => {
   const [currentQuarter, setCurrentQuarter] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [expandedRounds, setExpandedRounds] = useState(new Set([1])); // First round expanded by default
 
   // Basketball template
   const basketballStatsTemplate = {
@@ -69,7 +72,7 @@ const StaffStats = ({ sidebarOpen }) => {
     fetchEvents();
   }, []);
 
-  // Calculate team scores from player stats - FIXED: Added sportType parameter
+  // Calculate team scores from player stats
   const calculateTeamScores = (stats, team1Id, team2Id, sportType) => {
     const team1Scores = sportType === "basketball" 
       ? [0, 0, 0, 0] 
@@ -96,6 +99,46 @@ const StaffStats = ({ sidebarOpen }) => {
     return { team1: team1Scores, team2: team2Scores };
   };
 
+  // Group games by round and bracket
+  const groupGamesByRound = (games) => {
+    const grouped = {};
+    
+    games.forEach(game => {
+      let roundKey;
+      
+      // Handle championship matches specially
+      if (game.bracket_type === 'championship') {
+        roundKey = 'Championship';
+      } else {
+        roundKey = `Round ${game.round_number}`;
+      }
+      
+      if (!grouped[roundKey]) {
+        grouped[roundKey] = {};
+      }
+      
+      const bracketKey = game.bracket_name;
+      if (!grouped[roundKey][bracketKey]) {
+        grouped[roundKey][bracketKey] = [];
+      }
+      
+      grouped[roundKey][bracketKey].push(game);
+    });
+
+    return grouped;
+  };
+
+  // Toggle round expansion
+  const toggleRoundExpansion = (roundNumber) => {
+    const newExpandedRounds = new Set(expandedRounds);
+    if (newExpandedRounds.has(roundNumber)) {
+      newExpandedRounds.delete(roundNumber);
+    } else {
+      newExpandedRounds.add(roundNumber);
+    }
+    setExpandedRounds(newExpandedRounds);
+  };
+
   // Handle event selection
   const handleEventSelect = async (event) => {
     console.log("Selected event:", event);
@@ -104,6 +147,7 @@ const StaffStats = ({ sidebarOpen }) => {
     setPlayerStats([]);
     setTeamScores({ team1: [0, 0, 0, 0], team2: [0, 0, 0, 0] });
     setCurrentQuarter(0);
+    setExpandedRounds(new Set([1])); // Reset to show first round
     setLoading(true);
     setError(null);
 
@@ -146,7 +190,8 @@ const StaffStats = ({ sidebarOpen }) => {
           ...match,
           bracket_name: bracket.name,
           sport_type: bracket.sport_type,
-          bracket_id: bracket.id
+          bracket_id: bracket.id,
+          elimination_type: bracket.elimination_type
         }));
         
         allMatches.push(...matchesWithBracket);
@@ -169,6 +214,8 @@ const StaffStats = ({ sidebarOpen }) => {
         }
       }
 
+      // Sort matches by round number
+      allMatches.sort((a, b) => a.round_number - b.round_number);
       setGames(allMatches);
       setTeams(allTeams);
 
@@ -209,7 +256,7 @@ const StaffStats = ({ sidebarOpen }) => {
         ...team1Players.map((p) => ({
           player_id: p.id,
           player_name: p.name,
-          jersey_number: p.jersey_number || p.jerseyNumber || "N/A", // Added jersey number
+          jersey_number: p.jersey_number || p.jerseyNumber || "N/A",
           team_id: game.team1_id,
           team_name: teams.find((t) => t.id === game.team1_id)?.name,
           ...JSON.parse(JSON.stringify(template)),
@@ -217,7 +264,7 @@ const StaffStats = ({ sidebarOpen }) => {
         ...team2Players.map((p) => ({
           player_id: p.id,
           player_name: p.name,
-          jersey_number: p.jersey_number || p.jerseyNumber || "N/A", // Added jersey number
+          jersey_number: p.jersey_number || p.jerseyNumber || "N/A",
           team_id: game.team2_id,
           team_name: teams.find((t) => t.id === game.team2_id)?.name,
           ...JSON.parse(JSON.stringify(template)),
@@ -226,7 +273,7 @@ const StaffStats = ({ sidebarOpen }) => {
       
       setPlayerStats(initialStats);
 
-      // Calculate initial team scores - FIXED: Pass sport_type directly
+      // Calculate initial team scores
       const scores = calculateTeamScores(initialStats, game.team1_id, game.team2_id, game.sport_type);
       setTeamScores(scores);
 
@@ -270,7 +317,7 @@ const StaffStats = ({ sidebarOpen }) => {
           
           setPlayerStats(merged);
           
-          // Recalculate team scores with loaded stats - FIXED: Pass sport_type directly
+          // Recalculate team scores with loaded stats
           const loadedScores = calculateTeamScores(merged, game.team1_id, game.team2_id, game.sport_type);
           setTeamScores(loadedScores);
         }
@@ -302,7 +349,7 @@ const StaffStats = ({ sidebarOpen }) => {
     setActiveTab("statistics");
   };
 
-  // Update player stat - FIXED: Check if selectedGame exists
+  // Update player stat
   const updatePlayerStat = (playerIndex, statName, value) => {
     const newStats = [...playerStats];
     const newValue = Math.max(0, parseInt(value) || 0);
@@ -317,7 +364,7 @@ const StaffStats = ({ sidebarOpen }) => {
     }
   };
 
-  // Adjust player stat - FIXED: Check if selectedGame exists
+  // Adjust player stat
   const adjustPlayerStat = (playerIndex, statName, increment) => {
     const newStats = [...playerStats];
     const currentValue = newStats[playerIndex][statName][currentQuarter] || 0;
@@ -342,7 +389,7 @@ const StaffStats = ({ sidebarOpen }) => {
     return (((kills - errors) / attempts) * 100).toFixed(2) + "%";
   };
 
-  // Save statistics
+  // Save statistics - UPDATED FOR DOUBLE ELIMINATION
   const saveStatistics = async () => {
     if (!selectedGame) return;
     setLoading(true);
@@ -396,7 +443,10 @@ const StaffStats = ({ sidebarOpen }) => {
               volleyball_assists: p.volleyball_assists
                 ? p.volleyball_assists.reduce((a, b) => a + b, 0)
                 : 0,
-            }))
+            })),
+            // Add bracket type for double elimination handling
+            bracket_type: selectedGame.bracket_type,
+            elimination_type: selectedGame.elimination_type
           }),
         }
       );
@@ -409,13 +459,35 @@ const StaffStats = ({ sidebarOpen }) => {
       
       // Show success message with advancement info
       let message = "Statistics saved successfully!";
+      
+      // Enhanced messaging for double elimination
       if (data.advanced) {
-        message += " Winner has been advanced to the next round!";
+        if (selectedGame.elimination_type === 'double') {
+          if (selectedGame.bracket_type === 'winner') {
+            message += " Winner has been advanced in the winner's bracket!";
+            if (data.loserAdvanced) {
+              message += " Loser has been moved to the loser's bracket.";
+            }
+          } else if (selectedGame.bracket_type === 'loser') {
+            message += " Winner has been advanced in the loser's bracket!";
+            message += " Loser has been eliminated from the tournament.";
+          } else if (selectedGame.bracket_type === 'championship') {
+            message += " Championship match completed!";
+          }
+        } else {
+          message += " Winner has been advanced to the next round!";
+        }
       }
+      
       if (data.winnerId) {
         const winnerTeam = data.winnerId === selectedGame.team1_id ? 
           selectedGame.team1_name : selectedGame.team2_name;
         message += ` Winner: ${winnerTeam}`;
+        
+        // For championship matches in double elimination
+        if (selectedGame.bracket_type === 'championship' && selectedGame.elimination_type === 'double') {
+          message += ` is the tournament champion!`;
+        }
       }
       
       alert(message);
@@ -812,7 +884,7 @@ const StaffStats = ({ sidebarOpen }) => {
               </div>
             )}
 
-            {/* Manage Games */}
+            {/* Manage Games - UPDATED WITH ROUND ORGANIZATION */}
             {activeTab === "games" && selectedEvent && (
               <div className="bracket-view-section">
                 <div className="event-details-header">
@@ -838,39 +910,99 @@ const StaffStats = ({ sidebarOpen }) => {
                     <p>Make sure brackets have been created and matches have been generated.</p>
                   </div>
                 ) : (
-                  <div className="bracket-grid">
-                    {games.map((game) => (
-                      <div className="bracket-card" key={game.id}>
-                        <div className="bracket-card-header">
-                          <h3>
-                            {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
-                          </h3>
-                          <span className={`bracket-sport-badge bracket-sport-${game.sport_type}`}>
-                            {game.sport_type}
-                          </span>
-                        </div>
-                        <div className="bracket-card-info">
-                          <div><strong>Bracket:</strong> {game.bracket_name}</div>
-                          <div><strong>Round:</strong> {game.round_number}</div>
-                          <div><strong>Status:</strong> 
-                            <span className={`status-${game.status}`}>
-                              {game.status}
-                            </span>
+                  <div className="rounds-container">
+                    {Object.entries(groupGamesByRound(games))
+                      .sort(([a], [b]) => {
+                        const aNum = parseInt(a.split(' ')[1]);
+                        const bNum = parseInt(b.split(' ')[1]);
+                        return aNum - bNum;
+                      })
+                      .map(([roundName, brackets]) => {
+                        const roundNumber = roundName === "Championship" ? 999 : parseInt(roundName.split(' ')[1]);
+                        const isExpanded = expandedRounds.has(roundNumber) || roundName === "Championship";
+                        const roundGames = Object.values(brackets).flat();
+                        const completedGames = roundGames.filter(g => g.status === 'completed').length;
+                        const totalGames = roundGames.length;
+                        
+                        return (
+                          <div key={roundName} className="round-section">
+                            <div 
+                              className="round-header"
+                              onClick={() => toggleRoundExpansion(roundNumber)}
+                            >
+                              <div className="round-header-content">
+                                <h3>{roundName}</h3>
+                                <div className="round-info">
+                                  <span className="round-progress">
+                                    {completedGames}/{totalGames} matches completed
+                                  </span>
+                                  <div className="round-progress-bar">
+                                    <div 
+                                      className="round-progress-fill"
+                                      style={{ width: `${totalGames > 0 ? (completedGames / totalGames) * 100 : 0}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              <button className="round-toggle-btn">
+                                {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                              </button>
+                            </div>
+                            
+                            {isExpanded && (
+                              <div className="round-content">
+                                {Object.entries(brackets).map(([bracketName, bracketGames]) => (
+                                  <div key={bracketName} className="bracket-section">
+                                    <h4 className="bracket-section-title">{bracketName}</h4>
+                                    <div className="bracket-grid">
+                                      {bracketGames.map((game) => (
+                                        <div className="bracket-card" key={game.id}>
+                                          <div className="bracket-card-header">
+                                            <h3>
+                                              {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
+                                            </h3>
+                                            <span className={`bracket-sport-badge bracket-sport-${game.sport_type}`}>
+                                              {game.sport_type}
+                                            </span>
+                                            {game.elimination_type === 'double' && (
+                                              <span className={`bracket-type-badge bracket-type-${game.bracket_type || 'winner'}`}>
+                                                {game.bracket_type ? game.bracket_type.charAt(0).toUpperCase() + game.bracket_type.slice(1) : 'Winner'} Bracket
+                                              </span>
+                                            )}
+                                          </div>
+                                          <div className="bracket-card-info">
+                                            <div><strong>Type:</strong> 
+                                              <span className={`elimination-type-${game.elimination_type}`}>
+                                                {game.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
+                                              </span>
+                                            </div>
+                                            <div><strong>Status:</strong> 
+                                              <span className={`status-${game.status}`}>
+                                                {game.status}
+                                              </span>
+                                            </div>
+                                            {game.status === "completed" && (
+                                              <div><strong>Score:</strong> {game.score_team1} - {game.score_team2}</div>
+                                            )}
+                                            {game.winner_name && (
+                                              <div><strong>Winner:</strong> {game.winner_name}</div>
+                                            )}
+                                          </div>
+                                          <div className="bracket-card-actions">
+                                            <button className="bracket-view-btn" onClick={() => handleGameSelect(game)}>
+                                              {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          {game.status === "completed" && (
-                            <div><strong>Score:</strong> {game.score_team1} - {game.score_team2}</div>
-                          )}
-                          {game.winner_name && (
-                            <div><strong>Winner:</strong> {game.winner_name}</div>
-                          )}
-                        </div>
-                        <div className="bracket-card-actions">
-                          <button className="bracket-view-btn" onClick={() => handleGameSelect(game)}>
-                            {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
                   </div>
                 )}
               </div>
@@ -887,6 +1019,13 @@ const StaffStats = ({ sidebarOpen }) => {
                     <span><strong>Sport:</strong> {selectedGame.sport_type}</span>
                     <span><strong>Bracket:</strong> {selectedGame.bracket_name}</span>
                     <span><strong>Round:</strong> {selectedGame.round_number}</span>
+                    {selectedGame.elimination_type === 'double' && (
+                      <span><strong>Bracket Type:</strong> 
+                        <span className={`bracket-type-${selectedGame.bracket_type || 'winner'}`}>
+                          {selectedGame.bracket_type ? selectedGame.bracket_type.charAt(0).toUpperCase() + selectedGame.bracket_type.slice(1) : 'Winner'} Bracket
+                        </span>
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -958,7 +1097,7 @@ const StaffStats = ({ sidebarOpen }) => {
                   </div>
                 </div>
 
-                {/* Player Stats - FIXED: Two-column layout for all players */}
+                {/* Player Stats */}
                 {loading ? (
                   <p>Loading player data...</p>
                 ) : (
