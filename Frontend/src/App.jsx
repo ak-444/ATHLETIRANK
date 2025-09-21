@@ -12,15 +12,19 @@ import SideBar from "./components/sidebar";
 import TeamsPage from "./pages/Admin/Admin_Teams";
 import AdminStats from "./pages/Admin/Admin_Stats";
 import AdminUsers from "./pages/Admin/Admin_Users";
+
 import StaffDashboard from "./pages/Staff/Staff_Dashboard";
 import StaffEvents from "./pages/Staff/Staff_Events";
 import StaffSchedulePage from "./pages/Staff/Staff_Schedules";
 import StaffStats from "./pages/Staff/Staff_Stats";
-import StaffBrackets from "./pages/Staff/Staff_Brackets"; // Import the new component
+import StaffBrackets from "./pages/Staff/Staff_Brackets";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 import EventDetails from "./pages/Admin/Admin_EventDetails";
+
 import UserTeamsPage from "./pages/Users/User_TeamPage";
 import UserStatsPage from "./pages/Users/User_StatsPage";
+import User_BracketPage from "./pages/Users/User_BracketPage";
 
 import "./style/app.css";
 
@@ -38,6 +42,7 @@ function App() {
 
           <Route path="/teams" element={<UserTeamsPage />} />
           <Route path="/stats" element={<UserStatsPage />} />
+          <Route path="/brackets" element={<User_BracketPage />} />
 
           {/* Admin protected routes */}
           <Route element={<ProtectedRoute requiredRole="admin" />}>
