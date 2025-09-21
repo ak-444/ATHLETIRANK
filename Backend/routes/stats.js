@@ -131,6 +131,7 @@ router.get("/matches/:matchId/stats", async (req, res) => {
 });
 
 // Enhanced Save stats for a match with bracket advancement and awards
+// Enhanced Save stats for a match - REMOVED bracket advancement logic
 router.post("/matches/:matchId/stats", async (req, res) => {
   const { players, team1_id, team2_id, awards = [] } = req.body;
   const matchId = req.params.matchId;
@@ -243,108 +244,26 @@ router.post("/matches/:matchId/stats", async (req, res) => {
       }
     }
 
-    // Determine winner
-    let winnerId = null;
-    if (team1Total > team2Total) {
-      winnerId = team1_id;
-    } else if (team2Total > team1Total) {
-      winnerId = team2_id;
-    }
-    // If tied, winnerId remains null
-
-    // Update current match with scores and winner
+    // ONLY UPDATE MATCH SCORES - NO BRACKET ADVANCEMENT
+    // The brackets API will handle all advancement logic
     await conn.query(
       `UPDATE matches 
-       SET score_team1 = ?, score_team2 = ?, winner_id = ?, status = 'completed' 
+       SET score_team1 = ?, score_team2 = ? 
        WHERE id = ?`,
-      [team1Total, team2Total, winnerId, matchId]
+      [team1Total, team2Total, matchId]
     );
 
-    // BRACKET ADVANCEMENT LOGIC
-    let advanced = false;
-    if (winnerId) {
-      console.log("Advancing winner to next round...");
-      
-      // Find the next round match where this winner should advance
-      const nextRound = match.round_number + 1;
-      const currentMatchOrder = match.match_order || 0;
-      
-      // Calculate which match in the next round this winner should advance to
-      const nextMatchOrder = Math.floor(currentMatchOrder / 2);
-      
-      console.log(`Looking for next round match: Round ${nextRound}, Order ${nextMatchOrder}`);
-      
-      // Find the next round match
-      const [nextMatches] = await conn.query(
-        `SELECT * FROM matches 
-         WHERE bracket_id = ? AND round_number = ? AND match_order = ?`,
-        [match.bracket_id, nextRound, nextMatchOrder]
-      );
-
-      if (nextMatches.length > 0) {
-        const nextMatch = nextMatches[0];
-        console.log("Found next match:", nextMatch);
-        
-        // Determine if winner goes to team1_id or team2_id slot
-        const isEvenMatch = currentMatchOrder % 2 === 0;
-        
-        if (isEvenMatch) {
-          // Winner of even-positioned match goes to team1_id slot
-          await conn.query(
-            `UPDATE matches SET team1_id = ? WHERE id = ?`,
-            [winnerId, nextMatch.id]
-          );
-          console.log(`Advanced team ${winnerId} to team1_id of match ${nextMatch.id}`);
-        } else {
-          // Winner of odd-positioned match goes to team2_id slot
-          await conn.query(
-            `UPDATE matches SET team2_id = ? WHERE id = ?`,
-            [winnerId, nextMatch.id]
-          );
-          console.log(`Advanced team ${winnerId} to team2_id of match ${nextMatch.id}`);
-        }
-
-        // Check if next match is now ready to be played (both teams assigned)
-        const [updatedNextMatch] = await conn.query(
-          `SELECT * FROM matches WHERE id = ?`,
-          [nextMatch.id]
-        );
-        
-        if (updatedNextMatch[0].team1_id && updatedNextMatch[0].team2_id) {
-          await conn.query(
-            `UPDATE matches SET status = 'scheduled' WHERE id = ?`,
-            [nextMatch.id]
-          );
-          console.log(`Match ${nextMatch.id} is now ready - both teams assigned`);
-        }
-        
-        advanced = true;
-      } else {
-        console.log("No next round match found - this might be the final match");
-      }
-
-      // Handle double elimination logic if needed
-      if (match.elimination_type === 'double') {
-        console.log("Double elimination logic needed here");
-        // Future enhancement for double elimination tournaments
-      }
-    }
-
     await conn.commit();
-    console.log("Stats saved and bracket advanced successfully:", { 
+    console.log("Stats saved successfully:", { 
       team1Total, 
       team2Total, 
-      winnerId,
-      matchId,
-      advanced
+      matchId
     });
     
     res.json({ 
-      message: "Stats saved and bracket updated successfully", 
+      message: "Stats saved successfully", 
       team1Total, 
-      team2Total, 
-      winnerId,
-      advanced
+      team2Total
     });
     
   } catch (err) {
@@ -355,7 +274,6 @@ router.post("/matches/:matchId/stats", async (req, res) => {
     conn.release();
   }
 });
-
 // Get match awards
 router.get("/matches/:matchId/awards", async (req, res) => {
   try {

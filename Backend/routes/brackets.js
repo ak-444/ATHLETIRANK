@@ -64,7 +64,7 @@ router.get("/:id/matches", async (req, res) => {
       LEFT JOIN teams t2 ON m.team2_id = t2.id
       LEFT JOIN teams w ON m.winner_id = w.id
       WHERE m.bracket_id = ?
-      ORDER BY m.bracket_type, m.round_number, m.id
+      ORDER BY m.bracket_type, m.round_number, m.match_order
     `, [req.params.id]);
 
     res.json(matches);
@@ -117,7 +117,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// POST generate full bracket (all rounds with placeholders)
+// POST generate full bracket (all rounds with placeholders) - FIXED DOUBLE ELIMINATION
 router.post("/:id/generate", async (req, res) => {
   const bracketId = req.params.id;
 
@@ -152,18 +152,17 @@ router.post("/:id/generate", async (req, res) => {
 
     // Shuffle teams
     const shuffledTeams = fisherYatesShuffle(teams);
-
-    // Pad teams to next power of 2 (for complete bracket structure)
-    const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(shuffledTeams.length)));
-    while (shuffledTeams.length < nextPowerOfTwo) {
-      shuffledTeams.push(null); // BYE slot
-    }
-
-    const totalRounds = Math.log2(nextPowerOfTwo);
     const allMatches = [];
 
     if (eliminationType === "single") {
       // Single elimination logic (existing code)
+      // Pad teams to next power of 2 (for complete bracket structure)
+      const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(shuffledTeams.length)));
+      while (shuffledTeams.length < nextPowerOfTwo) {
+        shuffledTeams.push(null); // BYE slot
+      }
+
+      const totalRounds = Math.log2(nextPowerOfTwo);
       let currentRoundTeams = shuffledTeams;
 
       for (let round = 1; round <= totalRounds; round++) {
@@ -180,7 +179,8 @@ router.post("/:id/generate", async (req, res) => {
             team1_id: team1 ? team1.id : null,
             team2_id: team2 ? team2.id : null,
             winner_id: null,
-            status: "scheduled"
+            status: "scheduled",
+            match_order: Math.floor(i / 2)
           };
 
           // If BYE → auto advance
@@ -197,8 +197,8 @@ router.post("/:id/generate", async (req, res) => {
           }
 
           const [result] = await db.pool.query(
-            `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status, match_order) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               matchData.bracket_id,
               matchData.round_number,
@@ -206,7 +206,8 @@ router.post("/:id/generate", async (req, res) => {
               matchData.team1_id,
               matchData.team2_id,
               matchData.winner_id,
-              matchData.status
+              matchData.status,
+              matchData.match_order
             ]
           );
 
@@ -218,157 +219,155 @@ router.post("/:id/generate", async (req, res) => {
 
         currentRoundTeams = nextRoundTeams;
       }
-    } else if (eliminationType === "double") {
-      // Enhanced double elimination logic
-      let currentRoundTeams = shuffledTeams;
-      const winnerBracketMatchesByRound = [];
-
-      // Generate winner's bracket (same as single elimination)
-      for (let round = 1; round <= totalRounds; round++) {
-        const nextRoundTeams = [];
-        const roundMatches = [];
-
-        for (let i = 0; i < currentRoundTeams.length; i += 2) {
-          const team1 = currentRoundTeams[i];
-          const team2 = currentRoundTeams[i + 1];
-
-          let matchData = {
-            bracket_id: bracketId,
-            round_number: round,
-            bracket_type: 'winner',
-            team1_id: team1 ? team1.id : null,
-            team2_id: team2 ? team2.id : null,
-            winner_id: null,
-            status: "scheduled"
-          };
-
-          // If BYE → auto advance
-          if (team1 && !team2) {
-            matchData.winner_id = team1.id;
-            matchData.status = "completed";
-            nextRoundTeams.push(team1);
-          } else if (team2 && !team1) {
-            matchData.winner_id = team2.id;
-            matchData.status = "completed";
-            nextRoundTeams.push(team2);
-          } else {
-            nextRoundTeams.push({ placeholder: true });
-          }
-
-          const [result] = await db.pool.query(
-            `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [
-              matchData.bracket_id,
-              matchData.round_number,
-              matchData.bracket_type,
-              matchData.team1_id,
-              matchData.team2_id,
-              matchData.winner_id,
-              matchData.status
-            ]
-          );
-
-          const matchWithId = {
-            id: result.insertId,
-            ...matchData
-          };
-          
-          roundMatches.push(matchWithId);
-          allMatches.push(matchWithId);
-        }
-
-        winnerBracketMatchesByRound.push(roundMatches);
-        currentRoundTeams = nextRoundTeams;
-      }
-
-      // Generate loser's bracket with proper connections
-      // Loser's bracket has rounds that correspond to winner's bracket rounds
-      const loserBracketRounds = 2 * totalRounds - 1;
-      const loserBracketMatchesByRound = [];
+   // COMPREHENSIVE Double elimination bracket generation - handles 3-9+ teams
+} else if (eliminationType === "double") {
+  const totalTeams = shuffledTeams.filter(t => t !== null).length;
+  
+  // Pad to next power of 2 for bracket structure
+  const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(totalTeams)));
+  while (shuffledTeams.length < nextPowerOfTwo) {
+    shuffledTeams.push(null); // BYE slots
+  }
+  
+  // Calculate winner's bracket rounds - this determines when to stop creating rounds
+  const winnerBracketRounds = Math.log2(nextPowerOfTwo);
+  
+  // WINNER'S BRACKET GENERATION
+  let currentRoundTeams = shuffledTeams;
+  
+  for (let round = 1; round <= winnerBracketRounds; round++) {
+    const matchCount = Math.floor(currentRoundTeams.length / 2);
+    const nextRoundTeams = [];
+    
+    for (let i = 0; i < matchCount; i++) {
+      const team1 = currentRoundTeams[i * 2];
+      const team2 = currentRoundTeams[i * 2 + 1];
       
-      for (let round = 1; round <= loserBracketRounds; round++) {
-        const roundMatches = [];
-        let matchesCount = 0;
-        
-        // Determine number of matches based on round
-        if (round === 1) {
-          matchesCount = Math.pow(2, totalRounds - 2); // First round of loser's bracket
-        } else if (round < totalRounds) {
-          matchesCount = Math.pow(2, totalRounds - round - 1);
-        } else {
-          matchesCount = 1; // Later rounds
-        }
-        
-        for (let i = 0; i < matchesCount; i++) {
-          const matchData = {
-            bracket_id: bracketId,
-            round_number: round,
-            bracket_type: 'loser',
-            team1_id: null,
-            team2_id: null,
-            winner_id: null,
-            status: "scheduled"
-          };
-          
-          const [result] = await db.pool.query(
-            `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [
-              matchData.bracket_id,
-              matchData.round_number,
-              matchData.bracket_type,
-              matchData.team1_id,
-              matchData.team2_id,
-              matchData.winner_id,
-              matchData.status
-            ]
-          );
-          
-          const matchWithId = {
-            id: result.insertId,
-            ...matchData
-          };
-          
-          roundMatches.push(matchWithId);
-          allMatches.push(matchWithId);
-        }
-        
-        loserBracketMatchesByRound.push(roundMatches);
-      }
-      
-      // Create championship match
-      const championshipMatch = {
+      const matchData = {
         bracket_id: bracketId,
-        round_number: 1,
-        bracket_type: 'championship',
-        team1_id: null, // Winner of winner's bracket
-        team2_id: null, // Winner of loser's bracket
+        round_number: round,
+        bracket_type: 'winner',
+        team1_id: team1 ? team1.id : null,
+        team2_id: team2 ? team2.id : null,
         winner_id: null,
-        status: "scheduled"
+        status: "scheduled",
+        match_order: i
       };
       
-      const [champResult] = await db.pool.query(
-        `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status) 
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          championshipMatch.bracket_id,
-          championshipMatch.round_number,
-          championshipMatch.bracket_type,
-          championshipMatch.team1_id,
-          championshipMatch.team2_id,
-          championshipMatch.winner_id,
-          championshipMatch.status
-        ]
+      // Handle BYE situations
+      if (team1 && !team2) {
+        matchData.winner_id = team1.id;
+        matchData.status = "completed";
+        nextRoundTeams.push(team1);
+      } else if (team2 && !team1) {
+        matchData.winner_id = team2.id;
+        matchData.status = "completed";
+        nextRoundTeams.push(team2);
+      } else if (team1 && team2) {
+        nextRoundTeams.push({ placeholder: true, round: round, match: i });
+      }
+      
+      const [result] = await db.pool.query(
+        `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status, match_order) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [matchData.bracket_id, matchData.round_number, matchData.bracket_type,
+         matchData.team1_id, matchData.team2_id, matchData.winner_id,
+         matchData.status, matchData.match_order]
       );
       
-      championshipMatch.id = champResult.insertId;
-      allMatches.push(championshipMatch);
+      matchData.id = result.insertId;
+      allMatches.push(matchData);
     }
+    
+    currentRoundTeams = nextRoundTeams;
+    
+    // Stop when we have the winner's bracket champion
+    if (nextRoundTeams.length <= 1) {
+      break;
+    }
+  }
+  
+  // LOSER'S BRACKET GENERATION
+  // Calculate loser's bracket structure based on winner's bracket
+  const loserRounds = 2 * (winnerBracketRounds - 1) + 1;
+  
+  for (let round = 1; round <= loserRounds; round++) {
+    let matchCount = 0;
+    
+    // Calculate matches per round in loser's bracket
+    if (round === 1) {
+      // First round: first round losers from winner's bracket
+      matchCount = Math.floor(nextPowerOfTwo / 4);
+    } else if (round <= loserRounds - 1) {
+      // Intermediate rounds
+      const baseMatches = Math.pow(2, Math.max(0, winnerBracketRounds - Math.ceil((round + 1) / 2) - 1));
+      matchCount = Math.max(1, baseMatches);
+    } else {
+      // Final loser's bracket round
+      matchCount = 1;
+    }
+    
+    // Ensure realistic match count
+    matchCount = Math.max(1, Math.min(matchCount, Math.floor(totalTeams / 2)));
+    
+    for (let i = 0; i < matchCount; i++) {
+      const matchData = {
+        bracket_id: bracketId,
+        round_number: round,
+        bracket_type: 'loser',
+        team1_id: null,
+        team2_id: null,
+        winner_id: null,
+        status: "scheduled",
+        match_order: i
+      };
+      
+      const [result] = await db.pool.query(
+        `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status, match_order) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [matchData.bracket_id, matchData.round_number, matchData.bracket_type,
+         matchData.team1_id, matchData.team2_id, matchData.winner_id,
+         matchData.status, matchData.match_order]
+      );
+      
+      matchData.id = result.insertId;
+      allMatches.push(matchData);
+    }
+  }
+  
+  // CHAMPIONSHIP MATCH
+  const championshipMatch = {
+    bracket_id: bracketId,
+    round_number: 1,
+    bracket_type: 'championship',
+    team1_id: null, // Winner of winner's bracket final
+    team2_id: null, // Winner of loser's bracket final
+    winner_id: null,
+    status: "scheduled",
+    match_order: 0
+  };
+  
+  const [champResult] = await db.pool.query(
+    `INSERT INTO matches (bracket_id, round_number, bracket_type, team1_id, team2_id, winner_id, status, match_order) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [championshipMatch.bracket_id, championshipMatch.round_number, championshipMatch.bracket_type,
+     championshipMatch.team1_id, championshipMatch.team2_id, championshipMatch.winner_id,
+     championshipMatch.status, championshipMatch.match_order]
+  );
+  
+  championshipMatch.id = champResult.insertId;
+  allMatches.push(championshipMatch);
+  
+  console.log(`Generated double elimination bracket:`);
+  console.log(`- Teams: ${totalTeams}`);
+  console.log(`- Winner's bracket rounds: ${winnerBracketRounds}`);
+  console.log(`- Loser's bracket rounds: ${loserRounds}`);
+  console.log(`- Total matches: ${allMatches.length}`);
+}
 
     res.json({
       success: true,
-      message: `Generated ${allMatches.length} matches`,
+      message: `Generated ${allMatches.length} matches for ${eliminationType} elimination`,
       matches: allMatches,
       elimination_type: eliminationType
     });
@@ -379,7 +378,7 @@ router.post("/:id/generate", async (req, res) => {
   }
 });
 
-// POST complete a match and handle bracket progression - ENHANCED FOR DOUBLE ELIMINATION
+// FIXED POST complete a match - Comprehensive double elimination advancement
 router.post("/matches/:id/complete", async (req, res) => {
   const matchId = req.params.id;
   const { winner_id, scores } = req.body;
@@ -403,9 +402,13 @@ router.post("/matches/:id/complete", async (req, res) => {
       [winner_id, scores.team1, scores.team2, matchId]
     );
     
-    // Get bracket elimination type
+    // Get bracket elimination type and team count
     const [bracketInfo] = await db.pool.query(
-      "SELECT elimination_type FROM brackets WHERE id = ?",
+      `SELECT b.elimination_type, COUNT(bt.team_id) as team_count 
+       FROM brackets b
+       LEFT JOIN bracket_teams bt ON b.id = bt.bracket_id 
+       WHERE b.id = ?
+       GROUP BY b.id`,
       [match.bracket_id]
     );
     
@@ -414,9 +417,11 @@ router.post("/matches/:id/complete", async (req, res) => {
     }
     
     const eliminationType = bracketInfo[0].elimination_type;
+    const totalTeams = bracketInfo[0].team_count;
     const loser_id = winner_id === match.team1_id ? match.team2_id : match.team1_id;
     
     let loserAdvanced = false;
+    let winnerAdvanced = false;
     
     // Handle bracket progression based on elimination type
     if (eliminationType === "single") {
@@ -426,7 +431,7 @@ router.post("/matches/:id/complete", async (req, res) => {
          WHERE bracket_id = ? AND bracket_type = 'winner' 
          AND round_number = ? 
          AND (team1_id IS NULL OR team2_id IS NULL)
-         ORDER BY id
+         ORDER BY match_order
          LIMIT 1`,
         [match.bracket_id, match.round_number + 1]
       );
@@ -439,31 +444,41 @@ router.post("/matches/:id/complete", async (req, res) => {
           `UPDATE matches SET ${updateField} = ? WHERE id = ?`,
           [winner_id, nextMatch.id]
         );
+        winnerAdvanced = true;
       }
     } else if (eliminationType === "double") {
-      // Enhanced double elimination logic
+      // Calculate bracket structure
+      const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(totalTeams)));
+      const totalWinnerRounds = Math.log2(nextPowerOfTwo);
+      
       if (match.bracket_type === 'winner') {
-        // Winner advances in winner's bracket
-        const [nextWinnerMatches] = await db.pool.query(
-          `SELECT * FROM matches 
-           WHERE bracket_id = ? AND bracket_type = 'winner' 
-           AND round_number = ? 
-           AND (team1_id IS NULL OR team2_id IS NULL)
-           ORDER BY id
-           LIMIT 1`,
-          [match.bracket_id, match.round_number + 1]
-        );
+        // WINNER BRACKET LOGIC
+        const nextRound = match.round_number + 1;
         
-        if (nextWinnerMatches.length > 0) {
-          const nextMatch = nextWinnerMatches[0];
-          const updateField = nextMatch.team1_id === null ? 'team1_id' : 'team2_id';
+        // Check if this is the final round of winner's bracket
+        if (nextRound <= totalWinnerRounds) {
+          // Advance within winner's bracket
+          const nextMatchOrder = Math.floor(match.match_order / 2);
           
-          await db.pool.query(
-            `UPDATE matches SET ${updateField} = ? WHERE id = ?`,
-            [winner_id, nextMatch.id]
+          const [nextWinnerMatches] = await db.pool.query(
+            `SELECT * FROM matches 
+             WHERE bracket_id = ? AND bracket_type = 'winner' 
+             AND round_number = ? AND match_order = ?`,
+            [match.bracket_id, nextRound, nextMatchOrder]
           );
+          
+          if (nextWinnerMatches.length > 0) {
+            const nextMatch = nextWinnerMatches[0];
+            const updateField = match.match_order % 2 === 0 ? 'team1_id' : 'team2_id';
+            
+            await db.pool.query(
+              `UPDATE matches SET ${updateField} = ? WHERE id = ?`,
+              [winner_id, nextMatch.id]
+            );
+            winnerAdvanced = true;
+          }
         } else {
-          // Winner of winner's bracket final goes to championship
+          // Winner's bracket final - advance to championship
           const [championshipMatches] = await db.pool.query(
             `SELECT * FROM matches 
              WHERE bracket_id = ? AND bracket_type = 'championship'
@@ -476,62 +491,58 @@ router.post("/matches/:id/complete", async (req, res) => {
               "UPDATE matches SET team1_id = ? WHERE id = ?",
               [winner_id, championshipMatches[0].id]
             );
+            winnerAdvanced = true;
           }
         }
         
-        // Loser goes to loser's bracket - FIXED TYPO HERE
+        // LOSER PLACEMENT LOGIC - Drop losers to loser's bracket
         if (loser_id) {
-          // Calculate which loser's bracket round this team should go to
-          // For double elimination, teams drop from winner's bracket round N 
-          // to loser's bracket at specific positions based on bracket structure
+          let targetLoserRound;
           
-          // Simple mapping: winner's bracket round 1 losers go to loser's bracket round 1
-          // winner's bracket round 2 losers go to loser's bracket round 2, etc.
-          const loserBracketRound = match.round_number; // FIXED: was "loserBasketRound"
+          if (match.round_number === 1) {
+            // First round losers go to loser bracket round 1
+            targetLoserRound = 1;
+          } else {
+            // Calculate where losers from later winner rounds go
+            // For round 2 and beyond, they enter at specific loser bracket rounds
+            targetLoserRound = 2 * (match.round_number - 1);
+          }
           
-          // Find the appropriate loser's bracket match
+          // Find available loser bracket match
           const [loserBracketMatches] = await db.pool.query(
             `SELECT * FROM matches 
              WHERE bracket_id = ? AND bracket_type = 'loser' 
-             AND round_number = ? 
+             AND round_number = ?
              AND (team1_id IS NULL OR team2_id IS NULL)
-             ORDER BY id
-             LIMIT 1`,
-            [match.bracket_id, loserBracketRound]
+             ORDER BY match_order`,
+            [match.bracket_id, targetLoserRound]
           );
           
           if (loserBracketMatches.length > 0) {
-            const loserMatch = loserBracketMatches[0];
-            const updateField = loserMatch.team1_id === null ? 'team1_id' : 'team2_id';
+            const targetMatch = loserBracketMatches[0];
+            const updateField = targetMatch.team1_id === null ? 'team1_id' : 'team2_id';
             
             await db.pool.query(
               `UPDATE matches SET ${updateField} = ? WHERE id = ?`,
-              [loser_id, loserMatch.id]
+              [loser_id, targetMatch.id]
             );
             loserAdvanced = true;
           }
         }
+        
       } else if (match.bracket_type === 'loser') {
-        // Winner advances in loser's bracket
+        // LOSER BRACKET LOGIC - Stay within loser's bracket
         const nextLoserRound = match.round_number + 1;
-        
-        // Check if this is the final of the loser's bracket
-        const [teamCountResult] = await db.pool.query(
-          `SELECT COUNT(*) as count FROM bracket_teams WHERE bracket_id = ?`,
-          [match.bracket_id]
-        );
-        
-        const totalTeams = teamCountResult[0].count;
-        const maxLoserRounds = 2 * Math.ceil(Math.log2(totalTeams)) - 1;
+        const maxLoserRounds = 2 * (totalWinnerRounds - 1) + 1;
         
         if (match.round_number < maxLoserRounds) {
           // Continue in loser's bracket
           const [nextLoserMatches] = await db.pool.query(
             `SELECT * FROM matches 
              WHERE bracket_id = ? AND bracket_type = 'loser' 
-             AND round_number = ? 
+             AND round_number = ?
              AND (team1_id IS NULL OR team2_id IS NULL)
-             ORDER BY id
+             ORDER BY match_order
              LIMIT 1`,
             [match.bracket_id, nextLoserRound]
           );
@@ -544,9 +555,10 @@ router.post("/matches/:id/complete", async (req, res) => {
               `UPDATE matches SET ${updateField} = ? WHERE id = ?`,
               [winner_id, nextMatch.id]
             );
+            winnerAdvanced = true;
           }
         } else {
-          // Winner of the loser's bracket final goes to championship
+          // Loser's bracket final - advance to championship
           const [championshipMatches] = await db.pool.query(
             `SELECT * FROM matches 
              WHERE bracket_id = ? AND bracket_type = 'championship'
@@ -559,12 +571,12 @@ router.post("/matches/:id/complete", async (req, res) => {
               "UPDATE matches SET team2_id = ? WHERE id = ?",
               [winner_id, championshipMatches[0].id]
             );
+            winnerAdvanced = true;
           }
         }
         
-        // Loser in loser's bracket is eliminated (no further action needed)
       } else if (match.bracket_type === 'championship') {
-        // Championship match - update the bracket winner
+        // Championship match - tournament complete
         await db.pool.query(
           "UPDATE brackets SET winner_team_id = ? WHERE id = ?",
           [winner_id, match.bracket_id]
@@ -575,10 +587,13 @@ router.post("/matches/:id/complete", async (req, res) => {
     res.json({ 
       success: true, 
       message: "Match updated successfully",
-      advanced: true,
+      advanced: winnerAdvanced || loserAdvanced,
       winnerId: winner_id,
       loserId: loser_id,
-      loserAdvanced: loserAdvanced
+      loserAdvanced: loserAdvanced,
+      winnerAdvanced: winnerAdvanced,
+      bracketType: match.bracket_type,
+      roundNumber: match.round_number
     });
   } catch (err) {
     console.error("Error completing match:", err);
