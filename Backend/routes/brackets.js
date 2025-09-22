@@ -229,7 +229,7 @@ router.post("/:id/generate", async (req, res) => {
     shuffledTeams.push(null); // BYE slots
   }
   
-  // Calculate winner's bracket rounds - this determines when to stop creating rounds
+  // Calculate winner's bracket rounds
   const winnerBracketRounds = Math.log2(nextPowerOfTwo);
   
   // WINNER'S BRACKET GENERATION
@@ -245,7 +245,7 @@ router.post("/:id/generate", async (req, res) => {
       
       const matchData = {
         bracket_id: bracketId,
-        round_number: round,
+        round_number: round, // Winner's bracket uses rounds 1, 2, 3, etc.
         bracket_type: 'winner',
         team1_id: team1 ? team1.id : null,
         team2_id: team2 ? team2.id : null,
@@ -287,35 +287,47 @@ router.post("/:id/generate", async (req, res) => {
     }
   }
   
-  // LOSER'S BRACKET GENERATION
-  // Calculate loser's bracket structure based on winner's bracket
-  const loserRounds = 2 * (winnerBracketRounds - 1) + 1;
+  // LOSER'S BRACKET GENERATION - FIXED VERSION
+  // Create loser's bracket matches using a different round numbering system
+  // LB rounds will be: 101, 102, 103, etc. (or use a separate field)
   
-  for (let round = 1; round <= loserRounds; round++) {
-    let matchCount = 0;
+  // For 3-9 teams, calculate proper loser's bracket structure
+  let loserRounds;
+  if (totalTeams <= 2) {
+    loserRounds = 0; // No loser's bracket needed
+  } else if (totalTeams <= 4) {
+    loserRounds = 2; // LB Round 1 + LB Final
+  } else if (totalTeams <= 8) {
+    loserRounds = 5; // More complex structure
+  } else {
+    loserRounds = 2 * (winnerBracketRounds - 1) + 1;
+  }
+  
+  // Create initial loser's bracket matches (empty placeholders)
+  for (let lbRound = 1; lbRound <= loserRounds; lbRound++) {
+    let matchCount;
     
-    // Calculate matches per round in loser's bracket
-    if (round === 1) {
-      // First round: first round losers from winner's bracket
-      matchCount = Math.floor(nextPowerOfTwo / 4);
-    } else if (round <= loserRounds - 1) {
-      // Intermediate rounds
-      const baseMatches = Math.pow(2, Math.max(0, winnerBracketRounds - Math.ceil((round + 1) / 2) - 1));
-      matchCount = Math.max(1, baseMatches);
-    } else {
-      // Final loser's bracket round
+    // Calculate matches per loser's bracket round
+    if (lbRound === 1) {
+      // First LB round gets losers from first WB round
+      matchCount = Math.max(1, Math.floor(totalTeams / 4));
+    } else if (lbRound === loserRounds) {
+      // LB Final - always 1 match
       matchCount = 1;
+    } else {
+      // Intermediate rounds - calculate based on remaining teams
+      matchCount = Math.max(1, Math.floor(Math.pow(2, Math.max(0, winnerBracketRounds - Math.ceil(lbRound / 2)))));
     }
     
-    // Ensure realistic match count
-    matchCount = Math.max(1, Math.min(matchCount, Math.floor(totalTeams / 2)));
+    // Limit match count to realistic numbers
+    matchCount = Math.min(matchCount, totalTeams);
     
     for (let i = 0; i < matchCount; i++) {
       const matchData = {
         bracket_id: bracketId,
-        round_number: round,
+        round_number: lbRound + 100, // Use 101, 102, 103 for LB rounds
         bracket_type: 'loser',
-        team1_id: null,
+        team1_id: null, // Will be filled when teams lose from WB
         team2_id: null,
         winner_id: null,
         status: "scheduled",
@@ -335,10 +347,10 @@ router.post("/:id/generate", async (req, res) => {
     }
   }
   
-  // CHAMPIONSHIP MATCH
+  // CHAMPIONSHIP MATCH - Use round 200
   const championshipMatch = {
     bracket_id: bracketId,
-    round_number: 1,
+    round_number: 200, // Championship round
     bracket_type: 'championship',
     team1_id: null, // Winner of winner's bracket final
     team2_id: null, // Winner of loser's bracket final
@@ -378,6 +390,7 @@ router.post("/:id/generate", async (req, res) => {
   }
 });
 
+// FIXED POST complete a match - Comprehensive double elimination advancement
 // FIXED POST complete a match - Comprehensive double elimination advancement
 router.post("/matches/:id/complete", async (req, res) => {
   const matchId = req.params.id;
@@ -447,7 +460,7 @@ router.post("/matches/:id/complete", async (req, res) => {
         winnerAdvanced = true;
       }
     } else if (eliminationType === "double") {
-      // Calculate bracket structure
+      // FIXED Double elimination advancement logic
       const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(totalTeams)));
       const totalWinnerRounds = Math.log2(nextPowerOfTwo);
       
@@ -492,6 +505,7 @@ router.post("/matches/:id/complete", async (req, res) => {
               [winner_id, championshipMatches[0].id]
             );
             winnerAdvanced = true;
+            console.log(`Winner bracket champion ${winner_id} advanced to championship`);
           }
         }
         
@@ -500,12 +514,12 @@ router.post("/matches/:id/complete", async (req, res) => {
           let targetLoserRound;
           
           if (match.round_number === 1) {
-            // First round losers go to loser bracket round 1
-            targetLoserRound = 1;
+            // First round losers go to LB round 101
+            targetLoserRound = 101;
           } else {
             // Calculate where losers from later winner rounds go
-            // For round 2 and beyond, they enter at specific loser bracket rounds
-            targetLoserRound = 2 * (match.round_number - 1);
+            // Round 2 losers go to LB round 102, Round 3 to 103, etc.
+            targetLoserRound = 100 + match.round_number;
           }
           
           // Find available loser bracket match
@@ -527,16 +541,20 @@ router.post("/matches/:id/complete", async (req, res) => {
               [loser_id, targetMatch.id]
             );
             loserAdvanced = true;
+            console.log(`Loser ${loser_id} dropped to loser bracket round ${targetLoserRound}`);
           }
         }
         
       } else if (match.bracket_type === 'loser') {
-        // LOSER BRACKET LOGIC - Stay within loser's bracket
-        const nextLoserRound = match.round_number + 1;
-        const maxLoserRounds = 2 * (totalWinnerRounds - 1) + 1;
+        // LOSER BRACKET LOGIC - FIXED calculation
+        // Calculate the maximum loser bracket round (CORRECTED FORMULA)
+        const maxLoserRound = 100 + 2 * (totalWinnerRounds - 1);
         
-        if (match.round_number < maxLoserRounds) {
+        console.log(`Processing loser bracket match: round ${match.round_number}, maxLoserRound: ${maxLoserRound}`);
+        
+        if (match.round_number < maxLoserRound) {
           // Continue in loser's bracket
+          const nextLoserRound = match.round_number + 1;
           const [nextLoserMatches] = await db.pool.query(
             `SELECT * FROM matches 
              WHERE bracket_id = ? AND bracket_type = 'loser' 
@@ -556,6 +574,7 @@ router.post("/matches/:id/complete", async (req, res) => {
               [winner_id, nextMatch.id]
             );
             winnerAdvanced = true;
+            console.log(`Loser bracket winner ${winner_id} advanced to next loser round ${nextLoserRound}`);
           }
         } else {
           // Loser's bracket final - advance to championship
@@ -572,6 +591,7 @@ router.post("/matches/:id/complete", async (req, res) => {
               [winner_id, championshipMatches[0].id]
             );
             winnerAdvanced = true;
+            console.log(`Loser bracket champion ${winner_id} advanced to championship`);
           }
         }
         
@@ -581,6 +601,7 @@ router.post("/matches/:id/complete", async (req, res) => {
           "UPDATE brackets SET winner_team_id = ? WHERE id = ?",
           [winner_id, match.bracket_id]
         );
+        console.log(`Tournament completed! Champion: ${winner_id}`);
       }
     }
     

@@ -57,6 +57,80 @@ const StaffStats = ({ sidebarOpen }) => {
     volleyball_assists: [0, 0, 0, 0, 0],
   };
 
+  // Group games by round and bracket with proper double elimination handling
+  const groupGamesByRound = (games) => {
+    const grouped = {};
+    
+    // Separate games by bracket type and round
+    const winnerGames = games.filter(game => game.bracket_type === 'winner');
+    const loserGames = games.filter(game => game.bracket_type === 'loser');
+    const championshipGames = games.filter(game => game.bracket_type === 'championship');
+    
+    // Group winner's bracket games (rounds 1, 2, 3, etc.)
+    winnerGames.forEach(game => {
+      const roundKey = `Round ${game.round_number}`;
+      
+      if (!grouped[roundKey]) {
+        grouped[roundKey] = {};
+      }
+      
+      const bracketKey = `${game.bracket_name || 'Main Bracket'} - Winner's Bracket`;
+      if (!grouped[roundKey][bracketKey]) {
+        grouped[roundKey][bracketKey] = [];
+      }
+      
+      grouped[roundKey][bracketKey].push(game);
+    });
+    
+    // Group loser's bracket games (rounds 101, 102, 103, etc.)
+    loserGames.forEach(game => {
+      const loserRound = game.round_number - 100; // Convert 101 -> 1, 102 -> 2, etc.
+      const roundKey = `LB Round ${loserRound}`;
+      
+      if (!grouped[roundKey]) {
+        grouped[roundKey] = {};
+      }
+      
+      const bracketKey = `${game.bracket_name || 'Main Bracket'} - Loser's Bracket`;
+      if (!grouped[roundKey][bracketKey]) {
+        grouped[roundKey][bracketKey] = [];
+      }
+      
+      grouped[roundKey][bracketKey].push(game);
+    });
+    
+    // Add championship games at the end
+    if (championshipGames.length > 0) {
+      grouped['Championship'] = {
+        'Grand Final': championshipGames
+      };
+    }
+
+    return grouped;
+  };
+
+  // Updated sorting function for round display
+  const sortRounds = (rounds) => {
+    return Object.entries(rounds).sort(([a], [b]) => {
+      // Championship always last
+      if (a === 'Championship') return 1;
+      if (b === 'Championship') return -1;
+      
+      // LB rounds come after WB rounds of same number
+      const aIsLB = a.startsWith('LB Round');
+      const bIsLB = b.startsWith('LB Round');
+      
+      if (aIsLB && !bIsLB) return 1;
+      if (!aIsLB && bIsLB) return -1;
+      
+      // Extract round numbers
+      const aNum = parseInt(a.match(/\d+/)?.[0] || '0');
+      const bNum = parseInt(b.match(/\d+/)?.[0] || '0');
+      
+      return aNum - bNum;
+    });
+  };
+
   // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
@@ -99,40 +173,6 @@ const StaffStats = ({ sidebarOpen }) => {
     });
 
     return { team1: team1Scores, team2: team2Scores };
-  };
-
-  // Group games by round and bracket with proper ordering
-  const groupGamesByRound = (games) => {
-    const grouped = {};
-    
-    // First, separate championship games
-    const championshipGames = games.filter(game => game.bracket_type === 'championship');
-    const nonChampionshipGames = games.filter(game => game.bracket_type !== 'championship');
-    
-    // Group non-championship games by round
-    nonChampionshipGames.forEach(game => {
-      const roundKey = `Round ${game.round_number}`;
-      
-      if (!grouped[roundKey]) {
-        grouped[roundKey] = {};
-      }
-      
-      const bracketKey = game.bracket_name || 'Main Bracket';
-      if (!grouped[roundKey][bracketKey]) {
-        grouped[roundKey][bracketKey] = [];
-      }
-      
-      grouped[roundKey][bracketKey].push(game);
-    });
-    
-    // Add championship games at the end
-    if (championshipGames.length > 0) {
-      grouped['Championship'] = {
-        'Championship': championshipGames
-      };
-    }
-
-    return grouped;
   };
 
   // Toggle round expansion
@@ -404,157 +444,156 @@ const StaffStats = ({ sidebarOpen }) => {
     return (((kills - errors) / attempts) * 100).toFixed(2) + "%";
   };
 
-  // Save statistics
   // Save statistics - UPDATED to use brackets API for match completion
-const saveStatistics = async () => {
-  if (!selectedGame) return;
-  setLoading(true);
-  try {
-    // First, save the player statistics
-    const statsRes = await fetch(
-      `http://localhost:5000/api/stats/matches/${selectedGame.id}/stats`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          team1_id: selectedGame.team1_id,
-          team2_id: selectedGame.team2_id,
-          players: playerStats.map((p) => ({
-            player_id: p.player_id,
-            team_id: p.team_id,
-            // Basketball stats
-            points: p.points ? p.points.reduce((a, b) => a + b, 0) : 0,
-            assists: p.assists ? p.assists.reduce((a, b) => a + b, 0) : 0,
-            rebounds: p.rebounds ? p.rebounds.reduce((a, b) => a + b, 0) : 0,
-            three_points_made: p.three_points_made
-              ? p.three_points_made.reduce((a, b) => a + b, 0)
-              : 0,
-            steals: p.steals ? p.steals.reduce((a, b) => a + b, 0) : 0,
-            blocks: p.blocks ? p.blocks.reduce((a, b) => a + b, 0) : 0,
-            fouls: p.fouls ? p.fouls.reduce((a, b) => a + b, 0) : 0,
-            turnovers: p.turnovers
-              ? p.turnovers.reduce((a, b) => a + b, 0)
-              : 0,
-            // Volleyball stats
-            kills: p.kills ? p.kills.reduce((a, b) => a + b, 0) : 0,
-            attack_attempts: p.attack_attempts
-              ? p.attack_attempts.reduce((a, b) => a + b, 0)
-              : 0,
-            attack_errors: p.attack_errors
-              ? p.attack_errors.reduce((a, b) => a + b, 0)
-              : 0,
-            serves: p.serves ? p.serves.reduce((a, b) => a + b, 0) : 0,
-            service_aces: p.service_aces
-              ? p.service_aces.reduce((a, b) => a + b, 0)
-              : 0,
-            serve_errors: p.serve_errors
-              ? p.serve_errors.reduce((a, b) => a + b, 0)
-              : 0,
-            receptions: p.receptions
-              ? p.receptions.reduce((a, b) => a + b, 0)
-              : 0,
-            reception_errors: p.reception_errors
-              ? p.reception_errors.reduce((a, b) => a + b, 0)
-              : 0,
-            digs: p.digs ? p.digs.reduce((a, b) => a + b, 0) : 0,
-            volleyball_assists: p.volleyball_assists
-              ? p.volleyball_assists.reduce((a, b) => a + b, 0)
-              : 0,
-          })),
-        }),
-      }
-    );
-    
-    if (!statsRes.ok) {
-      throw new Error(`Failed to save stats: ${statsRes.status}`);
-    }
-
-    // Calculate winner based on team scores
-    const team1TotalScore = teamScores.team1.reduce((a, b) => a + b, 0);
-    const team2TotalScore = teamScores.team2.reduce((a, b) => a + b, 0);
-    
-    let winner_id;
-    if (team1TotalScore > team2TotalScore) {
-      winner_id = selectedGame.team1_id;
-    } else if (team2TotalScore > team1TotalScore) {
-      winner_id = selectedGame.team2_id;
-    } else {
-      // Handle tie - you might want to show a dialog here
-      alert("The game is tied! Please enter different scores or handle the tie appropriately.");
-      setLoading(false);
-      return;
-    }
-
-    // Complete the match using brackets API for proper bracket progression
-    const bracketRes = await fetch(
-      `http://localhost:5000/api/brackets/matches/${selectedGame.id}/complete`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          winner_id: winner_id,
-          scores: {
-            team1: team1TotalScore,
-            team2: team2TotalScore
-          }
-        }),
-      }
-    );
-    
-    if (!bracketRes.ok) {
-      throw new Error(`Failed to complete match: ${bracketRes.status}`);
-    }
-    
-    const bracketData = await bracketRes.json();
-    
-    // Show success message with advancement info
-    let message = "Statistics saved successfully!";
-    
-    // Enhanced messaging for double elimination
-    if (bracketData.advanced) {
-      if (selectedGame.elimination_type === 'double') {
-        if (selectedGame.bracket_type === 'winner') {
-          message += " Winner has been advanced in the winner's bracket!";
-          if (bracketData.loserAdvanced) {
-            message += " Loser has been moved to the loser's bracket.";
-          }
-        } else if (selectedGame.bracket_type === 'loser') {
-          message += " Winner has been advanced in the loser's bracket!";
-          message += " Loser has been eliminated from the tournament.";
-        } else if (selectedGame.bracket_type === 'championship') {
-          message += " Championship match completed!";
+  const saveStatistics = async () => {
+    if (!selectedGame) return;
+    setLoading(true);
+    try {
+      // First, save the player statistics
+      const statsRes = await fetch(
+        `http://localhost:5000/api/stats/matches/${selectedGame.id}/stats`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            team1_id: selectedGame.team1_id,
+            team2_id: selectedGame.team2_id,
+            players: playerStats.map((p) => ({
+              player_id: p.player_id,
+              team_id: p.team_id,
+              // Basketball stats
+              points: p.points ? p.points.reduce((a, b) => a + b, 0) : 0,
+              assists: p.assists ? p.assists.reduce((a, b) => a + b, 0) : 0,
+              rebounds: p.rebounds ? p.rebounds.reduce((a, b) => a + b, 0) : 0,
+              three_points_made: p.three_points_made
+                ? p.three_points_made.reduce((a, b) => a + b, 0)
+                : 0,
+              steals: p.steals ? p.steals.reduce((a, b) => a + b, 0) : 0,
+              blocks: p.blocks ? p.blocks.reduce((a, b) => a + b, 0) : 0,
+              fouls: p.fouls ? p.fouls.reduce((a, b) => a + b, 0) : 0,
+              turnovers: p.turnovers
+                ? p.turnovers.reduce((a, b) => a + b, 0)
+                : 0,
+              // Volleyball stats
+              kills: p.kills ? p.kills.reduce((a, b) => a + b, 0) : 0,
+              attack_attempts: p.attack_attempts
+                ? p.attack_attempts.reduce((a, b) => a + b, 0)
+                : 0,
+              attack_errors: p.attack_errors
+                ? p.attack_errors.reduce((a, b) => a + b, 0)
+                : 0,
+              serves: p.serves ? p.serves.reduce((a, b) => a + b, 0) : 0,
+              service_aces: p.service_aces
+                ? p.service_aces.reduce((a, b) => a + b, 0)
+                : 0,
+              serve_errors: p.serve_errors
+                ? p.serve_errors.reduce((a, b) => a + b, 0)
+                : 0,
+              receptions: p.receptions
+                ? p.receptions.reduce((a, b) => a + b, 0)
+                : 0,
+              reception_errors: p.reception_errors
+                ? p.reception_errors.reduce((a, b) => a + b, 0)
+                : 0,
+              digs: p.digs ? p.digs.reduce((a, b) => a + b, 0) : 0,
+              volleyball_assists: p.volleyball_assists
+                ? p.volleyball_assists.reduce((a, b) => a + b, 0)
+                : 0,
+            })),
+          }),
         }
-      } else {
-        message += " Winner has been advanced to the next round!";
-      }
-    }
-    
-    if (bracketData.winnerId) {
-      const winnerTeam = bracketData.winnerId === selectedGame.team1_id ? 
-        selectedGame.team1_name : selectedGame.team2_name;
-      message += ` Winner: ${winnerTeam}`;
+      );
       
-      // For championship matches in double elimination
-      if (selectedGame.bracket_type === 'championship' && selectedGame.elimination_type === 'double') {
-        message += ` is the tournament champion!`;
+      if (!statsRes.ok) {
+        throw new Error(`Failed to save stats: ${statsRes.status}`);
       }
+
+      // Calculate winner based on team scores
+      const team1TotalScore = teamScores.team1.reduce((a, b) => a + b, 0);
+      const team2TotalScore = teamScores.team2.reduce((a, b) => a + b, 0);
+      
+      let winner_id;
+      if (team1TotalScore > team2TotalScore) {
+        winner_id = selectedGame.team1_id;
+      } else if (team2TotalScore > team1TotalScore) {
+        winner_id = selectedGame.team2_id;
+      } else {
+        // Handle tie - you might want to show a dialog here
+        alert("The game is tied! Please enter different scores or handle the tie appropriately.");
+        setLoading(false);
+        return;
+      }
+
+      // Complete the match using brackets API for proper bracket progression
+      const bracketRes = await fetch(
+        `http://localhost:5000/api/brackets/matches/${selectedGame.id}/complete`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            winner_id: winner_id,
+            scores: {
+              team1: team1TotalScore,
+              team2: team2TotalScore
+            }
+          }),
+        }
+      );
+      
+      if (!bracketRes.ok) {
+        throw new Error(`Failed to complete match: ${bracketRes.status}`);
+      }
+      
+      const bracketData = await bracketRes.json();
+      
+      // Show success message with advancement info
+      let message = "Statistics saved successfully!";
+      
+      // Enhanced messaging for double elimination
+      if (bracketData.advanced) {
+        if (selectedGame.elimination_type === 'double') {
+          if (selectedGame.bracket_type === 'winner') {
+            message += " Winner has been advanced in the winner's bracket!";
+            if (bracketData.loserAdvanced) {
+              message += " Loser has been moved to the loser's bracket.";
+            }
+          } else if (selectedGame.bracket_type === 'loser') {
+            message += " Winner has been advanced in the loser's bracket!";
+            message += " Loser has been eliminated from the tournament.";
+          } else if (selectedGame.bracket_type === 'championship') {
+            message += " Championship match completed!";
+          }
+        } else {
+          message += " Winner has been advanced to the next round!";
+        }
+      }
+      
+      if (bracketData.winnerId) {
+        const winnerTeam = bracketData.winnerId === selectedGame.team1_id ? 
+          selectedGame.team1_name : selectedGame.team2_name;
+        message += ` Winner: ${winnerTeam}`;
+        
+        // For championship matches in double elimination
+        if (selectedGame.bracket_type === 'championship' && selectedGame.elimination_type === 'double') {
+          message += ` is the tournament champion!`;
+        }
+      }
+      
+      alert(message);
+      console.log(bracketData);
+      
+      // Refresh the games list to show updated match status
+      if (selectedEvent) {
+        handleEventSelect(selectedEvent);
+      }
+      
+    } catch (err) {
+      console.error("Save stats error:", err);
+      alert("Failed to save stats: " + err.message);
+    } finally {
+      setLoading(false);
     }
-    
-    alert(message);
-    console.log(bracketData);
-    
-    // Refresh the games list to show updated match status
-    if (selectedEvent) {
-      handleEventSelect(selectedEvent);
-    }
-    
-  } catch (err) {
-    console.error("Save stats error:", err);
-    alert("Failed to save stats: " + err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Reset stats
   const resetStatistics = () => {
@@ -961,105 +1000,99 @@ const saveStatistics = async () => {
                   </div>
                 ) : (
                   <div className="rounds-container">
-                    {Object.entries(groupGamesByRound(games))
-                      .sort(([a], [b]) => {
-                        // Sort rounds with Championship always last
-                        if (a === 'Championship') return 1;
-                        if (b === 'Championship') return -1;
-                        const aNum = parseInt(a.split(' ')[1]);
-                        const bNum = parseInt(b.split(' ')[1]);
-                        return aNum - bNum;
-                      })
-                      .map(([roundName, brackets]) => {
-                        const roundNumber = roundName === "Championship" ? 999 : parseInt(roundName.split(' ')[1]);
-                        const isExpanded = expandedRounds.has(roundNumber) || roundName === "Championship";
-                        const roundGames = Object.values(brackets).flat();
-                        const completedGames = roundGames.filter(g => g.status === 'completed').length;
-                        const totalGames = roundGames.length;
-                        
-                        return (
-                          <div key={roundName} className="round-section">
-                            <div 
-                              className={`round-header ${roundName === 'Championship' ? 'championship-header' : ''}`}
-                              onClick={() => toggleRoundExpansion(roundNumber)}
-                            >
-                              <div className="round-header-content">
-                                <h3>
-                                  {roundName === 'Championship' ? (
-                                    <><FaTrophy className="trophy-icon" /> Championship</>
-                                  ) : roundName}
-                                </h3>
-                                <div className="round-info">
-                                  <span className="round-progress">
-                                    {completedGames}/{totalGames} matches completed
-                                  </span>
-                                  <div className="round-progress-bar">
-                                    <div 
-                                      className="round-progress-fill"
-                                      style={{ width: `${totalGames > 0 ? (completedGames / totalGames) * 100 : 0}%` }}
-                                    />
-                                  </div>
+                    {sortRounds(groupGamesByRound(games)).map(([roundName, brackets]) => {
+                      const roundNumber = roundName === "Championship" ? 999 : 
+                        roundName.startsWith("LB Round") ? 
+                        parseInt(roundName.split(' ')[2]) + 100 : 
+                        parseInt(roundName.split(' ')[1]);
+                      const isExpanded = expandedRounds.has(roundNumber) || roundName === "Championship";
+                      const roundGames = Object.values(brackets).flat();
+                      const completedGames = roundGames.filter(g => g.status === 'completed').length;
+                      const totalGames = roundGames.length;
+                      
+                      return (
+                        <div key={roundName} className="round-section">
+                          <div 
+                            className={`round-header ${roundName === 'Championship' ? 'championship-header' : ''}`}
+                            onClick={() => toggleRoundExpansion(roundNumber)}
+                          >
+                            <div className="round-header-content">
+                              <h3>
+                                {roundName === 'Championship' ? (
+                                  <><FaTrophy className="trophy-icon" /> Championship</>
+                                ) : roundName}
+                              </h3>
+                              <div className="round-info">
+                                <span className="round-progress">
+                                  {completedGames}/{totalGames} matches completed
+                                </span>
+                                <div className="round-progress-bar">
+                                  <div 
+                                    className="round-progress-fill"
+                                    style={{ width: `${totalGames > 0 ? (completedGames / totalGames) * 100 : 0}%` }}
+                                  />
                                 </div>
                               </div>
-                              <button className="round-toggle-btn">
-                                {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
-                              </button>
                             </div>
-                            
-                            {isExpanded && (
-                              <div className="round-content">
-                                {Object.entries(brackets).map(([bracketName, bracketGames]) => (
-                                  <div key={bracketName} className="bracket-section">
-                                    <h4 className="bracket-section-title">{bracketName}</h4>
-                                    <div className="bracket-grid">
-                                      {bracketGames.map((game) => (
-                                        <div className="bracket-card" key={game.id}>
-                                          <div className="bracket-card-header">
-                                            <h3>
-                                              {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
-                                            </h3>
-                                            <span className={`bracket-sport-badge bracket-sport-${game.sport_type}`}>
-                                              {game.sport_type}
-                                            </span>
-                                            {game.elimination_type === 'double' && (
-                                              <span className={`bracket-type-badge bracket-type-${game.bracket_type || 'winner'}`}>
-                                                {game.bracket_type ? game.bracket_type.charAt(0).toUpperCase() + game.bracket_type.slice(1) : 'Winner'} Bracket
-                                              </span>
-                                            )}
-                                          </div>
-                                          <div className="bracket-card-info">
-                                            <div><strong>Type:</strong> 
-                                              <span className={`elimination-type-${game.elimination_type}`}>
-                                                {game.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
-                                              </span>
-                                            </div>
-                                            <div><strong>Status:</strong> 
-                                              <span className={`status-${game.status}`}>
-                                                {game.status}
-                                              </span>
-                                            </div>
-                                            {game.status === "completed" && (
-                                              <div><strong>Score:</strong> {game.score_team1} - {game.score_team2}</div>
-                                            )}
-                                            {game.winner_name && (
-                                              <div><strong>Winner:</strong> {game.winner_name}</div>
-                                            )}
-                                          </div>
-                                          <div className="bracket-card-actions">
-                                            <button className="bracket-view-btn" onClick={() => handleGameSelect(game)}>
-                                              {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
-                                            </button>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                            <button className="round-toggle-btn">
+                              {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                            </button>
                           </div>
-                        );
-                      })}
+                          
+                          {isExpanded && (
+                            <div className="round-content">
+                              {Object.entries(brackets).map(([bracketName, bracketGames]) => (
+                                <div key={bracketName} className="bracket-section">
+                                  <h4 className="bracket-section-title">{bracketName}</h4>
+                                  <div className="bracket-grid">
+                                    {bracketGames.map((game) => (
+                                      <div className="bracket-card" key={game.id}>
+                                        <div className="bracket-card-header">
+                                          <h3>
+                                            {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
+                                          </h3>
+                                          <span className={`bracket-sport-badge bracket-sport-${game.sport_type}`}>
+                                            {game.sport_type}
+                                          </span>
+                                          {game.elimination_type === 'double' && (
+                                            <span className={`bracket-type-badge bracket-type-${game.bracket_type || 'winner'}`}>
+                                              {game.bracket_type ? game.bracket_type.charAt(0).toUpperCase() + game.bracket_type.slice(1) : 'Winner'} Bracket
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="bracket-card-info">
+                                          <div><strong>Type:</strong> 
+                                            <span className={`elimination-type-${game.elimination_type}`}>
+                                              {game.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
+                                            </span>
+                                          </div>
+                                          <div><strong>Status:</strong> 
+                                            <span className={`status-${game.status}`}>
+                                              {game.status}
+                                            </span>
+                                          </div>
+                                          {game.status === "completed" && (
+                                            <div><strong>Score:</strong> {game.score_team1} - {game.score_team2}</div>
+                                          )}
+                                          {game.winner_name && (
+                                            <div><strong>Winner:</strong> {game.winner_name}</div>
+                                          )}
+                                        </div>
+                                        <div className="bracket-card-actions">
+                                          <button className="bracket-view-btn" onClick={() => handleGameSelect(game)}>
+                                            {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
