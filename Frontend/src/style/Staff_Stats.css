@@ -69,6 +69,7 @@
 .bracket-view-section {
   background: var(--background-card);
   padding: 40px;
+  min-height: 600px;
 }
 
 .bracket-view-section h2 {
@@ -379,24 +380,6 @@
   color: white;
 }
 
-/* Championship round special styling */
-.championship-round .round-header {
-  background: linear-gradient(135deg, #ff9800, #ef6c00);
-  border: none;
-}
-
-.championship-round .round-header h3 {
-  color: white;
-}
-
-.championship-round .round-header .round-progress {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.championship-round .round-toggle-btn {
-  color: rgba(255, 255, 255, 0.9);
-}
-
 /* Elimination type indicators */
 .elimination-type-single {
   color: #2196f3;
@@ -425,7 +408,7 @@
   color: #c62828;
 }
 
-/* NEW: Round Organization Styles */
+/* Round Organization Styles */
 .rounds-container {
   display: flex;
   flex-direction: column;
@@ -467,6 +450,9 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .round-info {
@@ -479,6 +465,9 @@
   font-size: 14px;
   color: var(--text-secondary);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .round-progress-bar {
@@ -696,7 +685,7 @@
   border: 1px solid var(--border-color);
 }
 
-/* NEW: Two-column layout for teams */
+/* Two-column layout for teams */
 .teams-stats-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -861,7 +850,68 @@
   color: var(--text-primary);
   font-size: 14px;
   font-weight: 600;
-  -webkit-appearance: none; /* Removes inner shadow on iOS */
+  -webkit-appearance: none;
+}
+
+/* Champion styles */
+.champion-badge {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: bold;
+  margin-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.champion-info {
+  background: rgba(255, 215, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 8px;
+  margin-left: 10px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.champion-crown {
+  color: #ffd700;
+  margin-left: 8px;
+  font-size: 1.2em;
+}
+
+.winner-trophy {
+  color: #ffd700;
+  margin-left: 5px;
+}
+
+.winner-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.winner-name {
+  color: #4ade80;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+/* Championship header enhancement */
+.championship-header {
+  background: linear-gradient(135deg, #ff9800, #ff5722) !important;
+  border: 2px solid #ffd700 !important;
+}
+
+.championship-header h3 {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.trophy-icon {
+  color: #ffd700;
 }
 
 /* Responsive Design */
@@ -1045,4 +1095,3 @@
     width: 80px;
   }
 }
-
