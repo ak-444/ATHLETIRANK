@@ -417,7 +417,7 @@ router.post("/matches/:id/complete", async (req, res) => {
     // Update match with winner and scores
     await db.pool.query(
       "UPDATE matches SET winner_id = ?, status = 'completed', score_team1 = ?, score_team2 = ? WHERE id = ?",
-      [winner_id, scores.team1, scores.team2, matchId]
+      [winner_id, scores?.team1 || null, scores?.team2 || null, matchId]
     );
     
     // Get bracket elimination type and team count
@@ -634,6 +634,44 @@ router.post("/matches/:id/complete", async (req, res) => {
   } catch (err) {
     console.error("Error completing match:", err);
     res.status(500).json({ error: "Database error: " + err.message });
+  }
+});
+
+// PUT update bracket details
+router.put("/:id", async (req, res) => {
+  const bracketId = req.params.id;
+  const { name, sport_type, elimination_type } = req.body;
+
+  try {
+    const [result] = await db.pool.query(
+      "UPDATE brackets SET name = ?, sport_type = ?, elimination_type = ? WHERE id = ?",
+      [name, sport_type, elimination_type, bracketId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Bracket not found" });
+    }
+
+    res.json({ success: true, message: "Bracket updated successfully" });
+  } catch (err) {
+    console.error("Error updating bracket:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// POST reset bracket (clear all matches)
+router.post("/:id/reset", async (req, res) => {
+  const bracketId = req.params.id;
+
+  try {
+    // Clear all matches and reset winner
+    await db.pool.query("DELETE FROM matches WHERE bracket_id = ?", [bracketId]);
+    await db.pool.query("UPDATE brackets SET winner_team_id = NULL WHERE id = ?", [bracketId]);
+
+    res.json({ success: true, message: "Bracket reset successfully" });
+  } catch (err) {
+    console.error("Error resetting bracket:", err);
+    res.status(500).json({ error: "Database error" });
   }
 });
 

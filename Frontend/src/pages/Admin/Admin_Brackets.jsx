@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomBracket from "../../components/CustomBracket";
+import DoubleEliminationBracket from "../../components/DoubleEliminationBracket";
 import "../../style/Admin_BracketPage.css";
 
 const BracketsPage = ({ sidebarOpen }) => {
@@ -442,18 +443,27 @@ const BracketsPage = ({ sidebarOpen }) => {
               </div>
             )}
 
-            {/* Bracket Visualization */}
-            {activeTab === "bracket" && selectedBracket && (
-              <div className="bracket-visualization-section">
-                <h2>{selectedBracket.name} - Tournament Bracket</h2>
-                <div className="bracket-info">
-                  <p><strong>Sport:</strong> {capitalize(selectedBracket.sport_type)}</p>
-                  <p><strong>Type:</strong> {selectedBracket.elimination_type === "single" ? "Single" : "Double"} Elimination</p>
-                  <p><strong>Teams:</strong> {selectedBracket.team_count || 0}</p>
-                </div>
-                <CustomBracket matches={bracketMatches} />
+           {/* Bracket Visualization - FIXED: Conditional rendering */}
+          {activeTab === "bracket" && selectedBracket && (
+            <div className="bracket-visualization-section">
+              <h2>{selectedBracket.name} - Tournament Bracket</h2>
+              <div className="bracket-info">
+                <p><strong>Sport:</strong> {capitalize(selectedBracket.sport_type)}</p>
+                <p><strong>Type:</strong> {selectedBracket.elimination_type === "single" ? "Single" : "Double"} Elimination</p>
+                <p><strong>Teams:</strong> {selectedBracket.team_count || 0}</p>
               </div>
-            )}
+              
+              {/* Conditional rendering based on elimination type */}
+              {selectedBracket.elimination_type === "double" ? (
+                <DoubleEliminationBracket matches={bracketMatches} />
+              ) : (
+                <CustomBracket 
+                  matches={bracketMatches} 
+                  eliminationType={selectedBracket.elimination_type} 
+                />
+              )}
+            </div>
+          )}
           </div>
         </div>
       </div>

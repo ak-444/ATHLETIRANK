@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import "../style/CustomBrackets.css";
 
+
 const CustomBracket = ({ matches, eliminationType = 'single' }) => {
   const bracketRef = useRef(null);
   const [connectionPoints, setConnectionPoints] = useState([]);
@@ -30,6 +31,35 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
 
     setMatchDisplayNumbers(displayNumbers);
   }, [matches]);
+
+  // Measure match positions for connection lines
+  useEffect(() => {
+    if (!bracketRef.current) return;
+
+    const matchEls = bracketRef.current.querySelectorAll(".match");
+    const points = [];
+
+    matchEls.forEach((matchEl) => {
+      const roundIndex = parseInt(matchEl.closest(".round")?.dataset.round, 10);
+      const matchIndex = parseInt(matchEl.dataset.match, 10);
+      const bracketType = matchEl.closest(".bracket-section")?.dataset.bracketType || 'winner';
+
+      const rect = matchEl.getBoundingClientRect();
+      const containerRect = bracketRef.current.getBoundingClientRect();
+
+      // Right-center of current match
+      const x = rect.right - containerRect.left;
+      const y = rect.top - containerRect.top + rect.height / 2;
+
+      // Left-center of current match (for connecting into)
+      const xLeft = rect.left - containerRect.left;
+      const yLeft = rect.top - containerRect.top + rect.height / 2;
+
+      points.push({ roundIndex, matchIndex, x, y, xLeft, yLeft, bracketType });
+    });
+
+    setConnectionPoints(points);
+  }, [matches, eliminationType]);
 
   if (!matches || matches.length === 0) {
     return (
@@ -64,36 +94,7 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
   const winnerRounds = groupMatchesByRound(winnerMatches);
   const loserRounds = groupMatchesByRound(loserMatches);
 
-  // Measure match positions for connection lines
-  useEffect(() => {
-    if (!bracketRef.current) return;
-
-    const matchEls = bracketRef.current.querySelectorAll(".match");
-    const points = [];
-
-    matchEls.forEach((matchEl) => {
-      const roundIndex = parseInt(matchEl.closest(".round")?.dataset.round, 10);
-      const matchIndex = parseInt(matchEl.dataset.match, 10);
-      const bracketType = matchEl.closest(".bracket-section")?.dataset.bracketType || 'winner';
-
-      const rect = matchEl.getBoundingClientRect();
-      const containerRect = bracketRef.current.getBoundingClientRect();
-
-      // Right-center of current match
-      const x = rect.right - containerRect.left;
-      const y = rect.top - containerRect.top + rect.height / 2;
-
-      // Left-center of current match (for connecting into)
-      const xLeft = rect.left - containerRect.left;
-      const yLeft = rect.top - containerRect.top + rect.height / 2;
-
-      points.push({ roundIndex, matchIndex, x, y, xLeft, yLeft, bracketType });
-    });
-
-    setConnectionPoints(points);
-  }, [matches, eliminationType]);
-
-  // Function to render a single match component
+  // Function to render a single match component (using your exact original styling)
   const renderMatch = (match, matchIndex) => (
     <div 
       key={match.id} 
@@ -170,23 +171,40 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
     </div>
   );
 
-  // Function to render a round section
-  const renderRoundSection = (roundNumber, rounds, matches, bracketType, title) => (
-    <div key={roundNumber} className="round" data-round={parseInt(roundNumber) - 1}>
-      <div className="round-header">
-        <div className="round-number">{title} {roundNumber}</div>
-        <div className="round-subtitle">
-          {roundNumber === '1' ? 'First Round' :
-           roundNumber === rounds[rounds.length - 1] ? 'Final' :
-           roundNumber === rounds[rounds.length - 2] ? 'Semi-Final' :
-           `Round ${roundNumber}`}
+  // Function to render a round section (using your exact original styling)
+  const renderRoundSection = (roundNumber, matches, bracketType) => {
+    let displayRoundNumber, roundTitle;
+    
+    if (bracketType === 'loser') {
+      displayRoundNumber = roundNumber - 100;
+      roundTitle = `LB Round ${displayRoundNumber}`;
+    } else if (bracketType === 'championship') {
+      roundTitle = "Championship";
+    } else {
+      displayRoundNumber = roundNumber;
+      roundTitle = `Round ${displayRoundNumber}`;
+    }
+
+    const roundMatches = matches.filter(m => m.round_number == roundNumber);
+
+    return (
+      <div key={roundNumber} className="round" data-round={displayRoundNumber || 0}>
+        <div className="round-header">
+          <div className="round-number">{roundTitle}</div>
+          <div className="round-subtitle">
+            {bracketType === 'championship' ? 'Final Match' :
+             bracketType === 'loser' && displayRoundNumber === 1 ? 'First LB Round' :
+             bracketType === 'loser' ? `LB Round ${displayRoundNumber}` :
+             displayRoundNumber === 1 ? 'First Round' :
+             `Round ${displayRoundNumber}`}
+          </div>
+        </div>
+        <div className="matches">
+          {roundMatches.map((match, matchIndex) => renderMatch(match, matchIndex))}
         </div>
       </div>
-      <div className="matches">
-        {matches[roundNumber].map((match, matchIndex) => renderMatch(match, matchIndex))}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="enhanced-bracket-wrapper">
@@ -215,7 +233,7 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
                     y1={fromPoint.y}
                     x2={midX}
                     y2={fromPoint.y}
-                    stroke="black"
+                    stroke="white"
                     strokeWidth="2"
                   />
                   <line
@@ -223,7 +241,7 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
                     y1={fromPoint.y}
                     x2={midX}
                     y2={toPoint.yLeft}
-                    stroke="black"
+                    stroke="white"
                     strokeWidth="2"
                   />
                   <line
@@ -231,7 +249,7 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
                     y1={toPoint.yLeft}
                     x2={toPoint.xLeft}
                     y2={toPoint.yLeft}
-                    stroke="black"
+                    stroke="white"
                     strokeWidth="2"
                   />
                 </g>
@@ -255,7 +273,7 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
                     y1={fromPoint.y}
                     x2={midX}
                     y2={fromPoint.y}
-                    stroke="black"
+                    stroke="white"
                     strokeWidth="2"
                   />
                   <line
@@ -263,7 +281,7 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
                     y1={fromPoint.y}
                     x2={midX}
                     y2={toPoint.yLeft}
-                    stroke="black"
+                    stroke="white"
                     strokeWidth="2"
                   />
                   <line
@@ -271,7 +289,7 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
                     y1={toPoint.yLeft}
                     x2={toPoint.xLeft}
                     y2={toPoint.yLeft}
-                    stroke="black"
+                    stroke="white"
                     strokeWidth="2"
                   />
                 </g>
@@ -289,61 +307,35 @@ const CustomBracket = ({ matches, eliminationType = 'single' }) => {
                 <h3 className="bracket-title">Winner's Bracket</h3>
                 <div className="rounds-container">
                   {winnerRounds.map(roundNumber => 
-                    renderRoundSection(
-                      roundNumber, 
-                      winnerRounds, 
-                      winnerMatches.reduce((acc, match) => {
-                        if (!acc[match.round_number]) acc[match.round_number] = [];
-                        acc[match.round_number].push(match);
-                        return acc;
-                      }, {}),
-                      'winner',
-                      'Round'
-                    )
+                    renderRoundSection(roundNumber, winnerMatches, 'winner')
                   )}
                 </div>
               </div>
 
               {/* Loser's Bracket */}
-              <div className="bracket-section loser-bracket" data-bracket-type="loser">
-                <h3 className="bracket-title">Loser's Bracket</h3>
-                <div className="rounds-container">
-                  {loserRounds.map(roundNumber => 
-                    renderRoundSection(
-                      roundNumber, 
-                      loserRounds, 
-                      loserMatches.reduce((acc, match) => {
-                        if (!acc[match.round_number]) acc[match.round_number] = [];
-                        acc[match.round_number].push(match);
-                        return acc;
-                      }, {}),
-                      'loser',
-                      'Round'
-                    )
-                  )}
+              {loserMatches.length > 0 && (
+                <div className="bracket-section loser-bracket" data-bracket-type="loser">
+                  <h3 className="bracket-title">Loser's Bracket</h3>
+                  <div className="rounds-container">
+                    {loserRounds.map(roundNumber => 
+                      renderRoundSection(roundNumber, loserMatches, 'loser')
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Championship Match */}
               {championshipMatches.length > 0 && (
                 <div className="bracket-section championship-bracket" data-bracket-type="championship">
                   <h3 className="bracket-title">Championship</h3>
                   <div className="rounds-container">
-                    <div className="round" data-round={0}>
-                      <div className="round-header">
-                        <div className="round-number">Championship</div>
-                        <div className="round-subtitle">Final Match</div>
-                      </div>
-                      <div className="matches">
-                        {championshipMatches.map((match, matchIndex) => renderMatch(match, matchIndex))}
-                      </div>
-                    </div>
+                    {renderRoundSection(200, championshipMatches, 'championship')}
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            // Single Elimination Bracket (original)
+            // Single Elimination Bracket (original layout)
             winnerRounds.map((roundNumber, roundIndex) => (
               <div key={roundNumber} className="round" data-round={roundIndex}>
                 <div className="round-header">
