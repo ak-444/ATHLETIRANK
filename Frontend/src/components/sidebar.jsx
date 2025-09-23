@@ -13,6 +13,7 @@ import { HiUsers } from "react-icons/hi2";
 import { RiLogoutCircleLine } from "react-icons/ri"
 import { FaUser } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { LiaAwardSolid } from "react-icons/lia";
 
 const SideBar = ({ isOpen, toggleSidebar }) => {
     const { user, logout } = useAuth();
@@ -30,6 +31,7 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
         { icon: <TbTournament />, label: "Brackets", id: "bracket", path: "/AdminDashboard/brackets" },
         { icon: <AiFillSchedule />, label: "Schedules", id: "schedule", path: "/AdminDashboard/schedules" },
         { icon: <RiTeamFill />, label: "Teams", id: "teams", path: "/AdminDashboard/teams" },
+        { icon: <LiaAwardSolid />, label: "Awards & Standings", id: "awards&standings", path: "/AdminDashboard/awards&standings" },
         { icon: <IoStatsChart />, label: "Stats", id: "stats", path: "/AdminDashboard/stats" },
         { icon: <HiUsers />, label: "Users", id: "users", path: "/AdminDashboard/users" },
          // Added Events

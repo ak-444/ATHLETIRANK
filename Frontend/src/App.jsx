@@ -12,6 +12,7 @@ import SideBar from "./components/sidebar";
 import TeamsPage from "./pages/Admin/Admin_Teams";
 import AdminStats from "./pages/Admin/Admin_Stats";
 import AdminUsers from "./pages/Admin/Admin_Users";
+import AdminAwardsStandings from "./pages/Admin/Admin_Awards & Standings";
 
 import StaffDashboard from "./pages/Staff/Staff_Dashboard";
 import StaffEvents from "./pages/Staff/Staff_Events";
@@ -125,6 +126,16 @@ function App() {
                 <>
                   <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
                   <AdminStats sidebarOpen={sidebarOpen} />
+                </>
+              }
+            />
+
+            <Route
+              path="/AdminDashboard/awards&standings"
+              element={
+                <>
+                  <SideBar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+                  <AdminAwardsStandings sidebarOpen={sidebarOpen} />
                 </>
               }
             />
