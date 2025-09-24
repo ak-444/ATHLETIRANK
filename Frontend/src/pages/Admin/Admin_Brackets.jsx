@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CustomBracket from "../../components/CustomBracket";
 import DoubleEliminationBracket from "../../components/DoubleEliminationBracket";
 import "../../style/Admin_BracketPage.css";
 
@@ -452,11 +453,18 @@ const BracketsPage = ({ sidebarOpen }) => {
                   <p><strong>Teams:</strong> {selectedBracket.team_count || 0}</p>
                 </div>
                 
-                {/* Use DoubleEliminationBracket component */}
-                <DoubleEliminationBracket 
-                  matches={bracketMatches} 
-                  eliminationType={selectedBracket.elimination_type} 
-                />
+                {/* Conditional rendering based on elimination type */}
+                {selectedBracket.elimination_type === 'single' ? (
+                  <CustomBracket 
+                    matches={bracketMatches} 
+                    eliminationType={selectedBracket.elimination_type} 
+                  />
+                ) : (
+                  <DoubleEliminationBracket 
+                    matches={bracketMatches} 
+                    eliminationType={selectedBracket.elimination_type} 
+                  />
+                )}
               </div>
             )}
           </div>
