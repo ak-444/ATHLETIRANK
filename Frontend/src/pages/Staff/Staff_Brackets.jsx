@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomBracket from "../../components/CustomBracket";
+import DoubleEliminationBracket from "../../components/DoubleEliminationBracket"; // Import the double elimination component
 import "../../style/Admin_BracketPage.css";
 
 const StaffBrackets = ({ sidebarOpen }) => {
@@ -77,6 +78,35 @@ const StaffBrackets = ({ sidebarOpen }) => {
     setActiveTab("bracket");
   };
 
+  const handleBackToBrackets = () => {
+    setSelectedBracket(null);
+    setBracketMatches([]);
+    setActiveTab("view");
+  };
+
+  // Function to render the appropriate bracket component based on elimination type
+  const renderBracketVisualization = () => {
+    if (!selectedBracket || !bracketMatches) return null;
+
+    // Check if it's double elimination
+    if (selectedBracket.elimination_type === 'double') {
+      return (
+        <DoubleEliminationBracket 
+          matches={bracketMatches} 
+          eliminationType="double" 
+        />
+      );
+    } else {
+      // Single elimination - use existing CustomBracket component
+      return (
+        <CustomBracket 
+          matches={bracketMatches} 
+          eliminationType="single"
+        />
+      );
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
@@ -121,15 +151,22 @@ const StaffBrackets = ({ sidebarOpen }) => {
                         <div key={b.id} className="bracket-card">
                           <div className="bracket-card-header">
                             <h3>{b.name}</h3>
-                            <span className={`bracket-sport-badge bracket-sport-${b.sport_type}`}>
-                              {capitalize(b.sport_type)}
-                            </span>
+                            <div className="bracket-badges">
+                              <span className={`bracket-sport-badge bracket-sport-${b.sport_type}`}>
+                                {capitalize(b.sport_type)}
+                              </span>
+                            </div>
                           </div>
                           <div className="bracket-card-info">
                             <div><strong>Event:</strong> {eventName}</div>
-                            <div><strong>Type:</strong> {b.elimination_type === "single" ? "Single" : "Double"} Elimination</div>
+                            <div><strong>Format:</strong> {b.elimination_type === "single" ? "Single" : "Double"} Elimination</div>
                             <div><strong>Teams:</strong> {b.team_count || 0}</div>
                             <div><strong>Created:</strong> {new Date(b.created_at).toLocaleDateString()}</div>
+                            {b.winner_team_name && (
+                              <div className="bracket-winner">
+                                <strong>Winner:</strong> {b.winner_team_name}
+                              </div>
+                            )}
                           </div>
                           <div className="bracket-card-actions">
                             <button 
@@ -150,21 +187,25 @@ const StaffBrackets = ({ sidebarOpen }) => {
             {/* Bracket Visualization */}
             {activeTab === "bracket" && selectedBracket && (
               <div className="bracket-visualization-section">
-                <div className="bracket-header">
-                  <h2>{selectedBracket.name}</h2>
-                  <button 
-                    className="bracket-back-btn"
-                    onClick={() => setActiveTab("view")}
-                  >
-                    Back to Brackets
-                  </button>
-                </div>
+                <h2>{selectedBracket.name} - Tournament Bracket</h2>
                 <div className="bracket-info">
                   <p><strong>Sport:</strong> {capitalize(selectedBracket.sport_type)}</p>
                   <p><strong>Type:</strong> {selectedBracket.elimination_type === "single" ? "Single" : "Double"} Elimination</p>
                   <p><strong>Teams:</strong> {selectedBracket.team_count || 0}</p>
                 </div>
-                <CustomBracket matches={bracketMatches} />
+                
+                {/* Conditional rendering based on elimination type */}
+                {selectedBracket.elimination_type === 'single' ? (
+                  <CustomBracket 
+                    matches={bracketMatches} 
+                    eliminationType={selectedBracket.elimination_type} 
+                  />
+                ) : (
+                  <DoubleEliminationBracket 
+                    matches={bracketMatches} 
+                    eliminationType={selectedBracket.elimination_type} 
+                  />
+                )}
               </div>
             )}
           </div>

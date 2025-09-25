@@ -1,4 +1,4 @@
-/* User Bracket Page Styles with Dark Theme - Unique class names to avoid conflicts */
+/* User Bracket Page Styles with Dark Theme - Widened Display Version */
 
 .user_bracket_page_admin_dashboard {
   min-height: 100vh;
@@ -128,20 +128,22 @@
   }
 }
 
-/* Dashboard Content */
+/* Dashboard Content - WIDENED VERSION */
 .user_bracket_page_dashboard_content {
   margin-left: 0;
   transition: margin-left 0.3s ease;
-  padding: 20px;
+  padding: 20px 10px; /* Reduced horizontal padding for more width */
 }
 
 .user_bracket_page_dashboard_content.user_bracket_page_sidebar_open {
   margin-left: 280px;
 }
 
+/* Dashboard Main - REMOVED WIDTH CONSTRAINTS */
 .user_bracket_page_dashboard_main {
-  max-width: 1400px;
-  margin: 0 auto;
+  max-width: none; /* Removed 1400px constraint */
+  margin: 0;
+  padding: 0 5px; /* Minimal horizontal padding */
 }
 
 .user_bracket_page_bracket_content {
@@ -150,6 +152,7 @@
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-light);
   overflow: hidden;
+  width: 100%;
 }
 
 /* Tab Navigation */
@@ -185,7 +188,7 @@
 /* View Section */
 .user_bracket_page_bracket_view_section {
   background: var(--background-card);
-  padding: 40px;
+  padding: 40px 30px; /* Reduced horizontal padding */
 }
 
 .user_bracket_page_bracket_filters h2 {
@@ -340,11 +343,12 @@
   line-height: 1.5;
 }
 
-/* Bracket Grid */
+/* Bracket Grid - WIDENED */
 .user_bracket_page_bracket_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Wider minimum width */
+  gap: 25px;
+  width: 100%;
 }
 
 .user_bracket_page_bracket_card {
@@ -440,6 +444,28 @@
   color: white;
 }
 
+/* Elimination type badges */
+.user_bracket_page_bracket_elimination_badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.user_bracket_page_bracket_elimination_single {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.user_bracket_page_bracket_elimination_double {
+  background: linear-gradient(135deg, #FF9800, #f57c00);
+  color: white;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+}
+
 .user_bracket_page_bracket_card_info {
   margin-bottom: 24px;
   line-height: 1.7;
@@ -490,17 +516,19 @@
   box-shadow: var(--shadow-medium);
 }
 
-/* Bracket Visualization Section */
+/* Bracket Visualization Section - WIDENED */
 .user_bracket_page_bracket_visualization_section {
-  padding: 40px;
+  padding: 40px 15px; /* Reduced horizontal padding */
   background: var(--background-card);
 }
 
 .user_bracket_page_bracket_header_controls {
   display: flex;
   align-items: center;
-  margin-bottom: 30px;
-  gap: 20px;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .user_bracket_page_bracket_header_controls .user_bracket_page_bracket_back_btn {
@@ -518,28 +546,19 @@
   gap: 8px;
 }
 
-/* Add these styles to your User_BracketPage.css file */
-
-/* Elimination type badges */
-.user_bracket_page_bracket_elimination_badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+.user_bracket_page_bracket_header_controls .user_bracket_page_bracket_back_btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
 }
 
-.user_bracket_page_bracket_elimination_single {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
-  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
-}
-
-.user_bracket_page_bracket_elimination_double {
-  background: linear-gradient(135deg, #FF9800, #f57c00);
-  color: white;
-  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+.user_bracket_page_bracket_visualization_section h2 {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  flex: 1;
 }
 
 /* Elimination type indicator in bracket view */
@@ -562,66 +581,6 @@
   background: linear-gradient(135deg, #FF9800, #f57c00);
   color: white;
   box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
-}
-
-/* Enhanced header controls styling */
-.user_bracket_page_bracket_header_controls {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.user_bracket_page_bracket_header_controls h2 {
-  margin: 0;
-  flex-grow: 1;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .user_bracket_page_bracket_header_controls {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .user_bracket_page_elimination_indicator {
-    margin-left: 0;
-    margin-top: 10px;
-  }
-  
-  .user_bracket_page_bracket_badges {
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-}
-
-/* Animation for badges */
-.user_bracket_page_bracket_elimination_badge,
-.user_bracket_page_elimination_indicator {
-  transition: all 0.3s ease;
-}
-
-.user_bracket_page_bracket_elimination_badge:hover,
-.user_bracket_page_elimination_indicator:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.user_bracket_page_bracket_header_controls .user_bracket_page_bracket_back_btn:hover {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-.user_bracket_page_bracket_visualization_section h2 {
-  color: var(--text-primary);
-  margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-  flex: 1;
 }
 
 /* Bracket Info */
@@ -656,12 +615,17 @@
   margin-right: 8px;
 }
 
+/* Bracket Wrapper - WIDENED WITH SCROLL */
 .user_bracket_page_bracket_wrapper {
   background: var(--background-secondary);
   border-radius: var(--border-radius-lg);
-  padding: 20px;
+  padding: 30px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-light);
+  overflow-x: auto; /* Enable horizontal scrolling for wide brackets */
+  overflow-y: visible;
+  min-height: 600px; /* Increased minimum height */
+  width: 100%;
 }
 
 /* Animations */
@@ -687,7 +651,67 @@
   outline-offset: 2px;
 }
 
-/* Responsive Design */
+/* Animation for badges */
+.user_bracket_page_bracket_elimination_badge,
+.user_bracket_page_elimination_indicator {
+  transition: all 0.3s ease;
+}
+
+.user_bracket_page_bracket_elimination_badge:hover,
+.user_bracket_page_elimination_indicator:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design - ENHANCED FOR WIDE SCREENS */
+@media (min-width: 1400px) {
+  .user_bracket_page_dashboard_content {
+    padding: 20px 15px;
+  }
+  
+  .user_bracket_page_bracket_wrapper {
+    padding: 40px;
+    min-height: 700px;
+  }
+  
+  .user_bracket_page_bracket_grid {
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 30px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .user_bracket_page_dashboard_content {
+    padding: 20px 20px;
+  }
+  
+  .user_bracket_page_bracket_wrapper {
+    padding: 50px;
+    min-height: 800px;
+  }
+  
+  .user_bracket_page_bracket_grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 35px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .user_bracket_page_dashboard_content {
+    padding: 20px 25px;
+  }
+  
+  .user_bracket_page_bracket_wrapper {
+    padding: 60px;
+    min-height: 900px;
+  }
+  
+  .user_bracket_page_bracket_grid {
+    grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    gap: 40px;
+  }
+}
+
 @media (max-width: 1200px) {
   .user_bracket_page_dashboard_content.user_bracket_page_sidebar_open {
     margin-left: 0;
@@ -758,13 +782,18 @@
   }
   
   .user_bracket_page_bracket_visualization_section {
-    padding: 20px;
+    padding: 15px;
   }
   
   .user_bracket_page_bracket_header_controls {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+  }
+  
+  .user_bracket_page_elimination_indicator {
+    margin-left: 0;
+    margin-top: 10px;
   }
   
   .user_bracket_page_bracket_info {
@@ -778,8 +807,9 @@
   }
   
   .user_bracket_page_bracket_wrapper {
-    padding: 15px;
+    padding: 20px;
     overflow-x: auto;
+    min-height: 400px;
   }
 }
 
@@ -805,7 +835,12 @@
   }
   
   .user_bracket_page_bracket_visualization_section {
+    padding: 10px;
+  }
+  
+  .user_bracket_page_bracket_wrapper {
     padding: 15px;
+    min-height: 350px;
   }
 }
 
