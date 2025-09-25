@@ -20,6 +20,7 @@ const StaffStats = ({ sidebarOpen }) => {
   const [teams, setTeams] = useState([]);
   const [games, setGames] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedBracket, setSelectedBracket] = useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
   const [playerStats, setPlayerStats] = useState([]);
   const [teamScores, setTeamScores] = useState({
@@ -256,6 +257,7 @@ const StaffStats = ({ sidebarOpen }) => {
   const handleEventSelect = async (event) => {
     console.log("Selected event:", event);
     setSelectedEvent(event);
+    setSelectedBracket(null);
     setSelectedGame(null);
     setPlayerStats([]);
     setTeamScores({ team1: [0, 0, 0, 0], team2: [0, 0, 0, 0] });
@@ -285,46 +287,62 @@ const StaffStats = ({ sidebarOpen }) => {
         return;
       }
 
+      setLoading(false);
+      setActiveTab("bracket-selection");
+
+    } catch (err) {
+      console.error("Error loading event data:", err);
+      setError("Failed to load event data: " + err.message);
+      setLoading(false);
+    }
+  };
+
+  // Handle bracket selection
+  const handleBracketSelect = async (bracket) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
       const allMatches = [];
       const allTeams = [];
 
-      for (const bracket of bracketData) {
-        const matchRes = await fetch(
-          `http://localhost:5000/api/stats/${bracket.id}/matches`
+      // Fetch matches for the selected bracket
+      const matchRes = await fetch(
+        `http://localhost:5000/api/stats/${bracket.id}/matches`
+      );
+      
+      if (!matchRes.ok) {
+        console.error(`Failed to fetch matches for bracket ${bracket.id}: ${matchRes.status}`);
+        throw new Error(`Failed to load matches for ${bracket.name}`);
+      }
+      
+      const matchData = await matchRes.json();
+      const matchesWithBracket = matchData.map(match => ({
+        ...match,
+        bracket_name: bracket.name,
+        sport_type: bracket.sport_type,
+        bracket_id: bracket.id,
+        elimination_type: bracket.elimination_type
+      }));
+      
+      allMatches.push(...matchesWithBracket);
+
+      // Fetch teams for the selected bracket
+      try {
+        const teamRes = await fetch(
+          `http://localhost:5000/api/stats/${bracket.id}/teams`
         );
         
-        if (!matchRes.ok) {
-          console.error(`Failed to fetch matches for bracket ${bracket.id}: ${matchRes.status}`);
-          continue;
+        if (teamRes.ok) {
+          const teamData = await teamRes.json();
+          teamData.forEach(team => {
+            if (!allTeams.find(t => t.id === team.id)) {
+              allTeams.push(team);
+            }
+          });
         }
-        
-        const matchData = await matchRes.json();
-        const matchesWithBracket = matchData.map(match => ({
-          ...match,
-          bracket_name: bracket.name,
-          sport_type: bracket.sport_type,
-          bracket_id: bracket.id,
-          elimination_type: bracket.elimination_type
-        }));
-        
-        allMatches.push(...matchesWithBracket);
-
-        try {
-          const teamRes = await fetch(
-            `http://localhost:5000/api/stats/${bracket.id}/teams`
-          );
-          
-          if (teamRes.ok) {
-            const teamData = await teamRes.json();
-            teamData.forEach(team => {
-              if (!allTeams.find(t => t.id === team.id)) {
-                allTeams.push(team);
-              }
-            });
-          }
-        } catch (teamErr) {
-          console.error(`Error fetching teams for bracket ${bracket.id}:`, teamErr);
-        }
+      } catch (teamErr) {
+        console.error(`Error fetching teams for bracket ${bracket.id}:`, teamErr);
       }
 
       // Sort matches by round number and bracket type
@@ -339,17 +357,19 @@ const StaffStats = ({ sidebarOpen }) => {
       
       setGames(allMatches);
       setTeams(allTeams);
+      setSelectedBracket(bracket);
 
       if (allMatches.length === 0) {
-        setError("No matches found for this event. Make sure brackets have matches.");
+        setError("No matches found for this bracket. Make sure brackets have matches.");
       }
 
+      setActiveTab("games");
+
     } catch (err) {
-      console.error("Error loading event data:", err);
-      setError("Failed to load event data: " + err.message);
+      console.error("Error loading bracket data:", err);
+      setError("Failed to load bracket data: " + err.message);
     } finally {
       setLoading(false);
-      setActiveTab("games");
     }
   };
 
@@ -645,8 +665,8 @@ const StaffStats = ({ sidebarOpen }) => {
       alert(message);
       
       // Refresh the games list to show updated match status
-      if (selectedEvent) {
-        handleEventSelect(selectedEvent);
+      if (selectedEvent && selectedBracket) {
+        handleBracketSelect(selectedBracket);
       }
       
     } catch (err) {
@@ -950,6 +970,8 @@ const StaffStats = ({ sidebarOpen }) => {
     );
   };
 
+  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+
   return (
     <div className="admin-dashboard">
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
@@ -969,6 +991,14 @@ const StaffStats = ({ sidebarOpen }) => {
                 Select Event
               </button>
               {selectedEvent && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "bracket-selection" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("bracket-selection")}
+                >
+                  Select Bracket
+                </button>
+              )}
+              {selectedEvent && selectedBracket && (
                 <button
                   className={`bracket-tab-button ${activeTab === "games" ? "bracket-tab-active" : ""}`}
                   onClick={() => setActiveTab("games")}
@@ -1029,11 +1059,11 @@ const StaffStats = ({ sidebarOpen }) => {
               </div>
             )}
 
-            {/* Manage Games */}
-            {activeTab === "games" && selectedEvent && (
+            {/* Select Bracket */}
+            {activeTab === "bracket-selection" && selectedEvent && (
               <div className="bracket-view-section">
                 <div className="event-details-header">
-                  <h2>Games for {selectedEvent.name}</h2>
+                  <h2>Select Bracket for {selectedEvent.name}</h2>
                   <div className="event-details-info">
                     <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
                     <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
@@ -1048,10 +1078,77 @@ const StaffStats = ({ sidebarOpen }) => {
                 )}
                 
                 {loading ? (
+                  <p>Loading brackets...</p>
+                ) : brackets.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No brackets found for this event.</p>
+                    <p>Create brackets first in the Brackets Management page.</p>
+                  </div>
+                ) : (
+                  <div className="bracket-grid">
+                    {brackets.map((bracket) => (
+                      <div className="bracket-card" key={bracket.id}>
+                        <div className="bracket-card-header">
+                          <h3>{bracket.name}</h3>
+                          <span className={`bracket-sport-badge bracket-sport-${bracket.sport_type}`}>
+                            {bracket.sport_type}
+                          </span>
+                        </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Sport:</strong> {bracket.sport_type}</div>
+                          <div><strong>Type:</strong> 
+                            <span className={`elimination-type-${bracket.elimination_type}`}>
+                              {bracket.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
+                            </span>
+                          </div>
+                          <div><strong>Teams:</strong> {bracket.team_count || 0}</div>
+                          <div><strong>Created:</strong> {new Date(bracket.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button 
+                            className="bracket-view-btn" 
+                            onClick={() => handleBracketSelect(bracket)}
+                          >
+                            Manage Games
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Manage Games */}
+            {activeTab === "games" && selectedEvent && selectedBracket && (
+              <div className="bracket-view-section">
+                <div className="event-details-header">
+                  <h2>
+                    Games for {selectedEvent.name} - {selectedBracket.name} ({selectedBracket.sport_type})
+                  </h2>
+                  <div className="event-details-info">
+                    <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
+                    <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
+                    <span><strong>Status:</strong> {selectedEvent.status}</span>
+                    <span><strong>Bracket Type:</strong> 
+                      <span className={`elimination-type-${selectedBracket.elimination_type}`}>
+                        {selectedBracket.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                
+                {error && (
+                  <div className="bracket-error">
+                    {error}
+                  </div>
+                )}
+                
+                {loading ? (
                   <p>Loading games...</p>
                 ) : games.length === 0 ? (
                   <div className="bracket-no-brackets">
-                    <p>No games found for this event.</p>
+                    <p>No games found for this bracket.</p>
                     <p>Make sure brackets have been created and matches have been generated.</p>
                   </div>
                 ) : (
