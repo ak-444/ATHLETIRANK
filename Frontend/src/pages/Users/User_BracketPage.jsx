@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomBracket from "../../components/CustomBracket";
+import DoubleEliminationBracket from "../../components/DoubleEliminationBracket"; // Import the double elimination component
 import "../../style/User_BracketPage.css";
 import { RiTrophyFill } from "react-icons/ri";
 
@@ -92,6 +93,29 @@ const User_BracketPage = ({ sidebarOpen }) => {
 
   // Get unique sports from brackets
   const availableSports = [...new Set(brackets.map(b => b.sport_type))];
+
+  // Function to render the appropriate bracket component based on elimination type
+  const renderBracketVisualization = () => {
+    if (!selectedBracket || !bracketMatches) return null;
+
+    // Check if it's double elimination
+    if (selectedBracket.elimination_type === 'double') {
+      return (
+        <DoubleEliminationBracket 
+          matches={bracketMatches} 
+          eliminationType="double" 
+        />
+      );
+    } else {
+      // Single elimination - use your existing CustomBracket component
+      return (
+        <CustomBracket 
+          matches={bracketMatches} 
+          eliminationType="single"
+        />
+      );
+    }
+  };
 
   return (
     <div className="user_bracket_page_admin_dashboard">
@@ -230,6 +254,10 @@ const User_BracketPage = ({ sidebarOpen }) => {
                               <span className={`user_bracket_page_bracket_sport_badge user_bracket_page_bracket_sport_${b.sport_type}`}>
                                 {capitalize(b.sport_type)}
                               </span>
+                              {/* Add elimination type badge */}
+                              <span className={`user_bracket_page_bracket_elimination_badge user_bracket_page_bracket_elimination_${b.elimination_type}`}>
+                                {b.elimination_type === 'double' ? 'DOUBLE' : 'SINGLE'}
+                              </span>
                               {isOngoing && (
                                 <span className="user_bracket_page_bracket_status_badge user_bracket_page_bracket_status_live">
                                   LIVE
@@ -282,6 +310,10 @@ const User_BracketPage = ({ sidebarOpen }) => {
                     ← Back to Brackets
                   </button>
                   <h2>{selectedBracket.name}</h2>
+                  {/* Add elimination type indicator */}
+                  <span className={`user_bracket_page_elimination_indicator elimination_${selectedBracket.elimination_type}`}>
+                    {selectedBracket.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
+                  </span>
                 </div>
                 
                 <div className="user_bracket_page_bracket_info">
@@ -292,7 +324,7 @@ const User_BracketPage = ({ sidebarOpen }) => {
                 </div>
                 
                 <div className="user_bracket_page_bracket_wrapper">
-                  <CustomBracket matches={bracketMatches} />
+                  {renderBracketVisualization()}
                 </div>
               </div>
             )}

@@ -518,6 +518,97 @@
   gap: 8px;
 }
 
+/* Add these styles to your User_BracketPage.css file */
+
+/* Elimination type badges */
+.user_bracket_page_bracket_elimination_badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.user_bracket_page_bracket_elimination_single {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.user_bracket_page_bracket_elimination_double {
+  background: linear-gradient(135deg, #FF9800, #f57c00);
+  color: white;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+}
+
+/* Elimination type indicator in bracket view */
+.user_bracket_page_elimination_indicator {
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 15px;
+  display: inline-block;
+}
+
+.elimination_single {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+.elimination_double {
+  background: linear-gradient(135deg, #FF9800, #f57c00);
+  color: white;
+  box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
+}
+
+/* Enhanced header controls styling */
+.user_bracket_page_bracket_header_controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.user_bracket_page_bracket_header_controls h2 {
+  margin: 0;
+  flex-grow: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user_bracket_page_bracket_header_controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .user_bracket_page_elimination_indicator {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  
+  .user_bracket_page_bracket_badges {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}
+
+/* Animation for badges */
+.user_bracket_page_bracket_elimination_badge,
+.user_bracket_page_elimination_indicator {
+  transition: all 0.3s ease;
+}
+
+.user_bracket_page_bracket_elimination_badge:hover,
+.user_bracket_page_elimination_indicator:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .user_bracket_page_bracket_header_controls .user_bracket_page_bracket_back_btn:hover {
   background: var(--primary-color);
   color: white;
