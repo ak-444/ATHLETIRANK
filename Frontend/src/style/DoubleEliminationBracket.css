@@ -1,11 +1,12 @@
-/* Double Elimination Bracket Styles */
+/* Double Elimination Bracket Styles - EXACT SINGLE ELIMINATION STYLING WITH DOUBLE PREFIXES */
 .double-bracket-wrapper {
   padding: 32px;
   background: linear-gradient(135deg, #0c1445 0%, #1a237e 50%, #283593 100%);
   border-radius: 16px;
   min-height: 500px;
   position: relative;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .double-bracket {
@@ -13,6 +14,7 @@
   z-index: 1;
   opacity: 0.95;
   transition: opacity 0.3s ease;
+  min-width: 1200px;
 }
 
 .double-tournament-title {
@@ -27,11 +29,13 @@
 /* Main Layout - Horizontal Structure */
 .double-main-bracket-container {
   display: flex;
-  align-items: flex-start;
-  gap: 60px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 80px;
   width: 100%;
-  overflow-x: auto;
-  padding: 20px 0;
+  padding: 24px 0;
+  position: relative;
+  z-index: 1;
 }
 
 .double-left-brackets {
@@ -39,14 +43,17 @@
   flex-direction: column;
   gap: 60px;
   flex: 1;
+  max-width: calc(100% - 400px);
 }
 
 .double-right-championship {
   display: flex;
   align-items: center;
+  justify-content: center;
   min-height: 400px;
   padding-left: 40px;
-  border-left: 3px dashed rgba(255, 255, 255, 0.3);
+  width: 350px;
+  flex-shrink: 0;
 }
 
 /* Bracket Sections */
@@ -61,40 +68,46 @@
   margin-bottom: 30px;
   padding: 16px;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(26, 35, 126, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 1.4em;
   font-weight: 700;
-}
-
-.winner-bracket-section .double-bracket-title {
   background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
 }
 
+/* Loser Bracket Title - Red */
 .loser-bracket-section .double-bracket-title {
-  background: linear-gradient(135deg, #7e1a1a 0%, #933928 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  box-shadow: 0 8px 32px rgba(220, 38, 38, 0.4);
 }
 
+/* Championship Bracket Title - Yellow */
 .championship-bracket-section .double-bracket-title {
-  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  box-shadow: 0 8px 32px rgba(234, 179, 8, 0.4);
+  color: #1a1a1a;
 }
 
 /* Rounds Container */
 .double-rounds-container {
   display: flex;
   gap: 80px;
-  min-width: max-content;
-  padding: 0 20px;
+  padding: 0;
 }
 
 .double-round {
+  min-width: 320px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  min-width: 320px;
+  justify-content: space-around;
 }
 
 .double-round-header {
   text-align: center;
+  margin-bottom: 24px;
   padding: 16px;
   background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
   color: white;
@@ -103,17 +116,9 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.loser-round-header {
-  background: linear-gradient(135deg, #7e1a1a 0%, #933928 100%);
-}
-
-.championship-round-header {
-  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-}
-
 .double-round-number {
   margin: 0;
-  font-size: 1.3em;
+  font-size: 1.4em;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
@@ -128,47 +133,25 @@
 .double-matches {
   display: flex;
   flex-direction: column;
-  gap: 60px;
   justify-content: space-around;
   flex-grow: 1;
+  gap: 20px;
 }
 
-/* Match Styles */
+/* Match Styles - EXACT SAME AS SINGLE ELIMINATION */
 .double-match {
   background: rgba(15, 23, 42, 0.85);
   border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   padding: 20px;
-  width: 280px;
-  min-width: 280px;
+  width: 100%;
+  min-width: auto;
+  max-width: none;
   box-sizing: border-box;
   box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(8px);
   position: relative;
-}
-
-.double-match::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 16px;
-  padding: 2px;
-  background: linear-gradient(135deg, transparent 0%, rgba(41, 98, 255, 0.15) 50%, transparent 100%);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: xor;
-  pointer-events: none;
-}
-
-.loser-match::before {
-  background: linear-gradient(135deg, transparent 0%, rgba(255, 41, 41, 0.15) 50%, transparent 100%);
-}
-
-.championship-match::before {
-  background: linear-gradient(135deg, transparent 0%, rgba(255, 215, 0, 0.15) 50%, transparent 100%);
 }
 
 .double-match:hover {
@@ -185,7 +168,7 @@
 .double-match.ongoing {
   border-color: rgba(245, 158, 11, 0.5);
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%);
-  animation: doublePulseMatch 2s infinite ease-in-out;
+  animation: pulseMatch 2s infinite ease-in-out;
 }
 
 .double-match.scheduled {
@@ -282,7 +265,7 @@
 }
 
 .double-winner-crown {
-  animation: doubleBounce 1s infinite;
+  animation: bounce 1s infinite;
 }
 
 .double-score {
@@ -294,14 +277,6 @@
   min-width: 40px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(26, 35, 126, 0.3);
-}
-
-.loser-bracket-section .double-score {
-  background: linear-gradient(135deg, #7e1a1a 0%, #933928 100%);
-}
-
-.championship-bracket-section .double-score {
-  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
 }
 
 /* VS Divider */
@@ -322,16 +297,6 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-.loser-bracket-section .double-vs-text,
-.loser-bracket-section .double-bye-text {
-  background: linear-gradient(135deg, #c05c5c 0%, #ab3939 100%);
-}
-
-.championship-bracket-section .double-vs-text,
-.championship-bracket-section .double-bye-text {
-  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-}
-
 /* Match Results & Indicators */
 .double-match-result {
   display: flex;
@@ -349,7 +314,7 @@
 
 .double-trophy-icon {
   font-size: 1.2em;
-  animation: doubleRotate 2s linear infinite;
+  animation: rotate 2s linear infinite;
 }
 
 .double-bye-notice {
@@ -388,7 +353,7 @@
   height: 8px;
   background: #ef4444;
   border-radius: 50%;
-  animation: doubleLivePulse 1.5s infinite ease-in-out;
+  animation: livePulse 1.5s infinite ease-in-out;
 }
 
 /* Connection Lines */
@@ -400,11 +365,6 @@
   height: 100%;
   pointer-events: none;
   z-index: 0;
-}
-
-.double-bracket-connection line {
-  stroke-width: 3;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 /* Empty States */
@@ -445,24 +405,14 @@
   line-height: 1.5;
 }
 
-/* Bracket-specific styles */
-.loser-bracket-section .double-match {
-  border-color: rgba(255, 107, 107, 0.4);
-}
-
-.championship-bracket-section .double-match {
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 0 25px rgba(255, 215, 0, 0.4);
-}
-
 /* Keyframe Animations */
-@keyframes doubleBounce {
+@keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-4px); }
   60% { transform: translateY(-2px); }
 }
 
-@keyframes doubleRotate {
+@keyframes rotate {
   0% { transform: rotate(0deg); }
   10% { transform: rotate(-10deg); }
   20% { transform: rotate(10deg); }
@@ -472,12 +422,12 @@
   100% { transform: rotate(0deg); }
 }
 
-@keyframes doubleLivePulse {
+@keyframes livePulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.2); }
 }
 
-@keyframes doublePulseMatch {
+@keyframes pulseMatch {
   0%, 100% { 
     box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 0 rgba(245, 158, 11, 0.4); 
   }
@@ -486,60 +436,23 @@
   }
 }
 
-@keyframes doubleDrawLine {
-  0% {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* Connector Styles for Horizontal Tree */
-.double-connector {
-  position: absolute;
-  background: #4dabf7;
-  z-index: -1;
-}
-
-.double-connector.horizontal {
-  height: 3px;
-}
-
-.double-connector.vertical {
-  width: 3px;
-}
-
-.double-connector.winner {
-  background: #4dabf7;
-}
-
-.double-connector.loser {
-  background: #ff6b6b;
-}
-
-.double-connector.championship {
-  background: #ffd700;
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
   .double-main-bracket-container {
     flex-direction: column;
     gap: 40px;
+    align-items: stretch;
   }
   
   .double-left-brackets {
     width: 100%;
+    max-width: none;
   }
   
   .double-right-championship {
     width: 100%;
     padding-left: 0;
     padding-top: 40px;
-    border-left: none;
-    border-top: 3px dashed rgba(255, 255, 255, 0.3);
     justify-content: center;
   }
   
@@ -558,6 +471,11 @@
     margin-bottom: 20px;
   }
   
+  .double-main-bracket-container {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
   .double-rounds-container {
     flex-direction: column;
     gap: 30px;
@@ -568,9 +486,8 @@
   }
   
   .double-match {
-    width: 100%;
-    min-width: auto;
-    max-width: 100%;
+    padding: 16px;
+    margin-bottom: 20px;
   }
   
   .double-connection-lines {
@@ -602,34 +519,5 @@
   
   .double-round-number {
     font-size: 1.1em;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .double-bracket-wrapper {
-    background: white;
-    padding: 20px;
-  }
-  
-  .double-tournament-title {
-    color: black;
-    text-shadow: none;
-  }
-  
-  .double-match {
-    background: white;
-    border-color: #ccc;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-  
-  .double-round-header {
-    background: #f5f5f5;
-    color: black;
-    border-color: #ddd;
-  }
-  
-  .double-connection-lines {
-    display: none;
   }
 }

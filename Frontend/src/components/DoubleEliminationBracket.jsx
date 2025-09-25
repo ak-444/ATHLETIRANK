@@ -32,13 +32,13 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
   useEffect(() => {
     if (!bracketRef.current) return;
 
-    const matchEls = bracketRef.current.querySelectorAll(".double-match");
+    const matchEls = bracketRef.current.querySelectorAll(".match");
     const points = [];
 
     matchEls.forEach((matchEl) => {
-      const roundIndex = parseInt(matchEl.closest(".double-round")?.dataset.round, 10);
+      const roundIndex = parseInt(matchEl.closest(".round")?.dataset.round, 10);
       const matchIndex = parseInt(matchEl.dataset.match, 10);
-      const bracketType = matchEl.closest(".double-bracket-section")?.dataset.bracketType || 'winner';
+      const bracketType = matchEl.closest(".bracket-section")?.dataset.bracketType || 'winner';
 
       const rect = matchEl.getBoundingClientRect();
       const containerRect = bracketRef.current.getBoundingClientRect();
@@ -56,9 +56,9 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
 
   if (!matches || matches.length === 0) {
     return (
-      <div className="double-no-matches">
-        <div className="double-no-matches-content">
-          <div className="double-no-matches-icon">🏆</div>
+      <div className="no-matches">
+        <div className="no-matches-content">
+          <div className="no-matches-icon">🏆</div>
           <h3>No Tournament Created Yet</h3>
           <p>Generate matches by creating a bracket with teams to see the tournament structure.</p>
         </div>
@@ -87,77 +87,77 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
   const winnerRounds = groupMatchesByRound(winnerMatches);
   const loserRounds = groupMatchesByRound(loserMatches);
 
-  // Function to render a single match component
+  // Function to render a single match component - USING SINGLE ELIMINATION CLASSES
   const renderMatch = (match, matchIndex, bracketType) => (
     <div 
       key={match.id} 
-      className={`double-match ${match.status} ${bracketType}-match`}
+      className={`match ${match.status}`}
       data-match={matchIndex}
     >
-      <div className="double-match-header">
-        <span className="double-match-id">Game #{matchDisplayNumbers[match.id]}</span>
-        <span className={`double-match-status ${match.status}`}>
+      <div className="match-header">
+        <span className="match-id">Game #{matchDisplayNumbers[match.id]}</span>
+        <span className={`match-status ${match.status}`}>
           {match.status === 'completed' ? '✓' : 
             match.status === 'ongoing' ? '⏱️' : '📅'}
           {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
         </span>
       </div>
       
-      <div className="double-teams-container">
-        <div className={`double-team double-team1 ${match.winner_id === match.team1_id ? 'winner' : ''}`}>
-          <div className="double-team-info">
-            <span className="double-team-name">
+      <div className="teams-container">
+        <div className={`team team1 ${match.winner_id === match.team1_id ? 'winner' : ''}`}>
+          <div className="team-info">
+            <span className="team-name">
               {match.team1_name || 'TBD'}
             </span>
             {match.winner_id === match.team1_id && (
-              <span className="double-winner-crown">👑</span>
+              <span className="winner-crown">👑</span>
             )}
           </div>
           {match.score_team1 !== null && match.score_team1 !== undefined && (
-            <span className="double-score">{match.score_team1}</span>
+            <span className="score">{match.score_team1}</span>
           )}
         </div>
 
-        <div className="double-vs-divider">
+        <div className="vs-divider">
           {match.team2_id ? (
-            <span className="double-vs-text">VS</span>
+            <span className="vs-text">VS</span>
           ) : (
-            <span className="double-bye-text">BYE</span>
+            <span className="bye-text">BYE</span>
           )}
         </div>
 
-        <div className={`double-team double-team2 ${match.winner_id === match.team2_id ? 'winner' : ''}`}>
-          <div className="double-team-info">
-            <span className="double-team-name">
+        <div className={`team team2 ${match.winner_id === match.team2_id ? 'winner' : ''}`}>
+          <div className="team-info">
+            <span className="team-name">
               {match.team2_name || (match.team2_id ? 'TBD' : '')}
             </span>
             {match.winner_id === match.team2_id && (
-              <span className="double-winner-crown">👑</span>
+              <span className="winner-crown">👑</span>
             )}
           </div>
           {match.score_team2 !== null && match.score_team2 !== undefined && (
-            <span className="double-score">{match.score_team2}</span>
+            <span className="score">{match.score_team2}</span>
           )}
         </div>
       </div>
 
       {match.status === 'completed' && match.winner_name && (
-        <div className="double-match-result">
-          <span className="double-trophy-icon">🏆</span>
-          <span className="double-winner-text">{match.winner_name} Wins!</span>
+        <div className="match-result">
+          <span className="trophy-icon">🏆</span>
+          <span className="winner-text">{match.winner_name} Wins!</span>
         </div>
       )}
 
       {match.team2_id === null && (
-        <div className="double-bye-notice">
-          <span className="double-advance-icon">⚡</span>
+        <div className="bye-notice">
+          <span className="advance-icon">⚡</span>
           {match.team1_name} advances automatically
         </div>
       )}
 
       {match.status === 'ongoing' && (
-        <div className="double-live-indicator">
-          <span className="double-live-dot"></span>
+        <div className="live-indicator">
+          <span className="live-dot"></span>
           LIVE MATCH
         </div>
       )}
@@ -166,7 +166,7 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
 
   // Function to render rounds for a bracket type
   const renderBracketSection = (rounds, matches, bracketType, title) => (
-    <div className={`double-bracket-section ${bracketType}-bracket-section`} data-bracket-type={bracketType}>
+    <div className={`bracket-section ${bracketType}-bracket-section`} data-bracket-type={bracketType}>
       {title && <h3 className="double-bracket-title">{title}</h3>}
       <div className="double-rounds-container">
         {rounds.map((roundNumber, roundIndex) => {
@@ -185,10 +185,10 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
           const roundMatches = matches.filter(m => m.round_number == roundNumber);
 
           return (
-            <div key={roundNumber} className="double-round" data-round={displayRoundNumber || 0}>
-              <div className={`double-round-header ${bracketType}-round-header`}>
-                <div className="double-round-number">{roundTitle}</div>
-                <div className="double-round-subtitle">
+            <div key={roundNumber} className="round" data-round={displayRoundNumber || 0}>
+              <div className="round-header">
+                <div className="round-number">{roundTitle}</div>
+                <div className="round-subtitle">
                   {bracketType === 'championship' ? 'Final Match' :
                    bracketType === 'loser' && displayRoundNumber === 1 ? 'First LB Round' :
                    bracketType === 'loser' ? `LB Round ${displayRoundNumber}` :
@@ -196,7 +196,7 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
                    `Round ${displayRoundNumber}`}
                 </div>
               </div>
-              <div className="double-matches">
+              <div className="matches">
                 {roundMatches.map((match, matchIndex) => renderMatch(match, matchIndex, bracketType))}
               </div>
             </div>
@@ -210,14 +210,10 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
     <div className="double-bracket-wrapper">
       <div className="double-bracket" ref={bracketRef}>
         
-        {/* Tournament Title */}
-        <div className="double-tournament-title">
-          Double Elimination Tournament
-        </div>
-
         {/* Connection Lines */}
         <svg className="double-connection-lines" xmlns="http://www.w3.org/2000/svg">
           {connectionPoints.map((fromPoint, i) => {
+            // Regular bracket connections within same bracket type
             const toPoint = connectionPoints.find(
               (p) =>
                 p.bracketType === fromPoint.bracketType &&
@@ -225,40 +221,118 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
                 Math.floor(fromPoint.matchIndex / 2) === p.matchIndex
             );
 
-            if (!toPoint) return null;
+            // Set color based on bracket type
+            let strokeColor = 'white'; // default
+            if (fromPoint.bracketType === 'winner') {
+              strokeColor = '#2196F3'; // blue
+            } else if (fromPoint.bracketType === 'loser') {
+              strokeColor = '#F44336'; // red
+            }
 
-            const midX = (fromPoint.x + toPoint.xLeft) / 2;
-            const strokeColor = fromPoint.bracketType === 'loser' ? '#ff6b6b' : 
-                               fromPoint.bracketType === 'championship' ? '#ffd700' : '#4dabf7';
+            if (toPoint) {
+              const midX = (fromPoint.x + toPoint.xLeft) / 2;
 
-            return (
-              <g key={i} className="double-bracket-connection">
-                <line
-                  x1={fromPoint.x}
-                  y1={fromPoint.y}
-                  x2={midX}
-                  y2={fromPoint.y}
-                  stroke={strokeColor}
-                  strokeWidth="3"
-                />
-                <line
-                  x1={midX}
-                  y1={fromPoint.y}
-                  x2={midX}
-                  y2={toPoint.yLeft}
-                  stroke={strokeColor}
-                  strokeWidth="3"
-                />
-                <line
-                  x1={midX}
-                  y1={toPoint.yLeft}
-                  x2={toPoint.xLeft}
-                  y2={toPoint.yLeft}
-                  stroke={strokeColor}
-                  strokeWidth="3"
-                />
-              </g>
-            );
+              return (
+                <g key={i} className="double-bracket-connection">
+                  <line
+                    x1={fromPoint.x}
+                    y1={fromPoint.y}
+                    x2={midX}
+                    y2={fromPoint.y}
+                    stroke={strokeColor}
+                    strokeWidth="3"
+                  />
+                  <line
+                    x1={midX}
+                    y1={fromPoint.y}
+                    x2={midX}
+                    y2={toPoint.yLeft}
+                    stroke={strokeColor}
+                    strokeWidth="3"
+                  />
+                  <line
+                    x1={midX}
+                    y1={toPoint.yLeft}
+                    x2={toPoint.xLeft}
+                    y2={toPoint.yLeft}
+                    stroke={strokeColor}
+                    strokeWidth="3"
+                  />
+                </g>
+              );
+            }
+
+            // Special connections to championship (YELLOW LINES)
+            const championshipPoint = connectionPoints.find(p => p.bracketType === 'championship');
+            if (championshipPoint) {
+              // Connect last winner bracket match to championship
+              if (fromPoint.bracketType === 'winner' && 
+                  fromPoint.roundIndex === Math.max(...connectionPoints.filter(p => p.bracketType === 'winner').map(p => p.roundIndex))) {
+                return (
+                  <g key={`winner-to-championship-${i}`} className="double-bracket-connection">
+                    <line
+                      x1={fromPoint.x}
+                      y1={fromPoint.y}
+                      x2={championshipPoint.xLeft - 20}
+                      y2={fromPoint.y}
+                      stroke="#FFD700"
+                      strokeWidth="3"
+                    />
+                    <line
+                      x1={championshipPoint.xLeft - 20}
+                      y1={fromPoint.y}
+                      x2={championshipPoint.xLeft - 20}
+                      y2={championshipPoint.yLeft - 30}
+                      stroke="#FFD700"
+                      strokeWidth="3"
+                    />
+                    <line
+                      x1={championshipPoint.xLeft - 20}
+                      y1={championshipPoint.yLeft - 30}
+                      x2={championshipPoint.xLeft}
+                      y2={championshipPoint.yLeft - 30}
+                      stroke="#FFD700"
+                      strokeWidth="3"
+                    />
+                  </g>
+                );
+              }
+
+              // Connect last loser bracket match to championship
+              if (fromPoint.bracketType === 'loser' && 
+                  fromPoint.roundIndex === Math.max(...connectionPoints.filter(p => p.bracketType === 'loser').map(p => p.roundIndex))) {
+                return (
+                  <g key={`loser-to-championship-${i}`} className="double-bracket-connection">
+                    <line
+                      x1={fromPoint.x}
+                      y1={fromPoint.y}
+                      x2={championshipPoint.xLeft - 20}
+                      y2={fromPoint.y}
+                      stroke="#FFD700"
+                      strokeWidth="3"
+                    />
+                    <line
+                      x1={championshipPoint.xLeft - 20}
+                      y1={fromPoint.y}
+                      x2={championshipPoint.xLeft - 20}
+                      y2={championshipPoint.yLeft + 30}
+                      stroke="#FFD700"
+                      strokeWidth="3"
+                    />
+                    <line
+                      x1={championshipPoint.xLeft - 20}
+                      y1={championshipPoint.yLeft + 30}
+                      x2={championshipPoint.xLeft}
+                      y2={championshipPoint.yLeft + 30}
+                      stroke="#FFD700"
+                      strokeWidth="3"
+                    />
+                  </g>
+                );
+              }
+            }
+
+            return null;
           })}
         </svg>
 
@@ -267,24 +341,33 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
           {/* Left Side - Winner's and Loser's Brackets */}
           <div className="double-left-brackets">
             {/* Winner's Bracket */}
-            {winnerMatches.length > 0 && renderBracketSection(winnerRounds, winnerMatches, 'winner', null)}
+            {winnerMatches.length > 0 && renderBracketSection(winnerRounds, winnerMatches, 'winner', "Winner's Bracket")}
             
             {/* Loser's Bracket */}
-            {loserMatches.length > 0 && renderBracketSection(loserRounds, loserMatches, 'loser', null)}
+            {loserMatches.length > 0 && renderBracketSection(loserRounds, loserMatches, 'loser', "Loser's Bracket")}
           </div>
 
           {/* Right Side - Championship */}
           {championshipMatches.length > 0 && (
             <div className="double-right-championship">
-              {renderBracketSection(['200'], championshipMatches, 'championship', 'Championship')}
+              <div className={`bracket-section championship-bracket-section`} data-bracket-type="championship">
+                <h3 className="double-bracket-title">Championship</h3>
+                <div className="double-rounds-container">
+                  <div className="round" data-round={0}>
+                    <div className="matches">
+                      {championshipMatches.map((match, matchIndex) => renderMatch(match, matchIndex, 'championship'))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
         {(winnerRounds.length === 0 && loserRounds.length === 0) && (
-          <div className="double-no-rounds">
-            <div className="double-no-rounds-content">
-              <div className="double-warning-icon">⚠️</div>
+          <div className="no-rounds">
+            <div className="no-rounds-content">
+              <div className="warning-icon">⚠️</div>
               <p>No tournament rounds found. Please check if matches were generated properly.</p>
             </div>
           </div>
