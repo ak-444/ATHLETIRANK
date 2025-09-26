@@ -58,7 +58,7 @@ const StaffStats = ({ sidebarOpen }) => {
     volleyball_assists: [0, 0, 0, 0, 0],
   };
 
-  // Fixed groupGamesByRound function - UPDATED FOR SINGLE ELIMINATION CHAMPIONSHIP
+  // Updated groupGamesByRound function with Reset Final support
   const groupGamesByRound = (games) => {
     const grouped = {};
     
@@ -116,11 +116,15 @@ const StaffStats = ({ sidebarOpen }) => {
       }
     }
     
-    // Handle double elimination games (existing logic)
+    // Handle double elimination games (existing logic + reset final support)
     if (doubleEliminationGames.length > 0) {
       const winnerGames = doubleEliminationGames.filter(game => game.bracket_type === 'winner');
       const loserGames = doubleEliminationGames.filter(game => game.bracket_type === 'loser');
       const championshipGames = doubleEliminationGames.filter(game => game.bracket_type === 'championship');
+      
+      // Separate Grand Final (200) and Reset Final (201)
+      const grandFinalGames = championshipGames.filter(game => game.round_number === 200);
+      const resetFinalGames = championshipGames.filter(game => game.round_number === 201);
       
       // Group winner's bracket games
       winnerGames.forEach(game => {
@@ -155,11 +159,18 @@ const StaffStats = ({ sidebarOpen }) => {
         grouped[roundKey][bracketKey].push(game);
       });
       
-      // Add championship games
-      if (championshipGames.length > 0) {
-        grouped['Championship'] = {
-          'Grand Final': championshipGames
-        };
+      // Add championship games with proper reset final handling
+      if (grandFinalGames.length > 0 || resetFinalGames.length > 0) {
+        grouped['Championship'] = {};
+        
+        if (grandFinalGames.length > 0) {
+          grouped['Championship']['Grand Final'] = grandFinalGames;
+        }
+        
+        // Only show reset final if it's not hidden (has been activated)
+        if (resetFinalGames.length > 0 && resetFinalGames[0].status !== 'hidden') {
+          grouped['Championship']['Reset Final'] = resetFinalGames;
+        }
       }
     }
 
@@ -196,6 +207,71 @@ const StaffStats = ({ sidebarOpen }) => {
       
       return aNum - bNum;
     });
+  };
+
+  // Render game card with reset final support
+  const renderGameCard = (game, roundName) => {
+    const isResetFinal = game.round_number === 201;
+    const isChampionship = roundName === 'Championship';
+    
+    return (
+      <div className={`bracket-card ${isResetFinal ? 'reset-final' : ''}`} key={game.id}>
+        <div className="bracket-card-header">
+          <h3>
+            {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
+            {isResetFinal && <span className="reset-final-badge">RESET FINAL</span>}
+            {game.winner_id && isChampionship && (
+              <FaCrown className="champion-crown" title="Tournament Champion" />
+            )}
+          </h3>
+          <span className={`bracket-sport-badge bracket-sport-${game.sport_type}`}>
+            {game.sport_type}
+          </span>
+          {game.elimination_type === 'double' && (
+            <span className={`bracket-type-badge bracket-type-${game.bracket_type || 'winner'} ${isResetFinal ? 'bracket-type-reset' : ''}`}>
+              {isResetFinal ? 'Reset Final' : 
+               game.bracket_type ? game.bracket_type.charAt(0).toUpperCase() + game.bracket_type.slice(1) : 'Winner'} 
+              {!isResetFinal && ' Bracket'}
+            </span>
+          )}
+        </div>
+        <div className="bracket-card-info">
+          <div><strong>Type:</strong> 
+            <span className={`elimination-type-${game.elimination_type}`}>
+              {game.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
+            </span>
+          </div>
+          <div><strong>Status:</strong> 
+            <span className={`status-${game.status}`}>
+              {game.status}
+            </span>
+          </div>
+          {isResetFinal && game.status === 'scheduled' && (
+            <div><strong>Special:</strong> 
+              <span className="reset-special">Both teams start fresh - Winner takes all!</span>
+            </div>
+          )}
+          {game.status === "completed" && (
+            <div><strong>Score:</strong> {game.score_team1} - {game.score_team2}</div>
+          )}
+          {game.winner_name && (
+            <div className="winner-info">
+              <strong>Winner:</strong> 
+              <span className={`winner-name ${isResetFinal ? 'tournament-champion' : ''}`}>
+                {game.winner_name}
+                {isResetFinal && game.status === 'completed' && <FaTrophy className="winner-trophy" />}
+                {game.round_number === 200 && !isResetFinal && <FaTrophy className="winner-trophy" />}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="bracket-card-actions">
+          <button className="bracket-view-btn" onClick={() => handleGameSelect(game)}>
+            {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
+          </button>
+        </div>
+      </div>
+    );
   };
 
   // Fetch events
@@ -297,7 +373,7 @@ const StaffStats = ({ sidebarOpen }) => {
     }
   };
 
-  // Handle bracket selection
+  // Handle bracket selection - UPDATED: Filter out hidden matches
   const handleBracketSelect = async (bracket) => {
     setLoading(true);
     setError(null);
@@ -317,7 +393,11 @@ const StaffStats = ({ sidebarOpen }) => {
       }
       
       const matchData = await matchRes.json();
-      const matchesWithBracket = matchData.map(match => ({
+      
+      // FILTER OUT HIDDEN MATCHES (bracket reset matches that haven't been activated)
+      const visibleMatches = matchData.filter(match => match.status !== 'hidden');
+      
+      const matchesWithBracket = visibleMatches.map(match => ({
         ...match,
         bracket_name: bracket.name,
         sport_type: bracket.sport_type,
@@ -530,7 +610,7 @@ const StaffStats = ({ sidebarOpen }) => {
     return (((kills - errors) / attempts) * 100).toFixed(2) + "%";
   };
 
-  // Save statistics
+  // Save statistics - UPDATED: Handle bracket reset notifications
   const saveStatistics = async () => {
     if (!selectedGame) return;
     setLoading(true);
@@ -631,10 +711,16 @@ const StaffStats = ({ sidebarOpen }) => {
       
       const bracketData = await bracketRes.json();
       
-      // Show success message with advancement info
+      // Show success message with advancement info and bracket reset handling
       let message = "Statistics saved successfully!";
       
-      if (bracketData.advanced) {
+      if (bracketData.bracketReset) {
+        message = "🚨 BRACKET RESET! 🚨\n\n";
+        message += "The Loser's Bracket winner has defeated the Winner's Bracket winner in the Grand Final!\n";
+        message += "A second Grand Final match has been scheduled where both teams start fresh.\n";
+        message += "The Winner's Bracket team needs to be beaten TWICE to lose the tournament.\n\n";
+        message += "Refresh the games list to see the new Reset Final match!";
+      } else if (bracketData.advanced) {
         if (selectedGame.elimination_type === 'double') {
           if (selectedGame.bracket_type === 'winner') {
             message += " Winner has been advanced in the winner's bracket!";
@@ -645,26 +731,72 @@ const StaffStats = ({ sidebarOpen }) => {
             message += " Winner has been advanced in the loser's bracket!";
             message += " Loser has been eliminated from the tournament.";
           } else if (selectedGame.bracket_type === 'championship') {
-            message += " Championship match completed!";
+            if (selectedGame.round_number === 201) {
+              message += " Reset Final completed! Tournament champion determined!";
+            } else {
+              message += " Grand Final completed!";
+            }
           }
         } else {
           message += " Winner has been advanced to the next round!";
         }
       }
       
-      if (bracketData.winnerId) {
+      if (bracketData.winnerId && bracketData.tournamentComplete) {
         const winnerTeam = bracketData.winnerId === selectedGame.team1_id ? 
           selectedGame.team1_name : selectedGame.team2_name;
-        message += ` Winner: ${winnerTeam}`;
-        
-        if (selectedGame.bracket_type === 'championship' && selectedGame.elimination_type === 'double') {
-          message += ` is the tournament champion!`;
-        }
+        message += ` Tournament Champion: ${winnerTeam}! 🏆`;
       }
       
-      alert(message);
+      // Use different alert types based on bracket reset
+      if (bracketData.bracketReset) {
+        // Custom styling for bracket reset notification
+        const resetNotification = document.createElement('div');
+        resetNotification.innerHTML = `
+          <div style="
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 10000;
+            max-width: 500px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+          ">
+            <h2 style="margin: 0 0 15px 0; font-size: 24px;">🚨 BRACKET RESET! 🚨</h2>
+            <p style="margin: 0 0 15px 0; line-height: 1.6;">
+              The Loser's Bracket winner has defeated the Winner's Bracket winner!<br>
+              A Reset Final has been scheduled - both teams start fresh!
+            </p>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+              background: white;
+              color: #ff6b35;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 25px;
+              font-weight: bold;
+              cursor: pointer;
+            ">Got it!</button>
+          </div>
+        `;
+        document.body.appendChild(resetNotification);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+          if (resetNotification.parentElement) {
+            resetNotification.remove();
+          }
+        }, 10000);
+      } else {
+        alert(message);
+      }
       
-      // Refresh the games list to show updated match status
+      // Refresh the games list to show updated match status (and potential reset match)
       if (selectedEvent && selectedBracket) {
         handleBracketSelect(selectedBracket);
       }
@@ -1168,16 +1300,24 @@ const StaffStats = ({ sidebarOpen }) => {
                         game.status === 'completed' && game.winner_id && roundName === 'Championship'
                       );
                       
+                      // Check if championship has reset final
+                      const hasResetFinal = roundName === 'Championship' && 
+                        roundGames.some(game => game.round_number === 201 && game.status !== 'hidden');
+                      
                       return (
                         <div key={roundName} className="round-section">
                           <div 
-                            className={`round-header ${roundName === 'Championship' ? 'championship-header' : ''}`}
+                            className={`round-header ${roundName === 'Championship' ? 'championship-header' : ''} ${hasResetFinal ? 'has-reset' : ''}`}
                             onClick={() => toggleRoundExpansion(roundNumber)}
                           >
                             <div className="round-header-content">
                               <h3>
                                 {roundName === 'Championship' ? (
-                                  <><FaTrophy className="trophy-icon" /> {roundName}</>
+                                  <>
+                                    <FaTrophy className="trophy-icon" /> 
+                                    {roundName}
+                                    {hasResetFinal && <span className="reset-final-info">Reset Final Active</span>}
+                                  </>
                                 ) : roundName}
                               </h3>
                               <div className="round-info">
@@ -1191,7 +1331,7 @@ const StaffStats = ({ sidebarOpen }) => {
                                 </span>
                                 <div className="round-progress-bar">
                                   <div 
-                                    className="round-progress-fill"
+                                    className={`round-progress-fill ${hasResetFinal ? 'reset-active' : ''}`}
                                     style={{ width: `${totalGames > 0 ? (completedGames / totalGames) * 100 : 0}%` }}
                                   />
                                 </div>
@@ -1208,55 +1348,7 @@ const StaffStats = ({ sidebarOpen }) => {
                                 <div key={bracketName} className="bracket-section">
                                   <h4 className="bracket-section-title">{bracketName}</h4>
                                   <div className="bracket-grid">
-                                    {bracketGames.map((game) => (
-                                      <div className="bracket-card" key={game.id}>
-                                        <div className="bracket-card-header">
-                                          <h3>
-                                            {game.team1_name || "Team 1"} vs {game.team2_name || "Team 2"}
-                                            {game.winner_id && roundName === 'Championship' && (
-                                              <FaCrown className="champion-crown" title="Champion" />
-                                            )}
-                                          </h3>
-                                          <span className={`bracket-sport-badge bracket-sport-${game.sport_type}`}>
-                                            {game.sport_type}
-                                          </span>
-                                          {game.elimination_type === 'double' && (
-                                            <span className={`bracket-type-badge bracket-type-${game.bracket_type || 'winner'}`}>
-                                              {game.bracket_type ? game.bracket_type.charAt(0).toUpperCase() + game.bracket_type.slice(1) : 'Winner'} Bracket
-                                            </span>
-                                          )}
-                                        </div>
-                                        <div className="bracket-card-info">
-                                          <div><strong>Type:</strong> 
-                                            <span className={`elimination-type-${game.elimination_type}`}>
-                                              {game.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}
-                                            </span>
-                                          </div>
-                                          <div><strong>Status:</strong> 
-                                            <span className={`status-${game.status}`}>
-                                              {game.status}
-                                            </span>
-                                          </div>
-                                          {game.status === "completed" && (
-                                            <div><strong>Score:</strong> {game.score_team1} - {game.score_team2}</div>
-                                          )}
-                                          {game.winner_name && (
-                                            <div className="winner-info">
-                                              <strong>Winner:</strong> 
-                                              <span className="winner-name">
-                                                {game.winner_name}
-                                                {roundName === 'Championship' && <FaTrophy className="winner-trophy" />}
-                                              </span>
-                                            </div>
-                                          )}
-                                        </div>
-                                        <div className="bracket-card-actions">
-                                          <button className="bracket-view-btn" onClick={() => handleGameSelect(game)}>
-                                            {game.status === "completed" ? "Edit Statistics" : "Record Statistics"}
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
+                                    {bracketGames.map((game) => renderGameCard(game, roundName))}
                                   </div>
                                 </div>
                               ))}
@@ -1276,6 +1368,7 @@ const StaffStats = ({ sidebarOpen }) => {
                 <div className="event-details-header">
                   <h2>
                     Recording Statistics: {selectedGame.team1_name} vs {selectedGame.team2_name}
+                    {selectedGame.round_number === 201 && <span className="reset-final-badge">RESET FINAL</span>}
                   </h2>
                   <div className="event-details-info">
                     <span><strong>Sport:</strong> {selectedGame.sport_type}</span>
@@ -1283,10 +1376,15 @@ const StaffStats = ({ sidebarOpen }) => {
                     <span><strong>Round:</strong> {selectedGame.round_number}</span>
                     {selectedGame.elimination_type === 'double' && (
                       <span><strong>Bracket Type:</strong> 
-                        <span className={`bracket-type-${selectedGame.bracket_type || 'winner'}`}>
-                          {selectedGame.bracket_type ? selectedGame.bracket_type.charAt(0).toUpperCase() + selectedGame.bracket_type.slice(1) : 'Winner'} Bracket
+                        <span className={`bracket-type-${selectedGame.bracket_type || 'winner'} ${selectedGame.round_number === 201 ? 'bracket-type-reset' : ''}`}>
+                          {selectedGame.round_number === 201 ? 'Reset Final' : 
+                           selectedGame.bracket_type ? selectedGame.bracket_type.charAt(0).toUpperCase() + selectedGame.bracket_type.slice(1) : 'Winner'} 
+                          {selectedGame.round_number !== 201 && ' Bracket'}
                         </span>
                       </span>
+                    )}
+                    {selectedGame.round_number === 201 && (
+                      <span className="reset-special-info">🚨 Reset Final - Winner takes all!</span>
                     )}
                   </div>
                 </div>

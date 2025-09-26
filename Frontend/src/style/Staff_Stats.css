@@ -1,4 +1,4 @@
-/* Staff_Stats.css - Staff Statistics Page Styling with Round Organization */
+/* Staff_Stats.css - Staff Statistics Page Styling with Bracket Reset Support */
 
 /* CSS Variables */
 :root {
@@ -7,6 +7,8 @@
   --error-color: #ef4444;
   --success-color: #10b981;
   --warning-color: #f59e0b;
+  --reset-color: #ff6b35;
+  --reset-hover: #f7931e;
   --background-primary: #0a0f1c;
   --background-secondary: #1a2332;
   --background-card: #0f172a;
@@ -51,7 +53,7 @@
   color: var(--text-muted);
   cursor: pointer;
   border-bottom: 3px solid transparent;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .bracket-tab-button:hover {
@@ -113,6 +115,18 @@
   transform: translateY(-2px);
 }
 
+/* Bracket Reset Match Styling */
+.bracket-card.reset-final {
+  border: 3px solid var(--reset-color) !important;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, var(--background-secondary) 100%) !important;
+  animation: resetPulse 2s infinite ease-in-out;
+}
+
+.bracket-card.reset-final:hover {
+  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+  transform: translateY(-3px);
+}
+
 .bracket-card-header {
   display: flex;
   justify-content: space-between;
@@ -128,6 +142,9 @@
   margin: 0;
   flex: 1;
   margin-right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .bracket-card-header h4 {
@@ -136,6 +153,20 @@
   font-weight: 600;
   margin: 0;
   flex: 1;
+}
+
+/* Reset Final Badge */
+.reset-final-badge {
+  background: linear-gradient(135deg, var(--reset-color) 0%, var(--reset-hover) 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: bold;
+  margin-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: resetBadgeGlow 2s infinite ease-in-out;
 }
 
 /* Player Jersey Number */
@@ -164,6 +195,22 @@
 .bracket-card-info strong {
   color: var(--text-primary);
   font-weight: 600;
+}
+
+/* Reset Final Special Info */
+.reset-special {
+  color: var(--reset-color);
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.reset-special-info {
+  background: linear-gradient(135deg, var(--reset-color), var(--reset-hover));
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9em;
 }
 
 .bracket-card-actions {
@@ -284,6 +331,10 @@
   font-size: 28px;
   margin-bottom: 15px;
   color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .event-details-info {
@@ -380,6 +431,12 @@
   color: white;
 }
 
+.bracket-type-reset {
+  background: linear-gradient(135deg, var(--reset-color) 0%, var(--reset-hover) 100%) !important;
+  color: white !important;
+  animation: resetBadgePulse 2s infinite ease-in-out;
+}
+
 /* Elimination type indicators */
 .elimination-type-single {
   color: #2196f3;
@@ -389,23 +446,6 @@
 .elimination-type-double {
   color: #9c27b0;
   font-weight: bold;
-}
-
-/* Bracket type display in statistics view */
-.bracket-type-winner, .bracket-type-loser {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-.bracket-type-winner {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.bracket-type-loser {
-  background-color: #ffebee;
-  color: #c62828;
 }
 
 /* Round Organization Styles */
@@ -484,6 +524,10 @@
   transition: width 0.3s ease;
 }
 
+.round-progress-fill.reset-active {
+  background: linear-gradient(90deg, var(--reset-color) 0%, var(--reset-hover) 100%) !important;
+}
+
 .round-toggle-btn {
   background: none;
   border: none;
@@ -534,6 +578,102 @@
   padding-bottom: 8px;
   border-bottom: 2px solid var(--primary-color);
   display: inline-block;
+}
+
+/* Championship section enhancements for reset matches */
+.championship-header.has-reset {
+  background: linear-gradient(135deg, var(--reset-color), var(--reset-hover)) !important;
+  border: 2px solid var(--reset-color) !important;
+}
+
+.championship-header.has-reset h3 {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.championship-header {
+  background: linear-gradient(135deg, #ff9800, #ff5722) !important;
+  border: 2px solid #ffd700 !important;
+}
+
+.championship-header h3 {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.trophy-icon {
+  color: #ffd700;
+}
+
+/* Round info for reset finals */
+.reset-final-info {
+  background: rgba(255, 107, 53, 0.2);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-left: 15px;
+  font-weight: bold;
+  color: var(--reset-color);
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.reset-final-info::before {
+  content: "🔄";
+  animation: resetSpin 2s linear infinite;
+}
+
+/* Champion styles */
+.champion-badge {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: bold;
+  margin-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.champion-info {
+  background: rgba(255, 215, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 8px;
+  margin-left: 10px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.champion-crown {
+  color: #ffd700;
+  margin-left: 8px;
+  font-size: 1.2em;
+}
+
+.winner-trophy {
+  color: #ffd700;
+  margin-left: 5px;
+}
+
+.winner-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.winner-name {
+  color: #4ade80;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.winner-name.tournament-champion {
+  color: var(--reset-color) !important;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 /* Stats Section */
@@ -853,65 +993,150 @@
   -webkit-appearance: none;
 }
 
-/* Champion styles */
-.champion-badge {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #000;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.7em;
-  font-weight: bold;
-  margin-left: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+/* Animations for bracket reset */
+@keyframes resetPulse {
+  0%, 100% { 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 0 rgba(255, 107, 53, 0.4); 
+    border-color: var(--reset-color);
+  }
+  50% { 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25), 0 0 25px rgba(255, 107, 53, 0.6); 
+    border-color: var(--reset-hover);
+  }
 }
 
-.champion-info {
-  background: rgba(255, 215, 0, 0.2);
-  padding: 4px 8px;
-  border-radius: 8px;
-  margin-left: 10px;
-  font-weight: bold;
-  color: #ffd700;
+@keyframes resetBadgeGlow {
+  0%, 100% { 
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  }
+  50% { 
+    box-shadow: 0 2px 15px rgba(255, 107, 53, 0.6);
+    transform: scale(1.05);
+  }
 }
 
-.champion-crown {
-  color: #ffd700;
-  margin-left: 8px;
-  font-size: 1.2em;
+@keyframes resetTrophyShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
 }
 
-.winner-trophy {
-  color: #ffd700;
-  margin-left: 5px;
+@keyframes resetSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.winner-info {
+@keyframes resetCardPulse {
+  0%, 100% { 
+    transform: translateY(0);
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+  }
+  50% { 
+    transform: translateY(-2px);
+    box-shadow: 0 5px 25px rgba(255, 107, 53, 0.4);
+  }
+}
+
+@keyframes resetTextGlow {
+  0%, 100% { 
+    text-shadow: 0 0 5px rgba(255, 107, 53, 0.5);
+  }
+  50% { 
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.8);
+  }
+}
+
+@keyframes resetBadgePulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+  }
+  50% { 
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.6);
+  }
+}
+
+@keyframes championGlow {
+  0%, 100% { 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* Notification overlay for bracket reset */
+.bracket-reset-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
 }
 
-.winner-name {
-  color: #4ade80;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
+.reset-notification-content {
+  background: linear-gradient(135deg, var(--reset-color) 0%, var(--reset-hover) 100%);
+  color: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  max-width: 600px;
+  text-align: center;
+  animation: resetNotificationSlideIn 0.5s ease-out;
 }
 
-/* Championship header enhancement */
-.championship-header {
-  background: linear-gradient(135deg, #ff9800, #ff5722) !important;
-  border: 2px solid #ffd700 !important;
-}
-
-.championship-header h3 {
-  color: white !important;
+.reset-notification-content h2 {
+  margin: 0 0 20px 0;
+  font-size: 32px;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.trophy-icon {
-  color: #ffd700;
+.reset-notification-content p {
+  margin: 0 0 25px 0;
+  line-height: 1.6;
+  font-size: 18px;
+}
+
+.reset-notification-button {
+  background: white;
+  color: var(--reset-color);
+  border: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.reset-notification-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  background: #f9f9f9;
+}
+
+@keyframes resetNotificationSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Special styling for completed reset finals */
+.bracket-card.reset-final .bracket-card-info .winner-info .winner-name.tournament-champion {
+  animation: championGlow 2s infinite ease-in-out;
 }
 
 /* Responsive Design */
@@ -1093,5 +1318,10 @@
   
   .round-progress-bar {
     width: 80px;
+  }
+  
+  .reset-final-badge {
+    font-size: 0.6em;
+    padding: 3px 8px;
   }
 }
