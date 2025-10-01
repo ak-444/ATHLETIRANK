@@ -249,8 +249,8 @@ const DoubleEliminationBracket = ({ matches, eliminationType = 'double' }) => {
   );
 
   return (
-    <div className="double-bracket-wrapper">
-      <div className="double-bracket" ref={bracketRef}>
+    <div className="double-bracket-wrapper" style={{ overflowX: 'auto', overflowY: 'hidden', width: '100%', maxWidth: '100vw' }}>
+      <div className="double-bracket" ref={bracketRef} style={{ minWidth: 'fit-content', display: 'inline-block', paddingRight: '500px', paddingBottom: '50px' }}>
         
         <svg className="double-connection-lines" xmlns="http://www.w3.org/2000/svg">
           

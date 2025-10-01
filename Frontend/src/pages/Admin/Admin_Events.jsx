@@ -15,6 +15,35 @@ const AdminEvents = ({ sidebarOpen }) => {
   const [eventBrackets, setEventBrackets] = useState([]);
   const [eventMatches, setEventMatches] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  
+  // Pagination state for matches per bracket
+  const [bracketPages, setBracketPages] = useState({});
+  const matchesPerPage = 6;
+
+  // Format round display based on bracket type and round number
+  const formatRoundDisplay = (match) => {
+    const roundNum = match.round_number;
+    
+    // Championship rounds
+    if (match.bracket_type === 'championship') {
+      if (roundNum === 200) return 'Grand Final';
+      if (roundNum === 201) return 'Bracket Reset';
+      return `Championship Round ${roundNum - 199}`;
+    }
+    
+    // Loser's bracket rounds (101, 102, 103, etc.) - Display as LB Round 1, 2, 3
+    if (match.bracket_type === 'loser') {
+      return `LB Round ${roundNum - 100}`;
+    }
+    
+    // Winner's bracket rounds (1, 2, 3, etc.)
+    if (match.bracket_type === 'winner') {
+      return `Round ${roundNum}`;
+    }
+    
+    // Fallback for single elimination or other bracket types
+    return `Round ${roundNum}`;
+  };
 
   // Fetch events
   const fetchEvents = async () => {
@@ -87,14 +116,25 @@ const AdminEvents = ({ sidebarOpen }) => {
           const matchesData = await matchesRes.json();
           const matchesWithBracket = matchesData.map(match => ({
             ...match,
+            bracket_id: bracket.id,
             bracket_name: bracket.name,
-            sport_type: bracket.sport_type
+            sport_type: bracket.sport_type,
+            // Add bracket_type if available, otherwise infer from elimination_type
+            bracket_type: match.bracket_type || bracket.bracket_type || bracket.elimination_type
           }));
           allMatches.push(...matchesWithBracket);
         }
         setEventMatches(allMatches);
+        
+        // Initialize pagination for each bracket
+        const initialPages = {};
+        bracketsData.forEach(bracket => {
+          initialPages[bracket.id] = 1;
+        });
+        setBracketPages(initialPages);
       } else {
         setEventMatches([]);
+        setBracketPages({});
       }
     } catch (err) {
       console.error("Error fetching event details:", err);
@@ -123,11 +163,11 @@ const AdminEvents = ({ sidebarOpen }) => {
 
   const getMatchStatusBadge = (status) => {
     const statusClasses = {
-      scheduled: "status-scheduled",
-      ongoing: "status-ongoing", 
-      completed: "status-completed"
+      scheduled: "event-match-status-scheduled",
+      ongoing: "event-match-status-ongoing", 
+      completed: "event-match-status-completed"
     };
-    return <span className={`match-status ${statusClasses[status] || ""}`}>{status}</span>;
+    return <span className={`event-match-status ${statusClasses[status] || ""}`}>{status}</span>;
   };
 
   const formatMatchTeams = (match) => {
@@ -135,6 +175,100 @@ const AdminEvents = ({ sidebarOpen }) => {
       return "TBD vs TBD";
     }
     return `${match.team1_name || "TBD"} vs ${match.team2_name || "TBD"}`;
+  };
+
+  // Get matches for a specific bracket
+  const getMatchesForBracket = (bracketId) => {
+    return eventMatches.filter(match => match.bracket_id === bracketId);
+  };
+
+  // Handle page change for a specific bracket
+  const handleBracketPageChange = (bracketId, pageNumber) => {
+    setBracketPages(prev => ({
+      ...prev,
+      [bracketId]: pageNumber
+    }));
+  };
+
+  // Render matches for a bracket with pagination
+  const renderBracketMatches = (bracket) => {
+    const matches = getMatchesForBracket(bracket.id);
+    const currentPage = bracketPages[bracket.id] || 1;
+    const indexOfLastMatch = currentPage * matchesPerPage;
+    const indexOfFirstMatch = indexOfLastMatch - matchesPerPage;
+    const currentMatches = matches.slice(indexOfFirstMatch, indexOfLastMatch);
+    const totalPages = Math.ceil(matches.length / matchesPerPage);
+
+    if (matches.length === 0) {
+      return <p className="event-no-data">No matches scheduled for this bracket yet.</p>;
+    }
+
+    return (
+      <>
+        <div className="event-matches-grid">
+          {currentMatches.map((match) => (
+            <div key={match.id} className="event-match-card">
+              <div className="event-match-header">
+                <div className="event-match-teams">
+                  <h4>{formatMatchTeams(match)}</h4>
+                  {match.status === "completed" && (
+                    <div className="event-match-score">
+                      {match.score_team1} - {match.score_team2}
+                    </div>
+                  )}
+                </div>
+                {getMatchStatusBadge(match.status)}
+              </div>
+              <div className="event-match-info">
+                <p><strong>Round:</strong> {formatRoundDisplay(match)}</p>
+                {match.scheduled_at && (
+                  <p><strong>Scheduled:</strong> {new Date(match.scheduled_at).toLocaleString()}</p>
+                )}
+                {match.winner_name && (
+                  <p><strong>Winner:</strong> {match.winner_name}</p>
+                )}
+                {match.mvp_name && (
+                  <p><strong>MVP:</strong> {match.mvp_name}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="event-pagination-container">
+            <button 
+              className="event-pagination-btn"
+              onClick={() => handleBracketPageChange(bracket.id, currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="event-pagination-numbers">
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  className={`event-pagination-number ${currentPage === index + 1 ? 'active' : ''}`}
+                  onClick={() => handleBracketPageChange(bracket.id, index + 1)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+              className="event-pagination-btn"
+              onClick={() => handleBracketPageChange(bracket.id, currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
@@ -297,71 +431,33 @@ const AdminEvents = ({ sidebarOpen }) => {
                   <p>Loading event details...</p>
                 ) : (
                   <div className="event-details-content">
-                    {/* Brackets Section */}
-                    <div className="event-brackets-section">
-                      <h3>Brackets ({eventBrackets.length})</h3>
-                      {eventBrackets.length === 0 ? (
-                        <p className="no-data">No brackets created for this event yet.</p>
-                      ) : (
-                        <div className="bracket-grid">
-                          {eventBrackets.map((bracket) => (
-                            <div key={bracket.id} className="bracket-card">
-                              <div className="bracket-card-header">
-                                <h4>{bracket.name}</h4>
-                                <span className={`bracket-sport-badge bracket-sport-${bracket.sport_type}`}>
-                                  {bracket.sport_type.charAt(0).toUpperCase() + bracket.sport_type.slice(1)}
-                                </span>
-                              </div>
-                              <div className="bracket-card-info">
-                                <div><strong>Type:</strong> {bracket.elimination_type === "single" ? "Single" : "Double"} Elimination</div>
-                                <div><strong>Teams:</strong> {bracket.team_count || 0}</div>
-                                <div><strong>Created:</strong> {new Date(bracket.created_at).toLocaleDateString()}</div>
-                              </div>
+                    {eventBrackets.length === 0 ? (
+                      <p className="event-no-data">No brackets created for this event yet.</p>
+                    ) : (
+                      eventBrackets.map((bracket) => (
+                        <div key={bracket.id} className="event-bracket-section">
+                          {/* Bracket Header */}
+                          <div className="event-bracket-section-header">
+                            <div className="event-bracket-section-title">
+                              <h3>{bracket.name}</h3>
+                              <span className={`bracket-sport-badge bracket-sport-${bracket.sport_type}`}>
+                                {bracket.sport_type.charAt(0).toUpperCase() + bracket.sport_type.slice(1)}
+                              </span>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                            <div className="event-bracket-section-info">
+                              <span><strong>Type:</strong> {bracket.elimination_type === "single" ? "Single" : "Double"} Elimination</span>
+                              <span><strong>Teams:</strong> {bracket.team_count || 0}</span>
+                              <span><strong>Matches:</strong> {getMatchesForBracket(bracket.id).length}</span>
+                            </div>
+                          </div>
 
-                    {/* Matches Section */}
-                    <div className="event-matches-section">
-                      <h3>Matches ({eventMatches.length})</h3>
-                      {eventMatches.length === 0 ? (
-                        <p className="no-data">No matches scheduled for this event yet.</p>
-                      ) : (
-                        <div className="matches-grid">
-                          {eventMatches.map((match) => (
-                            <div key={match.id} className="match-card">
-                              <div className="match-header">
-                                <div className="match-teams">
-                                  <h4>{formatMatchTeams(match)}</h4>
-                                  {match.status === "completed" && (
-                                    <div className="match-score">
-                                      {match.score_team1} - {match.score_team2}
-                                    </div>
-                                  )}
-                                </div>
-                                {getMatchStatusBadge(match.status)}
-                              </div>
-                              <div className="match-info">
-                                <p><strong>Bracket:</strong> {match.bracket_name}</p>
-                                <p><strong>Sport:</strong> {match.sport_type?.charAt(0).toUpperCase() + match.sport_type?.slice(1)}</p>
-                                <p><strong>Round:</strong> {match.round_number}</p>
-                                {match.scheduled_at && (
-                                  <p><strong>Scheduled:</strong> {new Date(match.scheduled_at).toLocaleString()}</p>
-                                )}
-                                {match.winner_name && (
-                                  <p><strong>Winner:</strong> {match.winner_name}</p>
-                                )}
-                                {match.mvp_name && (
-                                  <p><strong>MVP:</strong> {match.mvp_name}</p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                          {/* Matches for this Bracket */}
+                          <div className="event-bracket-matches-container">
+                            {renderBracketMatches(bracket)}
+                          </div>
                         </div>
-                      )}
-                    </div>
+                      ))
+                    )}
                   </div>
                 )}
               </div>

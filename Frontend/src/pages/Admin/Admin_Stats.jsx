@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaFilter, FaDownload, FaTrophy, FaUsers, FaChartLine } from "react-icons/fa";
+import { FaSearch, FaFilter, FaDownload, FaTrophy } from "react-icons/fa";
 import "../../style/Admin_Stats.css";
 
 const AdminStats = ({ sidebarOpen }) => {
@@ -16,6 +16,35 @@ const AdminStats = ({ sidebarOpen }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  // Format round display based on bracket type and round number
+  const formatRoundDisplay = (match) => {
+    const roundNum = match.round_number;
+    
+    // Championship rounds - check by round number first
+    if (roundNum === 200) return 'Grand Final';
+    if (roundNum === 201) return 'Bracket Reset';
+    if (roundNum >= 200 && match.bracket_type === 'championship') {
+      return `Championship Round ${roundNum - 199}`;
+    }
+    
+    // Loser's bracket rounds (101, 102, 103, etc.) - Display as LB Round 1, 2, 3
+    if (match.bracket_type === 'loser' || (roundNum >= 101 && roundNum < 200)) {
+      return `LB Round ${roundNum - 100}`;
+    }
+    
+    // Winner's bracket rounds (1, 2, 3, etc.)
+    if (match.bracket_type === 'winner' || roundNum < 100) {
+      return `Round ${roundNum}`;
+    }
+    
+    // Fallback
+    return `Round ${roundNum}`;
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -39,10 +68,23 @@ const AdminStats = ({ sidebarOpen }) => {
         setEvents(data);
       } catch (err) {
         console.error("Error fetching events:", err);
-        // Mock data for demonstration
         setEvents([
-          { id: 1, name: "Basketball Tournament", status: "completed", start_date: "2023-10-01", end_date: "2023-10-05" },
-          { id: 2, name: "Volleyball Championship", status: "completed", start_date: "2023-11-01", end_date: "2023-11-03" }
+          { 
+            id: 1, 
+            name: "Basketball Tournament", 
+            status: "ongoing", 
+            start_date: "2025-09-20", 
+            end_date: "2025-10-04",
+            archived: "no"
+          },
+          { 
+            id: 2, 
+            name: "Volleyball Championship", 
+            status: "completed", 
+            start_date: "2023-11-01", 
+            end_date: "2023-11-03",
+            archived: "no"
+          }
         ]);
       } finally {
         setLoading(false);
@@ -55,13 +97,12 @@ const AdminStats = ({ sidebarOpen }) => {
   const handleEventSelect = async (event) => {
     setSelectedEvent(event);
     setLoading(true);
+    setCurrentPage(1);
     try {
-      // Fetch brackets for the event
       const bracketRes = await fetch(`http://localhost:5000/api/stats/events/${event.id}/brackets`);
       const bracketData = await bracketRes.json();
       setBrackets(bracketData);
 
-      // Fetch matches for all brackets
       const allMatches = [];
       for (const bracket of bracketData) {
         const matchRes = await fetch(`http://localhost:5000/api/stats/${bracket.id}/matches`);
@@ -69,7 +110,8 @@ const AdminStats = ({ sidebarOpen }) => {
         const matchesWithBracket = matchData.map(match => ({
           ...match,
           bracket_name: bracket.name,
-          sport_type: bracket.sport_type
+          sport_type: bracket.sport_type,
+          bracket_type: match.bracket_type || bracket.bracket_type || bracket.elimination_type
         }));
         allMatches.push(...matchesWithBracket);
       }
@@ -77,20 +119,75 @@ const AdminStats = ({ sidebarOpen }) => {
       setActiveTab("brackets");
     } catch (err) {
       console.error("Error fetching event data:", err);
-      // Mock data for demonstration
       setBrackets([
-        { id: 1, name: "Men's Basketball Bracket", sport_type: "basketball", event_id: 1 },
-        { id: 2, name: "Women's Volleyball Bracket", sport_type: "volleyball", event_id: 2 }
+        { id: 1, name: "Men's Basketball Bracket", sport_type: "basketball", event_id: 1, elimination_type: "double" },
+        { id: 2, name: "Women's Volleyball Bracket", sport_type: "volleyball", event_id: 2, elimination_type: "single" }
       ]);
       setMatches([
-        { id: 1, bracket_id: 1, team1_name: "Team A", team2_name: "Team B", winner_name: "Team A", score_team1: 85, score_team2: 70, status: "completed", round_number: 1, bracket_name: "Men's Basketball Bracket", sport_type: "basketball" },
-        { id: 2, bracket_id: 1, team1_name: "Team C", team2_name: "Team D", winner_name: "Team D", score_team1: 65, score_team2: 75, status: "completed", round_number: 1, bracket_name: "Men's Basketball Bracket", sport_type: "basketball" },
-        { id: 3, bracket_id: 1, team1_name: "Team A", team2_name: "Team D", winner_name: "Team A", score_team1: 90, score_team2: 80, status: "completed", round_number: 2, bracket_name: "Men's Basketball Bracket", sport_type: "basketball" },
-        { id: 4, bracket_id: 2, team1_name: "Team X", team2_name: "Team Y", winner_name: "Team X", score_team1: 3, score_team2: 1, status: "completed", round_number: 1, bracket_name: "Women's Volleyball Bracket", sport_type: "volleyball" }
+        { 
+          id: 1, 
+          bracket_id: 1, 
+          team1_name: "Team A", 
+          team2_name: "Team B", 
+          winner_name: "Team A", 
+          score_team1: 85, 
+          score_team2: 70, 
+          status: "completed", 
+          round_number: 1, 
+          bracket_name: "Men's Basketball Bracket", 
+          sport_type: "basketball",
+          bracket_type: "winner"
+        },
+        { 
+          id: 2, 
+          bracket_id: 1, 
+          team1_name: "Team C", 
+          team2_name: "Team D", 
+          winner_name: "Team D", 
+          score_team1: 65, 
+          score_team2: 75, 
+          status: "completed", 
+          round_number: 101, 
+          bracket_name: "Men's Basketball Bracket", 
+          sport_type: "basketball",
+          bracket_type: "loser"
+        },
+        { 
+          id: 3, 
+          bracket_id: 1, 
+          team1_name: "Team A", 
+          team2_name: "Team D", 
+          winner_name: "Team A", 
+          score_team1: 90, 
+          score_team2: 80, 
+          status: "completed", 
+          round_number: 200, 
+          bracket_name: "Men's Basketball Bracket", 
+          sport_type: "basketball",
+          bracket_type: "championship"
+        },
+        { 
+          id: 4, 
+          bracket_id: 2, 
+          team1_name: "Team X", 
+          team2_name: "Team Y", 
+          winner_name: "Team X", 
+          score_team1: 3, 
+          score_team2: 1, 
+          status: "completed", 
+          round_number: 1, 
+          bracket_name: "Women's Volleyball Bracket", 
+          sport_type: "volleyball",
+          bracket_type: "winner"
+        }
       ]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewEvent = (event) => {
+    handleEventSelect(event);
   };
 
   // Handle match selection to view player stats
@@ -98,14 +195,11 @@ const AdminStats = ({ sidebarOpen }) => {
     setSelectedMatch(match);
     setLoading(true);
     try {
-      // Get player stats with player names already included
       const res = await fetch(`http://localhost:5000/api/stats/matches/${match.id}/stats`);
       const data = await res.json();
       
-      // The data now already includes player_name and team_name from the enhanced backend query
       const playersWithDetails = data.map((stat) => ({
         ...stat,
-        // Use the data that now comes directly from the backend
         player_name: stat.player_name || "Unknown Player",
         jersey_number: stat.jersey_number || stat.jerseyNumber || "N/A",
         team_name: stat.team_name || "Unknown Team"
@@ -115,7 +209,6 @@ const AdminStats = ({ sidebarOpen }) => {
       setActiveTab("statistics");
     } catch (err) {
       console.error("Error fetching player stats:", err);
-      // Mock data for demonstration based on your database schema
       setPlayerStats([
         { 
           player_id: 1, 
@@ -171,40 +264,6 @@ const AdminStats = ({ sidebarOpen }) => {
     }
   };
 
-  // Calculate percentages for display
-  const calculatePercentages = (player) => {
-    const isBasketball = selectedMatch?.sport_type === "basketball";
-    
-    if (isBasketball) {
-      // For basketball, calculate FG%, 3P%, FT%
-      // These would normally be calculated from more detailed stats
-      return {
-        field_goal_percentage: "45.0%",
-        three_point_percentage: "36.0%",
-        free_throw_percentage: "78.0%"
-      };
-    } else {
-      // For volleyball, calculate hitting percentage, service percentage, reception percentage
-      const hittingPercentage = player.attack_attempts > 0 
-        ? ((player.kills - player.attack_errors) / player.attack_attempts * 100).toFixed(1) + "%"
-        : "0.0%";
-        
-      const servicePercentage = (player.serves + player.serve_errors) > 0
-        ? (player.serves / (player.serves + player.serve_errors) * 100).toFixed(1) + "%"
-        : "0.0%";
-        
-      const receptionPercentage = (player.receptions + player.reception_errors) > 0
-        ? (player.receptions / (player.receptions + player.reception_errors) * 100).toFixed(1) + "%"
-        : "0.0%";
-        
-      return {
-        hitting_percentage: hittingPercentage,
-        service_percentage: servicePercentage,
-        reception_percentage: receptionPercentage
-      };
-    }
-  };
-
   // Filter player stats based on search term
   const filteredPlayerStats = playerStats.filter(player => 
     player.player_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -221,7 +280,7 @@ const AdminStats = ({ sidebarOpen }) => {
     matchesByBracket[match.bracket_id].push(match);
   });
 
-  // Find bracket winners (teams that won the final round)
+  // Find bracket winners
   const bracketWinners = {};
   brackets.forEach(bracket => {
     if (matchesByBracket[bracket.id]) {
@@ -233,6 +292,91 @@ const AdminStats = ({ sidebarOpen }) => {
       }
     }
   });
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Render matches with pagination
+  const renderMatchesWithPagination = (bracketMatches, totalPages) => {
+    return (
+      <>
+        <div className="matches-grid">
+          {bracketMatches.map((match) => (
+            <div 
+              key={match.id} 
+              className="match-card"
+              onClick={() => handleMatchSelect(match)}
+            >
+              <div className="match-teams">
+                <div className={`match-team ${match.winner_id === match.team1_id ? "match-winner" : ""}`}>
+                  {match.team1_name}
+                </div>
+                <div className="match-vs">vs</div>
+                <div className={`match-team ${match.winner_id === match.team2_id ? "match-winner" : ""}`}>
+                  {match.team2_name}
+                </div>
+              </div>
+              <div className="match-score">
+                {match.score_team1} - {match.score_team2}
+              </div>
+              <div className="match-info">
+                <span>{formatRoundDisplay(match)}</span>
+                {match.winner_name && (
+                  <span className="match-winner-tag">
+                    Winner: {match.winner_name}
+                  </span>
+                )}
+              </div>
+              <div className="match-actions">
+                <button className="bracket-view-btn">
+                  View Stats
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="adminstats-pagination-container">
+            <button 
+              className="adminstats-pagination-btn"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="adminstats-pagination-numbers">
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  className={`adminstats-pagination-number ${currentPage === index + 1 ? 'active' : ''}`}
+                  onClick={() => paginate(index + 1)}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+              className="adminstats-pagination-btn"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </>
+    );
+  };
 
   // Render player statistics table
   const renderStatsTable = () => {
@@ -357,7 +501,6 @@ const AdminStats = ({ sidebarOpen }) => {
             </thead>
             <tbody>
               {filteredPlayerStats.map((player) => {
-                const percentages = calculatePercentages(player);
                 const jerseyNumber = player.jersey_number || player.jerseyNumber || "N/A";
                 
                 return (
@@ -406,14 +549,12 @@ const AdminStats = ({ sidebarOpen }) => {
     const isBasketball = selectedMatch?.sport_type === "basketball";
     let csvContent = "data:text/csv;charset=utf-8,";
     
-    // Headers
     if (isBasketball) {
       csvContent += "Player,Team,Jersey,PTS,AST,REB,STL,BLK,3PM,Fouls,TO\n";
     } else {
       csvContent += "Player,Team,Jersey,Kills,Assists,Digs,Blocks,Aces,Serve Err,Att Err,Rec Err\n";
     }
     
-    // Rows
     playerStats.forEach(player => {
       const jerseyNumber = player.jersey_number || player.jerseyNumber || "N/A";
       if (isBasketball) {
@@ -481,10 +622,10 @@ const AdminStats = ({ sidebarOpen }) => {
                 ) : (
                   <div className="bracket-grid">
                     {events.map((event) => (
-                      <div className="bracket-card" key={event.id} onClick={() => handleEventSelect(event)}>
+                      <div className="bracket-card" key={event.id}>
                         <div className="bracket-card-header">
                           <h3>{event.name}</h3>
-                          <span className={`bracket-sport-badge ${event.status === "completed" ? "status-completed" : "status-ongoing"}`}>
+                          <span className={`bracket-sport-badge ${event.status === "ongoing" ? "bracket-sport-basketball" : "bracket-sport-volleyball"}`}>
                             {event.status}
                           </span>
                         </div>
@@ -492,13 +633,18 @@ const AdminStats = ({ sidebarOpen }) => {
                           <div><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</div>
                           <div><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</div>
                           <div><strong>Status:</strong> 
-                            <span className={event.status === "completed" ? "status-completed" : "status-ongoing"}>
+                            <span className={event.status === "ongoing" ? "status-ongoing" : "status-completed"}>
                               {event.status}
+                            </span>
+                          </div>
+                          <div><strong>Archived:</strong> 
+                            <span className={event.archived === "no" ? "archived-no" : "archived-yes"}>
+                              {event.archived || "no"}
                             </span>
                           </div>
                         </div>
                         <div className="bracket-card-actions">
-                          <button className="bracket-view-btn">
+                          <button className="bracket-view-btn" onClick={() => handleViewEvent(event)}>
                             View Results
                           </button>
                         </div>
@@ -513,9 +659,7 @@ const AdminStats = ({ sidebarOpen }) => {
             {activeTab === "brackets" && selectedEvent && (
               <div className="bracket-view-section">
                 <div className="event-details-header">
-                  <h2>
-                    {selectedEvent.name} - Results
-                  </h2>
+                  <h2>{selectedEvent.name} - Results</h2>
                   <div className="event-details-info">
                     <span><strong>Start:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()}</span>
                     <span><strong>End:</strong> {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
@@ -531,58 +675,30 @@ const AdminStats = ({ sidebarOpen }) => {
                   </div>
                 ) : (
                   <div>
-                    {brackets.map((bracket) => (
-                      <div key={bracket.id} className="bracket-section">
-                        <div className="bracket-header">
-                          <h3>{bracket.name}</h3>
-                          {bracketWinners[bracket.id] && (
-                            <div className="bracket-winner">
-                              <FaTrophy /> Winner: {bracketWinners[bracket.id]}
-                            </div>
+                    {brackets.map((bracket) => {
+                      const bracketMatches = matchesByBracket[bracket.id] || [];
+                      const currentMatches = bracketMatches.slice(indexOfFirstItem, indexOfLastItem);
+                      const totalPages = Math.ceil(bracketMatches.length / itemsPerPage);
+
+                      return (
+                        <div key={bracket.id} className="bracket-section">
+                          <div className="bracket-header">
+                            <h3>{bracket.name}</h3>
+                            {bracketWinners[bracket.id] && (
+                              <div className="bracket-winner">
+                                <FaTrophy /> Winner: {bracketWinners[bracket.id]}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {bracketMatches.length > 0 ? (
+                            renderMatchesWithPagination(currentMatches, totalPages)
+                          ) : (
+                            <p>No matches available for this bracket.</p>
                           )}
                         </div>
-                        
-                        {matchesByBracket[bracket.id] && matchesByBracket[bracket.id].length > 0 ? (
-                          <div className="matches-grid">
-                            {matchesByBracket[bracket.id].map((match) => (
-                              <div 
-                                key={match.id} 
-                                className="match-card"
-                                onClick={() => handleMatchSelect(match)}
-                              >
-                                <div className="match-teams">
-                                  <div className={`match-team ${match.winner_id === match.team1_id ? "match-winner" : ""}`}>
-                                    {match.team1_name}
-                                  </div>
-                                  <div className="match-vs">vs</div>
-                                  <div className={`match-team ${match.winner_id === match.team2_id ? "match-winner" : ""}`}>
-                                    {match.team2_name}
-                                  </div>
-                                </div>
-                                <div className="match-score">
-                                  {match.score_team1} - {match.score_team2}
-                                </div>
-                                <div className="match-info">
-                                  <span>Round {match.round_number}</span>
-                                  {match.winner_name && (
-                                    <span className="match-winner-tag">
-                                      Winner: {match.winner_name}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="match-actions">
-                                  <button className="bracket-view-btn">
-                                    View Stats
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p>No matches available for this bracket.</p>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -8,19 +8,20 @@
 
 .dashboard-content {
   flex: 1;
-  margin-left: 70px; 
-  padding-left: 20px; /* Add padding to prevent overlap */
+  margin-left: 70px;
   transition: var(--transition);
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .dashboard-content.sidebar-open {
   margin-left: 280px;
+  padding-left: 20px;
 }
 
 .dashboard-header {
-  padding: 80px 40px 40px 40px; /* Top padding accounts for toggle button */
+  padding: 40px;
   background: var(--background-secondary);
   border-bottom: 1px solid var(--border-color);
   box-shadow: var(--shadow-light);
@@ -64,12 +65,6 @@
   font-size: 1.1rem;
   color: var(--text-secondary);
   margin: 0;
-}
-
-.dashboard-main {
-  flex: 1;
-  padding: 40px;
-  background: var(--background-primary);
 }
 
 /* Loading State */
@@ -486,10 +481,11 @@
   
   .dashboard-content.sidebar-open {
     margin-left: 0;
+    padding-left: 0;
   }
   
   .dashboard-header {
-    padding: 60px 20px 30px 20px;
+    padding: 20px;
   }
   
   .dashboard-header h1 {

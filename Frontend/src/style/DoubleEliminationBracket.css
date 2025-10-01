@@ -1,4 +1,4 @@
-/* Double Elimination Bracket - Scoped Styles */
+/* Double Elimination Bracket - Fully Isolated Styles */
 
 .double-bracket-wrapper {
   padding: 32px;
@@ -54,17 +54,31 @@
   position: relative;
 }
 
-.double-bracket .bracket-section {
-  width: 100%;
-  margin-bottom: 0;
+/* CRITICAL: Override any admin dashboard styling for bracket-section */
+.double-bracket .bracket-section,
+.double-bracket-wrapper .bracket-section {
+  width: 100% !important;
+  margin-bottom: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+.double-bracket .bracket-section:hover,
+.double-bracket-wrapper .bracket-section:hover {
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .double-bracket .championship-bracket-section {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  padding: 0;
-  box-shadow: none;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
 }
 
 .double-bracket .double-bracket-title {

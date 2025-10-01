@@ -63,7 +63,7 @@
   transition: var(--transition);
   box-shadow: var(--shadow-heavy);
   position: relative;
-  overflow: hidden; /* Prevent content from overflowing */
+  overflow: hidden;
 }
 
 .sidebar-closed {
@@ -75,9 +75,9 @@
 }
 
 .sidebar-header {
-  padding: 80px 20px 20px 20px;
+  padding: 70px 20px 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0; /* Prevent header from shrinking */
+  flex-shrink: 0;
 }
 
 .sidebar-user-profile {
@@ -109,9 +109,9 @@
 
 .sidebar-nav {
   flex: 1;
-  padding: 20px 0;
-  overflow-y: auto; /* Allow scrolling if content overflows */
-  min-height: 0; /* Allow flex item to shrink below content size */
+  padding: 12px 0;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .sidebar-nav-list {
@@ -121,13 +121,13 @@
 }
 
 .sidebar-nav-item {
-  margin-bottom: 4px; /* Reduced margin to save space */
+  margin-bottom: 2px;
 }
 
 .sidebar-nav-link {
   display: flex;
   align-items: center;
-  padding: 10px 20px; /* Reduced padding to save space */
+  padding: 12px 20px;
   color: var(--text-primary);
   text-decoration: none;
   transition: var(--transition);
@@ -141,8 +141,8 @@
 }
 
 .sidebar-nav-icon {
-  font-size: 18px; /* Slightly smaller icons */
-  width: 20px; /* Smaller icon container */
+  font-size: 20px;
+  width: 20px;
   height: 20px;
   display: flex;
   align-items: center;
@@ -151,7 +151,7 @@
 }
 
 .sidebar-nav-label {
-  font-size: 15px; /* Slightly smaller text */
+  font-size: 14px;
   font-weight: 500;
   opacity: 1;
   transition: var(--transition);
@@ -165,16 +165,16 @@
 }
 
 .sidebar-footer {
-  padding: 15px 0; /* Reduced padding */
+  padding: 12px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0; /* Prevent footer from shrinking */
-  margin-top: auto; /* Push footer to bottom */
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 .logout-link {
   background: none;
   border: none;
-  padding: 10px 20px; /* Consistent padding with nav links */
+  padding: 12px 20px;
 }
 
 .logout-link:hover {
@@ -255,18 +255,22 @@
 /* For very small screens or high zoom levels */
 @media (max-height: 600px) {
   .sidebar-header {
-    padding: 70px 20px 15px 20px; /* Reduced top padding */
+    padding: 60px 20px 12px 20px;
+  }
+  
+  .sidebar-nav {
+    padding: 8px 0;
   }
   
   .sidebar-nav-item {
-    margin-bottom: 2px; /* Even smaller margins */
+    margin-bottom: 1px;
   }
   
   .sidebar-nav-link {
-    padding: 8px 20px; /* Smaller padding */
+    padding: 10px 20px;
   }
   
   .sidebar-footer {
-    padding: 10px 0; /* Smaller footer padding */
+    padding: 8px 0;
   }
 }

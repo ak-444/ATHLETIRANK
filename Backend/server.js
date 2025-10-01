@@ -14,7 +14,8 @@ const teamsRoutes = require('./routes/teams');      // ✅ NEW
 const playersRoutes = require('./routes/players');  // ✅ NEW
 const bracketTeamRoutes = require('./routes/bracketTeams');
 const statsRouter = require("./routes/stats");
-
+const scheduleRoutes = require('./routes/schedule');
+const matchesRoutes = require('./routes/matches'); // Add this
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,7 +39,8 @@ app.use('/api/teams', teamsRoutes);        // ✅ NEW
 app.use('/api/players', playersRoutes);    // ✅ NEW
 app.use('/api/bracketTeams', bracketTeamRoutes);
 app.use("/api/stats", statsRouter);
-
+app.use('/api/schedules', scheduleRoutes);
+app.use('/api/matches', matchesRoutes); // Add this
 
 // Test route
 app.get('/api/test', (req, res) => {

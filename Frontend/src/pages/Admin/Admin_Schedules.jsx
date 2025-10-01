@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../../style/Admin_SchedulePage.css";
 
-const SchedulesPage = ({ sidebarOpen }) => {
+const Admin_Schedules = ({ sidebarOpen }) => {
   const [activeTab, setActiveTab] = useState("create");
   const [schedules, setSchedules] = useState([]);
   const [events, setEvents] = useState([]);
@@ -9,6 +9,7 @@ const SchedulesPage = ({ sidebarOpen }) => {
   const [matches, setMatches] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     eventId: "",
@@ -20,33 +21,80 @@ const SchedulesPage = ({ sidebarOpen }) => {
     description: ""
   });
 
-  // Fetch Events, Brackets, Matches, and Teams
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+  // Format round display based on bracket type and round number
+  const formatRoundDisplay = (match) => {
+    if (!match) return "Unknown Round";
+    
+    const roundNum = match.round_number;
+    const bracketType = match.bracket_type;
+    
+    if (roundNum === 200) return 'Grand Final';
+    if (roundNum === 201) return 'Bracket Reset';
+    if (roundNum >= 200 && bracketType === 'championship') {
+      return `Championship Round ${roundNum - 199}`;
+    }
+    
+    if (bracketType === 'loser' || (roundNum >= 101 && roundNum < 200)) {
+      return `LB Round ${roundNum - 100}`;
+    }
+    
+    if (bracketType === 'winner' || roundNum < 100) {
+      return `Round ${roundNum}`;
+    }
+    
+    return `Round ${roundNum}`;
+  };
+
+  // Fetch all data
+  const fetchData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      // Fetch events, brackets, matches, and teams in parallel
+      const [eventsRes, bracketsRes, matchesRes, teamsRes] = await Promise.all([
+        fetch("http://localhost:5000/api/events").then(res => {
+          if (!res.ok) throw new Error('Failed to fetch events');
+          return res.json();
+        }),
+        fetch("http://localhost:5000/api/brackets").then(res => {
+          if (!res.ok) throw new Error('Failed to fetch brackets');
+          return res.json();
+        }),
+        fetch("http://localhost:5000/api/matches").then(res => {
+          if (!res.ok) throw new Error('Failed to fetch matches');
+          return res.json();
+        }),
+        fetch("http://localhost:5000/api/teams").then(res => {
+          if (!res.ok) throw new Error('Failed to fetch teams');
+          return res.json();
+        })
+      ]);
+
+      setEvents(eventsRes);
+      setBrackets(bracketsRes);
+      setMatches(matchesRes);
+      setTeams(teamsRes);
+
+      // Try to fetch schedules
       try {
-        const [eventsRes, bracketsRes, matchesRes, teamsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/events"),
-          fetch("http://localhost:5000/api/brackets"),
-          fetch("http://localhost:5000/api/matches"),
-          fetch("http://localhost:5000/api/teams")
-        ]);
-
-        const eventsData = await eventsRes.json();
-        const bracketsData = await bracketsRes.json();
-        const matchesData = await matchesRes.json();
-        const teamsData = await teamsRes.json();
-
-        setEvents(eventsData);
-        setBrackets(bracketsData);
-        setMatches(matchesData);
-        setTeams(teamsData);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
+        const schedulesRes = await fetch("http://localhost:5000/api/schedules");
+        if (schedulesRes.ok) {
+          const schedulesData = await schedulesRes.json();
+          setSchedules(schedulesData);
+        }
+      } catch (schedulesErr) {
+        console.log("Schedules not available yet, continuing without them");
+        setSchedules([]);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(`Failed to load data: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -56,23 +104,54 @@ const SchedulesPage = ({ sidebarOpen }) => {
       ...prev,
       [name]: value,
     }));
+
+    // Reset dependent fields when event changes
+    if (name === "eventId") {
+      setFormData(prev => ({
+        ...prev,
+        bracketId: "",
+        matchId: ""
+      }));
+    }
+
+    // Reset match when bracket changes
+    if (name === "bracketId") {
+      setFormData(prev => ({
+        ...prev,
+        matchId: ""
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     
     try {
-      const res = await fetch("http://localhost:5000/api/schedules", {
+      const scheduleData = {
+        eventId: parseInt(formData.eventId),
+        bracketId: parseInt(formData.bracketId),
+        matchId: parseInt(formData.matchId),
+        date: formData.date,
+        time: formData.time,
+        venue: formData.venue,
+        description: formData.description
+      };
+
+      console.log('Submitting schedule data:', scheduleData);
+
+      const response = await fetch("http://localhost:5000/api/schedules", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(scheduleData)
       });
 
-      if (res.ok) {
-        const newSchedule = await res.json();
-        setSchedules(prev => [...prev, newSchedule]);
-        
-        // Reset form
+      const result = await response.json();
+
+      if (response.ok) {
+        setSchedules(prev => [...prev, result]);
         setFormData({
           eventId: "",
           bracketId: "",
@@ -82,31 +161,31 @@ const SchedulesPage = ({ sidebarOpen }) => {
           venue: "",
           description: ""
         });
-        
         setActiveTab("view");
         alert("Schedule created successfully!");
       } else {
-        alert("Error creating schedule");
+        setError(result.message || "Failed to create schedule");
       }
     } catch (err) {
       console.error("Error creating schedule:", err);
-      alert("Error creating schedule");
+      setError("Network error: Could not create schedule");
     }
   };
 
-  const handleDeleteSchedule = async (id) => {
-    if (!confirm("Are you sure you want to delete this schedule?")) return;
+  const handleDeleteSchedule = async (schedule) => {
+    if (!window.confirm("Are you sure you want to delete this schedule?")) return;
     
     try {
-      const res = await fetch(`http://localhost:5000/api/schedules/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/schedules/${schedule.id}`, {
         method: "DELETE"
       });
 
-      if (res.ok) {
-        setSchedules(prev => prev.filter(sch => sch.id !== id));
+      if (response.ok) {
+        setSchedules(prev => prev.filter(sch => sch.id !== schedule.id));
         alert("Schedule deleted successfully!");
       } else {
-        alert("Error deleting schedule");
+        const result = await response.json();
+        alert(result.message || "Error deleting schedule");
       }
     } catch (err) {
       console.error("Error deleting schedule:", err);
@@ -114,13 +193,23 @@ const SchedulesPage = ({ sidebarOpen }) => {
     }
   };
 
+  // Get filtered brackets based on selected event
+  const filteredBrackets = formData.eventId 
+    ? brackets.filter(b => b.event_id === parseInt(formData.eventId))
+    : [];
+
   // Get filtered matches based on selected bracket
   const filteredMatches = formData.bracketId 
-    ? matches.filter(match => match.bracket_id === parseInt(formData.bracketId))
+    ? matches.filter(match => 
+        match.bracket_id === parseInt(formData.bracketId) &&
+        match.status !== 'hidden' &&
+        match.team1_id && match.team2_id
+      )
     : [];
 
   // Get team names for a match
   const getTeamNames = (match) => {
+    if (!match) return "TBD vs TBD";
     const team1 = teams.find(t => t.id === match.team1_id);
     const team2 = teams.find(t => t.id === match.team2_id);
     return `${team1?.name || "TBD"} vs ${team2?.name || "TBD"}`;
@@ -129,6 +218,36 @@ const SchedulesPage = ({ sidebarOpen }) => {
   // Capitalize first letter
   const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
+  // Group matches by round for better organization
+  const groupMatchesByRound = (matchesList) => {
+    const grouped = {};
+    matchesList.forEach(match => {
+      const roundKey = `${match.bracket_type}-${match.round_number}`;
+      const roundDisplay = formatRoundDisplay(match);
+      if (!grouped[roundKey]) {
+        grouped[roundKey] = {
+          roundDisplay: roundDisplay,
+          matches: []
+        };
+      }
+      grouped[roundKey].matches.push(match);
+    });
+    return grouped;
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-dashboard">
+        <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
+          <div className="dashboard-header">
+            <h1>Schedules Management</h1>
+            <p>Loading data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-dashboard">
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
@@ -136,6 +255,19 @@ const SchedulesPage = ({ sidebarOpen }) => {
           <h1>Schedules Management</h1>
           <p>Create and manage tournament schedules</p>
         </div>
+
+        {error && (
+          <div className="error-message" style={{ 
+            background: '#fee', 
+            border: '1px solid #fcc', 
+            padding: '10px', 
+            borderRadius: '4px', 
+            margin: '10px 0',
+            color: '#c33'
+          }}>
+            {error}
+          </div>
+        )}
 
         <div className="dashboard-main">
           <div className="bracket-content">
@@ -173,50 +305,83 @@ const SchedulesPage = ({ sidebarOpen }) => {
                       >
                         <option value="">Choose an event</option>
                         {events.map(ev => (
-                          <option key={ev.id} value={ev.id}>{ev.name}</option>
+                          <option key={ev.id} value={ev.id}>
+                            {ev.name} ({new Date(ev.start_date).toLocaleDateString()} - {new Date(ev.end_date).toLocaleDateString()})
+                          </option>
                         ))}
                       </select>
+                      {events.length === 0 && !loading && (
+                        <small style={{ color: '#ef4444', marginTop: '4px' }}>
+                          No events available. Please create events first.
+                        </small>
+                      )}
                     </div>
 
                     {/* Bracket Selection */}
-                    <div className="bracket-form-group">
-                      <label htmlFor="bracketId">Select Bracket *</label>
-                      <select
-                        id="bracketId"
-                        name="bracketId"
-                        value={formData.bracketId}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Choose a bracket</option>
-                        {brackets
-                          .filter(b => b.event_id === parseInt(formData.eventId))
-                          .map(b => (
+                    {formData.eventId && (
+                      <div className="bracket-form-group">
+                        <label htmlFor="bracketId">Select Bracket *</label>
+                        <select
+                          id="bracketId"
+                          name="bracketId"
+                          value={formData.bracketId}
+                          onChange={handleInputChange}
+                          required
+                        >
+                          <option value="">Choose a bracket</option>
+                          {filteredBrackets.map(b => (
                             <option key={b.id} value={b.id}>
-                              {b.name} ({capitalize(b.sport_type)})
+                              {b.name} ({capitalize(b.sport_type)} - {b.elimination_type === 'single' ? 'Single' : 'Double'} Elimination)
                             </option>
                           ))}
-                      </select>
-                    </div>
+                        </select>
+                        {filteredBrackets.length === 0 && formData.eventId && (
+                          <small style={{ color: '#ef4444', marginTop: '4px' }}>
+                            No brackets available for this event.
+                          </small>
+                        )}
+                      </div>
+                    )}
 
                     {/* Match Selection */}
                     {formData.bracketId && (
                       <div className="bracket-form-group">
                         <label htmlFor="matchId">Select Match *</label>
-                        <select
-                          id="matchId"
-                          name="matchId"
-                          value={formData.matchId}
-                          onChange={handleInputChange}
-                          required
-                        >
-                          <option value="">Choose a match</option>
-                          {filteredMatches.map(match => (
-                            <option key={match.id} value={match.id}>
-                              Round {match.round_number}: {getTeamNames(match)}
-                            </option>
-                          ))}
-                        </select>
+                        {filteredMatches.length === 0 ? (
+                          <div style={{ 
+                            padding: '12px', 
+                            background: '#f8f9fa', 
+                            borderRadius: '4px', 
+                            textAlign: 'center',
+                            border: '1px dashed #ddd'
+                          }}>
+                            No available matches. Matches need both teams assigned and cannot be hidden.
+                          </div>
+                        ) : (
+                          <>
+                            <select
+                              id="matchId"
+                              name="matchId"
+                              value={formData.matchId}
+                              onChange={handleInputChange}
+                              required
+                            >
+                              <option value="">Choose a match</option>
+                              {Object.entries(groupMatchesByRound(filteredMatches)).map(([roundKey, roundData]) => (
+                                <optgroup key={roundKey} label={roundData.roundDisplay}>
+                                  {roundData.matches.map(match => (
+                                    <option key={match.id} value={match.id}>
+                                      {getTeamNames(match)}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              ))}
+                            </select>
+                            <small style={{ color: '#6b7280', marginTop: '4px', display: 'block' }}>
+                              {filteredMatches.length} match(es) available - grouped by round
+                            </small>
+                          </>
+                        )}
                       </div>
                     )}
 
@@ -254,7 +419,7 @@ const SchedulesPage = ({ sidebarOpen }) => {
                         type="text" 
                         id="venue"
                         name="venue" 
-                        placeholder="Enter venue" 
+                        placeholder="e.g., Main Gymnasium, Court 1" 
                         value={formData.venue} 
                         onChange={handleInputChange} 
                         required 
@@ -263,20 +428,24 @@ const SchedulesPage = ({ sidebarOpen }) => {
 
                     {/* Description */}
                     <div className="bracket-form-group">
-                      <label htmlFor="description">Description</label>
+                      <label htmlFor="description">Additional Notes</label>
                       <textarea 
                         id="description"
                         name="description" 
                         value={formData.description} 
                         onChange={handleInputChange} 
-                        placeholder="Optional details" 
+                        placeholder="Optional: Add any special instructions or notes about this match" 
                         rows="3" 
                       />
                     </div>
 
                     {/* Actions */}
                     <div className="bracket-form-actions">
-                      <button type="submit" className="bracket-submit-btn">
+                      <button 
+                        type="submit" 
+                        className="bracket-submit-btn"
+                        disabled={!formData.eventId || !formData.bracketId || !formData.matchId || !formData.date || !formData.time || !formData.venue}
+                      >
                         Save Schedule
                       </button>
                       <button 
@@ -304,11 +473,9 @@ const SchedulesPage = ({ sidebarOpen }) => {
             {activeTab === "view" && (
               <div className="bracket-view-section">
                 <h2>All Schedules</h2>
-                {loading ? (
-                  <p>Loading schedules...</p>
-                ) : schedules.length === 0 ? (
+                {schedules.length === 0 ? (
                   <div className="bracket-no-brackets">
-                    <p>No schedules yet. Create one!</p>
+                    <p>No schedules yet. Create one to get started!</p>
                     <button 
                       className="bracket-submit-btn" 
                       onClick={() => setActiveTab("create")}
@@ -319,38 +486,63 @@ const SchedulesPage = ({ sidebarOpen }) => {
                 ) : (
                   <div className="bracket-grid">
                     {schedules.map((schedule) => {
-                      const relatedMatch = matches.find(m => m.id === schedule.match_id);
-                      const relatedBracket = brackets.find(b => b.id === schedule.bracket_id);
-                      const event = events.find(e => e.id === schedule.event_id);
-                      
-                      return (
-                        <div key={schedule.id} className="bracket-card">
-                          <div className="bracket-card-header">
-                            <h3>
-                              {relatedMatch ? getTeamNames(relatedMatch) : "Match TBD"}
-                            </h3>
-                            <span className={`bracket-sport-badge bracket-sport-${relatedBracket?.sport_type || "default"}`}>
-                              {relatedBracket ? capitalize(relatedBracket.sport_type) : "Unknown"}
-                            </span>
-                          </div>
-                          <div className="bracket-card-info">
-                            <div><strong>Event:</strong> {event?.name || "Unknown"}</div>
-                            <div><strong>Bracket:</strong> {relatedBracket?.name || "Unknown"}</div>
-                            <div><strong>Date & Time:</strong> {schedule.date} {schedule.time}</div>
-                            <div><strong>Venue:</strong> {schedule.venue}</div>
+  // Format date properly
+  const formatScheduleDateTime = (date, time) => {
+  if (!date || !time) return 'Date TBD';
+  
+  // date is in YYYY-MM-DD format, time is in HH:MM format
+  const [year, month, day] = date.split('-');
+  const [hours, minutes] = time.split(':');
+  
+  const dateObj = new Date(year, month - 1, day, hours, minutes);
+  
+  return dateObj.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+  
+  return (
+    <div key={schedule.id} className="bracket-card schedule-card">
+      <div className="bracket-card-header">
+        <h3>
+          {schedule.team1_name && schedule.team2_name 
+            ? `${schedule.team1_name} vs ${schedule.team2_name}`
+            : "Match Details TBD"
+          }
+        </h3>
+        <span className={`bracket-sport-badge bracket-sport-${schedule.sport_type || "default"}`}>
+          {schedule.sport_type ? capitalize(schedule.sport_type) : "Unknown"}
+        </span>
+      </div>
+      <div className="bracket-card-info">
+        <div><strong>Event:</strong> {schedule.event_name || "Unknown"}</div>
+        <div><strong>Bracket:</strong> {schedule.bracket_name || "Unknown"}</div>
+        {schedule.round_number && (
+          <div><strong>Round:</strong> {formatRoundDisplay(schedule)}</div>
+        )}
+        <div className="schedule-datetime">
+          <strong>Date & Time:</strong> {formatScheduleDateTime(schedule.date, schedule.time)}
+        </div>
+                            <div className="schedule-venue">
+                              <strong>Venue:</strong> {schedule.venue}
+                            </div>
                             {schedule.description && (
-                              <div><strong>Description:</strong> {schedule.description}</div>
-                            )}
-                            {relatedMatch && (
-                              <div><strong>Round:</strong> {relatedMatch.round_number}</div>
+                              <div className="schedule-description">
+                                <strong>Notes:</strong> {schedule.description}
+                              </div>
                             )}
                           </div>
                           <div className="bracket-card-actions">
                             <button 
                               className="bracket-delete-btn"
-                              onClick={() => handleDeleteSchedule(schedule.id)}
+                              onClick={() => handleDeleteSchedule(schedule)}
                             >
-                              Delete
+                              Delete Schedule
                             </button>
                           </div>
                         </div>
@@ -367,4 +559,4 @@ const SchedulesPage = ({ sidebarOpen }) => {
   );
 };
 
-export default SchedulesPage;
+export default Admin_Schedules;
