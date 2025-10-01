@@ -28,8 +28,8 @@ const Homepage = () => {
 
                 <div className={`nav-links ${isNavOpen ? 'active' : ''}`}>
                     <ul>
-                        <li><Link to="/" className="nav-link" onClick={toggleNav}>Home</Link></li>
-                        <li><Link to="/about" className="nav-link" onClick={toggleNav}>About</Link></li>
+                        <li><a href="#home" className="nav-link" onClick={toggleNav}>Home</a></li>
+                        <li><a href="#about" className="nav-link" onClick={toggleNav}>About</a></li>
                         <li><Link to="/brackets" className="nav-link" onClick={toggleNav}>Brackets</Link></li>
                         <li><Link to="/stats" className="nav-link" onClick={toggleNav}>Statistics</Link></li>
                         <li><Link to="/teams" className="nav-link" onClick={toggleNav}>Teams</Link></li>
@@ -50,7 +50,7 @@ const Homepage = () => {
             </nav>
 
            {/* Hero Section */}
-<main className="hero-section">
+<main className="hero-section" id="home">
     <div className="hero-content">
         
         <div className='hero-title-container'>
@@ -99,7 +99,7 @@ const Homepage = () => {
         
             {/* About Section */}
            
-<section className="about-section">
+<section className="about-section" id="about">
     <div className="about-container">
         <div className='about-content'>
             <div className='about-text'>
