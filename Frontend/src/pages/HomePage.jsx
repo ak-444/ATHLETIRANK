@@ -250,43 +250,88 @@ const Homepage = () => {
 
             {/* Features Section */}
             <section className="features-section" ref={featuresRef}>
-                <motion.div 
-                    className="features-container"
-                    variants={staggerContainer}
-                    initial="hidden"
-                    animate={featuresControls}
-                >
-                    <motion.h2 className="features-title" variants={fadeInUp}>
-                        Why Choose AthletiRank?
-                    </motion.h2>
+    <motion.div 
+        className="features-container"
+        variants={staggerContainer}
+        initial="hidden"
+        animate={featuresControls}
+    >
+        <motion.h2 className="features-title" variants={fadeInUp}>
+            Why Choose AthletiRank?
+        </motion.h2>
 
-                    <motion.div className="features-grid" variants={staggerContainer}>
-                        <motion.div className="feature-card" variants={fadeInUp}>
-                            <div className="feature-icon">📅</div>
-                            <h3>Automated Brackets</h3>
-                            <p>Easily generate and update tournament brackets for basketball and volleyball with real-time match progress.</p>
-                        </motion.div>
+        {/* Add the SVG filter for the electric effect */}
+        <svg className="eb-svg">
+            <defs>
+                <filter id="eb-glow">
+                    <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+        </svg>
 
-                        <motion.div className="feature-card" variants={fadeInUp}>
-                            <div className="feature-icon">📊</div>
-                            <h3>Player Statistics</h3>
-                            <p>Track points, assists, rebounds, and more with accurate, real-time leaderboards for fair recognition.</p>
-                        </motion.div>
+        <motion.div className="features-grid" variants={staggerContainer}>
+            <motion.div className="feature-card electric-border" variants={fadeInUp} style={{"--electric-border-color": "#3b82f6", "--electric-light-color": "#60a5fa"}}>
+                <div className="eb-layers">
+                    <div className="eb-background-glow"></div>
+                    <div className="eb-glow-2"></div>
+                    <div className="eb-glow-1"></div>
+                    <div className="eb-stroke"></div>
+                </div>
+                <div className="eb-content">
+                    <div className="feature-icon">📅</div>
+                    <h3>Automated Brackets</h3>
+                    <p>Easily generate and update tournament brackets for basketball and volleyball with real-time match progress.</p>
+                </div>
+            </motion.div>
 
-                        <motion.div className="feature-card" variants={fadeInUp}>
-                            <div className="feature-icon">🏆</div>
-                            <h3>Award Recognition</h3>
-                            <p>Automatically identify MVPs and Mythical 5 based on performance data, ensuring unbiased awards.</p>
-                        </motion.div>
+            <motion.div className="feature-card electric-border" variants={fadeInUp} style={{"--electric-border-color": "#10b981", "--electric-light-color": "#34d399"}}>
+                <div className="eb-layers">
+                    <div className="eb-background-glow"></div>
+                    <div className="eb-glow-2"></div>
+                    <div className="eb-glow-1"></div>
+                    <div className="eb-stroke"></div>
+                </div>
+                <div className="eb-content">
+                    <div className="feature-icon">📊</div>
+                    <h3>Player Statistics</h3>
+                    <p>Track points, assists, rebounds, and more with accurate, real-time leaderboards for fair recognition.</p>
+                </div>
+            </motion.div>
 
-                        <motion.div className="feature-card" variants={fadeInUp}>
-                            <div className="feature-icon">👥</div>
-                            <h3>Role-Based Access</h3>
-                            <p>Admins manage events, staff input scores, and viewers stay updated—all through a secure platform.</p>
-                        </motion.div>
-                    </motion.div>
-                </motion.div>
-            </section>
+            <motion.div className="feature-card electric-border" variants={fadeInUp} style={{"--electric-border-color": "#f59e0b", "--electric-light-color": "#fbbf24"}}>
+                <div className="eb-layers">
+                    <div className="eb-background-glow"></div>
+                    <div className="eb-glow-2"></div>
+                    <div className="eb-glow-1"></div>
+                    <div className="eb-stroke"></div>
+                </div>
+                <div className="eb-content">
+                    <div className="feature-icon">🏆</div>
+                    <h3>Award Recognition</h3>
+                    <p>Automatically identify MVPs and Mythical 5 based on performance data, ensuring unbiased awards.</p>
+                </div>
+            </motion.div>
+
+            <motion.div className="feature-card electric-border" variants={fadeInUp} style={{"--electric-border-color": "#8b5cf6", "--electric-light-color": "#a78bfa"}}>
+                <div className="eb-layers">
+                    <div className="eb-background-glow"></div>
+                    <div className="eb-glow-2"></div>
+                    <div className="eb-glow-1"></div>
+                    <div className="eb-stroke"></div>
+                </div>
+                <div className="eb-content">
+                    <div className="feature-icon">👥</div>
+                    <h3>Role-Based Access</h3>
+                    <p>Admins manage events, staff input scores, and viewers stay updated—all through a secure platform.</p>
+                </div>
+            </motion.div>
+        </motion.div>
+    </motion.div>
+</section>
 
             {/* Footer */}
             <footer className="footer">

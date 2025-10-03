@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import API from '../../services/api';
 import '../../style/admin_Users.css';
-import { FaEye, FaCheck, FaTimes, FaTrash, FaSearch } from 'react-icons/fa';
+import { FaEye, FaCheck, FaTimes, FaTrash, FaSearch, FaCheckDouble } from 'react-icons/fa';
 
 const AdminUsers = ({ sidebarOpen }) => {
   const { user } = useAuth();
@@ -14,6 +14,7 @@ const AdminUsers = ({ sidebarOpen }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showSearch, setShowSearch] = useState(false);
+  const [acceptingAll, setAcceptingAll] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -84,6 +85,35 @@ const AdminUsers = ({ sidebarOpen }) => {
     }
   };
 
+  // New function to approve all pending users
+  const approveAllPendingUsers = async () => {
+    const pendingUsers = users.filter(user => !user.is_approved);
+    
+    if (pendingUsers.length === 0) {
+      setError('No pending users to approve.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to approve all ${pendingUsers.length} pending users?`)) {
+      return;
+    }
+
+    try {
+      setAcceptingAll(true);
+      // Call the API endpoint to approve all pending users
+      await API.put('/admin/users/approve-all');
+      setSuccess(`Successfully approved all ${pendingUsers.length} pending users!`);
+      fetchUsers();
+      setTimeout(() => setSuccess(''), 5000);
+    } catch (error) {
+      setError('Failed to approve all users. Please try again.');
+      console.error('Error approving all users:', error);
+    } finally {
+      setAcceptingAll(false);
+    }
+  };
+
   const downloadId = (imagePath) => {
     window.open(`http://localhost:5000/uploads/${imagePath}`, '_blank');
   };
@@ -103,6 +133,9 @@ const AdminUsers = ({ sidebarOpen }) => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
+
+  // Get count of pending users
+  const pendingUsersCount = users.filter(user => !user.is_approved).length;
 
   return (
     <div className="admin-dashboard">
@@ -132,7 +165,7 @@ const AdminUsers = ({ sidebarOpen }) => {
             {/* Filter and Search Controls */}
             <div className="bracket-view-section">
               
-            {/* Filter and Search Controls */}
+              {/* Filter and Search Controls */}
               <div className="user-management-toolbar">
                 <div className="filter-controls">
                   <select 
@@ -141,11 +174,23 @@ const AdminUsers = ({ sidebarOpen }) => {
                     className="bracket-form-group select-filter"
                   >
                     <option value="all">All Users</option>
-                    <option value="pending">Pending Approval</option>
+                    <option value="pending">Pending Approval ({pendingUsersCount})</option>
                     <option value="approved">Approved</option>
                     <option value="staff">Staff Only</option>
                     <option value="admin">Admins Only</option>
                   </select>
+                  
+                  {/* Accept All Button - Only show when viewing pending users or when there are pending users */}
+                  {pendingUsersCount > 0 && (
+                    <button
+                      onClick={approveAllPendingUsers}
+                      disabled={acceptingAll}
+                      className={`bracket-submit-btn accept-all-btn ${acceptingAll ? 'loading' : ''}`}
+                    >
+                      <FaCheckDouble />
+                      {acceptingAll ? 'Approving All...' : `Approve All (${pendingUsersCount})`}
+                    </button>
+                  )}
                   
                   {isMobile ? (
                     <div className="mobile-search-container">

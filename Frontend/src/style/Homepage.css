@@ -636,6 +636,7 @@ body {
 }
 
 /* Enhanced Features Section */
+/* Enhanced Features Section */
 .features-section {
     padding: 8rem 2rem;
     background: var(--background-card);
@@ -677,47 +678,115 @@ body {
     gap: 2rem;
 }
 
+/* Updated Feature Card with Electric Border */
 .feature-card {
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.6));
-    border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: var(--border-radius-lg);
     text-align: center;
-    padding: 2.5rem;
+    padding: 0; /* Remove padding from main card, it will be on eb-content */
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(10px);
     transition: var(--transition);
+    isolation: isolate;
 }
 
-.feature-card::before {
-    content: "";
+/* Electric Border Styles */
+.electric-border {
+    --electric-light-color: oklch(from var(--electric-border-color) l c h);
+    --eb-border-width: 2px;
+    position: relative;
+    border-radius: inherit;
+    overflow: visible;
+    isolation: isolate;
+}
+
+.eb-svg {
+    position: fixed;
+    left: -10000px;
+    top: -10000px;
+    width: 10px;
+    height: 10px;
+    opacity: 0.001;
+    pointer-events: none;
+}
+
+.eb-content {
+    position: relative;
+    border-radius: inherit;
+    z-index: 1;
+    padding: 2.5rem; /* Move the padding here from feature-card */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.6));
+}
+
+.eb-layers {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    transform: scaleX(0);
-    transition: var(--transition);
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 2;
 }
 
-.feature-card:hover::before {
-    transform: scaleX(1);
+.eb-stroke,
+.eb-glow-1,
+.eb-glow-2,
+.eb-overlay-1,
+.eb-overlay-2,
+.eb-background-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.eb-stroke {
+    border: var(--eb-border-width) solid var(--electric-border-color);
+}
+
+.eb-glow-1 {
+    border: var(--eb-border-width) solid oklch(from var(--electric-border-color) l c h / 0.6);
+    opacity: 0.5;
+    filter: blur(calc(0.5px + (var(--eb-border-width) * 0.25)));
+}
+
+.eb-glow-2 {
+    border: var(--eb-border-width) solid var(--electric-light-color);
+    opacity: 0.5;
+    filter: blur(calc(2px + (var(--eb-border-width) * 0.5)));
+}
+
+.eb-background-glow {
+    z-index: -1;
+    transform: scale(1.08);
+    filter: blur(32px);
+    opacity: 0.3;
+    background: linear-gradient(-30deg, var(--electric-light-color), transparent, var(--electric-border-color));
+}
+
+/* Remove the old border and hover effects from feature-card since electric border handles it */
+.feature-card::before {
+    display: none; /* Remove the old top border effect */
 }
 
 .feature-card:hover {
     transform: translateY(-10px);
-    border-color: rgba(59, 130, 246, 0.5);
     box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2);
+}
+
+.feature-card:hover .eb-content {
     background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.8));
 }
 
 .feature-icon {
-   font-size: 3.5rem;
-   margin-bottom: 1.5rem;
-   display: block;
-   filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.4));
-   transition: var(--transition);
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.4));
+    transition: var(--transition);
 }
 
 .feature-card:hover .feature-icon {

@@ -98,6 +98,82 @@
   width: 300px;
 }
 
+/* Add these styles to your admin_Users.css file */
+
+/* Accept All Button */
+.accept-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: var(--border-radius);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.accept-all-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.accept-all-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.accept-all-btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.accept-all-btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: bracket-spin 1s linear infinite;
+}
+
+/* Filter controls layout */
+.filter-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Responsive adjustments for the accept all button */
+@media (max-width: 768px) {
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .accept-all-btn {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .select-filter {
+    width: 100%;
+  }
+}
+
+/* Pending count in filter dropdown */
+.select-filter option[value="pending"] {
+  position: relative;
+}
+
 .search-input {
   padding: 12px 100px 100px 100px;
   border: 2px solid var(--border-color);

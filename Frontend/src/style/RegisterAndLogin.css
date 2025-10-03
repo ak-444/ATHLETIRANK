@@ -729,21 +729,24 @@
     border-radius: 2px;
 }
 
-.brand-tagline {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--text-primary);
-    opacity: 0.9;
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0;
+    }
 }
 
-.brand-description {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    opacity: 0.8;
-    margin-top: 20px;
+
+.cursor {
+    display: inline-block;
+    margin-left: 4px;
+    animation: blink 1s step-end infinite;
+    -webkit-text-fill-color: currentColor;
+    background: none;
 }
+
 
 /* Right Section - Auth Forms - COVERS HALF THE PAGE */
 .right-section {

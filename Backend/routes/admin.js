@@ -152,6 +152,47 @@ router.put('/users/:userId/approve', verifyAdminToken, async (req, res) => {
     }
 });
 
+// Approve all pending users (admin only) - ADD THIS NEW ENDPOINT
+router.put('/users/approve-all', verifyAdminToken, async (req, res) => {
+    try {
+        // First, get count of pending users
+        const [pendingUsers] = await pool.execute(
+            'SELECT COUNT(*) as pending_count FROM users WHERE is_approved = 0'
+        );
+
+        const pendingCount = pendingUsers[0].pending_count;
+
+        if (pendingCount === 0) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'No pending users to approve' 
+            });
+        }
+
+        // Update all pending users to approved
+        const [result] = await pool.execute(
+            'UPDATE users SET is_approved = 1, updated_at = CURRENT_TIMESTAMP WHERE is_approved = 0'
+        );
+
+        const affectedRows = result.affectedRows;
+
+        console.log(`All ${affectedRows} pending users approved by admin ${req.user.username}`);
+
+        res.json({ 
+            success: true,
+            message: `Successfully approved ${affectedRows} pending users`,
+            approvedCount: affectedRows
+        });
+    } catch (error) {
+        console.error('Error approving all users:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Failed to approve all users',
+            error: error.message 
+        });
+    }
+});
+
 // Reject user (admin only)
 router.put('/users/:userId/reject', verifyAdminToken, async (req, res) => {
     try {

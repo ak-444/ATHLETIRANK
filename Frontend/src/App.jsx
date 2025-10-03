@@ -26,6 +26,7 @@ import EventDetails from "./pages/Admin/Admin_EventDetails";
 import UserTeamsPage from "./pages/Users/User_TeamPage";
 import UserStatsPage from "./pages/Users/User_StatsPage";
 import User_BracketPage from "./pages/Users/User_BracketPage";
+import UserSchedulePage from "./pages/Users/User_Schedule";
 
 import "./style/app.css";
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="/teams" element={<UserTeamsPage />} />
           <Route path="/stats" element={<UserStatsPage />} />
           <Route path="/brackets" element={<User_BracketPage />} />
+          <Route path="/schedules" element={<UserSchedulePage />} />
 
           {/* Admin protected routes */}
           <Route element={<ProtectedRoute requiredRole="admin" />}>
