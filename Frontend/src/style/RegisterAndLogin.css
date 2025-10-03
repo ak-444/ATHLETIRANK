@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  
   background: linear-gradient(135deg, var(--background-primary) 0%, var(--background-secondary) 100%);
   position: relative;
   overflow: hidden;
@@ -47,7 +47,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  
 }
 
 /* Header Section */
@@ -124,51 +124,73 @@
 }
 
 /* Navigation Tabs  */
-/* Back to Home Button */
+/* Simple Back to Home Button - No Background, Only Underline */
+/* Simple Back to Home Button - Under Login Button */
 .back-to-home-btn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    padding: 10px 16px;
-    background: var(--background-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    display: block;
+    width: fit-content;
+    margin: 20px auto 0;
+    padding: 8px 0;
+    background: transparent !important;
+    border: none !important;
     color: var(--text-primary);
-    text-decoration: none;
+    text-decoration: none; /* remove browser default underline */
     font-size: 14px;
     font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    text-align: center;
     transition: var(--transition);
-    z-index: 10;
-    box-shadow: var(--shadow-light);
+    position: relative;
+}
+
+.back-to-home-btn::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 1px; /* thickness of the line */
+    background: var(--text-primary);
+    margin-top: 1px; /* space between text and line */
+    transition: background var(--transition);
 }
 
 .back-to-home-btn:hover {
-    background: var(--background-secondary);
-    border-color: var(--border-focus);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-medium);
+    color: var(--primary-color);
 }
 
+.back-to-home-btn:hover::after {
+    background: var(--primary-color);
+}
+
+/* Remove any absolute positioning and other conflicting styles */
+.back-to-home-btn {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Ensure it's properly placed in the form container */
+.auth-form-container {
+    padding: 24px;
+    position: relative;
+}
+
+/* Responsive */
 @media (max-width: 480px) {
     .back-to-home-btn {
-        top: 15px;
-        left: 15px;
-        padding: 8px 12px;
+        margin: 15px auto 0;
         font-size: 13px;
     }
 }
 
 @media (max-width: 360px) {
     .back-to-home-btn {
-        top: 10px;
-        left: 10px;
-        padding: 6px 10px;
+        margin: 12px auto 0;
         font-size: 12px;
     }
 }
+
+
 
 .auth-tabs {
   display: flex;
@@ -203,7 +225,7 @@
 }
 
 .tab-btn.active {
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
   color: white;
   box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
 }
@@ -328,7 +350,7 @@
 .submit-btn {
   width: 100%;
   padding: 11px;
-  background: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
   border: none;
   border-radius: var(--border-radius);
   color: white;
@@ -553,4 +575,443 @@
   color: var(--text-muted);
   text-align: center;
   margin: 0;
+}
+
+/* Split Layout Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.split-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* ONLY apply these resets to the login/register page */
+.register-login-page-reset {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.register-login-page-reset * {
+    box-sizing: border-box;
+}
+
+/* Split Layout Styles for login/register page ONLY */
+.register-login-page-reset .split-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, var(--background-primary) 0%, var(--background-secondary) 100%);
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.register-login-page-reset .left-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: linear-gradient(135deg, rgba(30, 37, 50, 0.9) 0%, rgba(20, 25, 35, 0.95) 100%);
+    position: relative;
+    overflow: hidden;
+    margin: 0;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.register-login-page-reset .app-container {
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+
+/* Keep all your existing login/register styles but prefix them with .register-login-page-reset */
+
+/* Left Section - Branding */
+.left-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: linear-gradient(135deg, rgba(30, 37, 50, 0.9) 0%, rgba(20, 25, 35, 0.95) 100%);
+    margin: 0;
+    margin-right: 0;
+    padding-right: 0;
+}
+
+.left-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(51, 103, 214, 0.15)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+    animation: moveGrid 15s linear infinite;
+}
+
+@keyframes moveGrid {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 100px 100px;
+    }
+}
+.brand-container {
+    text-align: center;
+    color: white;
+    max-width: 500px;
+    z-index: 1;
+}
+
+.brand-logo {
+    width: 450px;
+    height: 450px;
+    margin-top: 2rem;
+    margin-bottom: 0px;
+    object-fit: contain;
+    animation: brandFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 80px rgba(96, 165, 250, 0.3));
+}
+
+@keyframes brandFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-30px) scale(1.02);
+    }
+}
+
+.brand-title {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 50px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+    position: relative;
+}
+
+.brand-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    border-radius: 2px;
+}
+
+.brand-tagline {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    opacity: 0.9;
+}
+
+.brand-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    margin-top: 20px;
+}
+
+/* Right Section - Auth Forms - COVERS HALF THE PAGE */
+.right-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    margin: 0;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/* Make the auth container larger to fill the right half */
+.auth-container {
+    width: 100%;
+    max-width: 800px; /* Increased from 420px */
+    height: fit-content;
+    max-height: 100vh;
+    position: relative;
+    z-index: 1;
+    
+}
+
+/* Make the auth card larger */
+.auth-card {
+    background: var(--background-card);
+    
+    box-shadow: var(--shadow-heavy);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    position: relative;
+    width: 100%;
+    min-height: 750px; /* Ensure minimum height */
+}
+
+/* Increase padding in form areas to utilize more space */
+.auth-header {
+    text-align: center;
+    padding: 20px 16px 12px; /* Increased padding */
+    background: linear-gradient(135deg, var(--background-card) 0%, rgba(30, 37, 50, 0.8) 100%);
+    user-select: none;
+}
+
+.auth-form-container {
+    padding: 24px; /* Increased padding */
+}
+
+/* Make form elements larger */
+.form-title {
+    font-size: 22px; /* Increased from 18px */
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px; /* Increased margin */
+    text-align: center;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* Increased gap between form groups */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Increased gap */
+}
+
+.form-label {
+    font-size: 14px; /* Slightly larger */
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px; /* Increased padding */
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    font-size: 15px; /* Slightly larger font */
+    transition: var(--transition);
+    outline: none;
+}
+
+/* Make buttons larger */
+.submit-btn {
+    width: 100%;
+    padding: 14px; /* Increased padding */
+    background: var(--primary-color);
+    border: none;
+    border-radius: var(--border-radius);
+    color: white;
+    font-size: 16px; /* Larger font */
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 8px;
+}
+
+/* Increase tab sizes */
+.auth-tabs {
+    display: flex;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    margin: 0 16px 16px; /* Increased bottom margin */
+    padding: 4px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 16px; /* Increased padding */
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px; /* Larger font */
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+/* Make role buttons larger */
+.role-btn {
+    flex: 1;
+    padding: 12px 16px; /* Increased padding */
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+    font-size: 14px; /* Larger font */
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+/* Make file upload area larger */
+.file-label {
+    width: 100%;
+    padding: 14px; /* Increased padding */
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    color: var(--text-secondary);
+    font-size: 15px; /* Larger font */
+    cursor: pointer;
+    text-align: center;
+    transition: var(--transition);
+}
+
+/* Increase logo size in auth header */
+.logo-image {
+    width: 60px;  /* Increased from 50px */
+    height: 60px; /* Increased from 50px */
+    object-fit: contain;
+    border-radius: 8px;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+    transition: var(--transition);
+}
+
+.brand-name {
+    font-size: 22px; /* Increased from 20px */
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+    font-size: 13px; /* Slightly larger */
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .split-layout {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .left-section {
+        padding: 30px 20px;
+        flex: none;
+        min-height: 40vh;
+    }
+
+    .right-section {
+        padding: 30px 20px;
+        flex: none;
+        min-height: 60vh;
+    }
+
+    .auth-container {
+        max-width: 100%;
+        max-height: none;
+    }
+
+    .brand-title {
+        font-size: 2.5rem;
+    }
+
+    .brand-tagline {
+        font-size: 1.3rem;
+    }
+
+    .brand-description {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .left-section {
+        padding: 20px 15px;
+        min-height: 35vh;
+    }
+
+    .right-section {
+        padding: 20px 15px;
+        min-height: 65vh;
+    }
+
+    .right-section {
+        padding: 30px 20px;
+        flex: none;
+        min-height: 60vh;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .auth-container {
+        max-width: 100%;
+        max-height: 60vh; /* Limit height */
+        overflow-y: auto; /* Enable scrolling on the form container */
+    }
+
+    .auth-card {
+        min-height: auto;
+        height: auto;
+    }
+
+    .brand-logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 15px;
+    }
+
+    .brand-title {
+        font-size: 2rem;
+    }
+
+    .brand-tagline {
+        font-size: 1.1rem;
+    }
+
+    .brand-description {
+        font-size: 0.9rem;
+    }
+
+    .auth-card {
+        min-height: 500px;
+    }
 }

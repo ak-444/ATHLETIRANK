@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import '../style/RegisterAndLogin.css';
 import universityLogo from '../assets/Arellano_University_logo.png';
 
@@ -109,6 +110,12 @@ const Login = ({ setCurrentView }) => {
                             {loading ? 'Logging in...' : 'Login'}
                         </button>
                     </form>
+                    <Link 
+                    to="/" 
+                    className="back-to-home-btn"
+                >
+                    Back to Home
+                </Link>
                 </div>
             </div>
         </div>

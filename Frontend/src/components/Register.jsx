@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../style/RegisterAndLogin.css'
+import { Link } from "react-router-dom";
 import universityLogo from '../assets/Arellano_University_logo.png'; 
 
 const Register = ({ setCurrentView }) => {
@@ -261,6 +262,12 @@ const Register = ({ setCurrentView }) => {
                             {loading ? 'Creating Account...' : 'Create Account'}
                         </button>
                     </form>
+                    <Link 
+                    to="/" 
+                    className="back-to-home-btn"
+                >
+                    Back to Home
+                </Link>
                 </div>
             </div>
         </div>
