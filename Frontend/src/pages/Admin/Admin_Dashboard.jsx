@@ -1,5 +1,3 @@
-
-
 import "../../style/Admin_Dashboard.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -113,8 +111,17 @@ const AdminDashboard = ({ sidebarOpen }) => {
     <div className="admin-dashboard">
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="dashboard-header">
-          <h1>Admin Dashboard</h1>
-          <p>Welcome to your sports management system</p>
+          <div className="header-content">
+            <div className="header-text">
+              <h1>Admin Dashboard</h1>
+              <p>Welcome to your sports management system</p>
+            </div>
+            <div className="header-decoration">
+              <div className="decoration-circle"></div>
+              <div className="decoration-circle"></div>
+              <div className="decoration-circle"></div>
+            </div>
+          </div>
         </div>
 
         <div className="dashboard-main">
