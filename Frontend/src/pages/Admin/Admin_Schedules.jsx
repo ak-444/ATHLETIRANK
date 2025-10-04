@@ -10,6 +10,10 @@ const Admin_Schedules = ({ sidebarOpen }) => {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Filters for view tab
+  const [filterEvent, setFilterEvent] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
   const [formData, setFormData] = useState({
     eventId: "",
@@ -50,7 +54,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
     setLoading(true);
     setError("");
     try {
-      // Fetch events, brackets, matches, and teams in parallel
       const [eventsRes, bracketsRes, matchesRes, teamsRes] = await Promise.all([
         fetch("http://localhost:5000/api/events").then(res => {
           if (!res.ok) throw new Error('Failed to fetch events');
@@ -75,7 +78,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
       setMatches(matchesRes);
       setTeams(teamsRes);
 
-      // Try to fetch schedules
       try {
         const schedulesRes = await fetch("http://localhost:5000/api/schedules");
         if (schedulesRes.ok) {
@@ -105,7 +107,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
       [name]: value,
     }));
 
-    // Reset dependent fields when event changes
     if (name === "eventId") {
       setFormData(prev => ({
         ...prev,
@@ -114,13 +115,17 @@ const Admin_Schedules = ({ sidebarOpen }) => {
       }));
     }
 
-    // Reset match when bracket changes
     if (name === "bracketId") {
       setFormData(prev => ({
         ...prev,
         matchId: ""
       }));
     }
+  };
+
+  const handleClearFilters = () => {
+    setFilterEvent("");
+    setFilterDate("");
   };
 
   const handleSubmit = async (e) => {
@@ -193,12 +198,20 @@ const Admin_Schedules = ({ sidebarOpen }) => {
     }
   };
 
-  // Get filtered brackets based on selected event
+  // Get filtered schedules for view tab
+  const getFilteredSchedules = () => {
+    return schedules.filter(schedule => {
+      const matchesEvent = !filterEvent || schedule.event_id === parseInt(filterEvent);
+      const matchesDate = !filterDate || schedule.date === filterDate;
+      
+      return matchesEvent && matchesDate;
+    });
+  };
+
   const filteredBrackets = formData.eventId 
     ? brackets.filter(b => b.event_id === parseInt(formData.eventId))
     : [];
 
-  // Get filtered matches based on selected bracket
   const filteredMatches = formData.bracketId 
     ? matches.filter(match => 
         match.bracket_id === parseInt(formData.bracketId) &&
@@ -207,7 +220,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
       )
     : [];
 
-  // Get team names for a match
   const getTeamNames = (match) => {
     if (!match) return "TBD vs TBD";
     const team1 = teams.find(t => t.id === match.team1_id);
@@ -215,10 +227,8 @@ const Admin_Schedules = ({ sidebarOpen }) => {
     return `${team1?.name || "TBD"} vs ${team2?.name || "TBD"}`;
   };
 
-  // Capitalize first letter
   const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
-  // Group matches by round for better organization
   const groupMatchesByRound = (matchesList) => {
     const grouped = {};
     matchesList.forEach(match => {
@@ -234,6 +244,26 @@ const Admin_Schedules = ({ sidebarOpen }) => {
     });
     return grouped;
   };
+
+  const formatScheduleDateTime = (date, time) => {
+    if (!date || !time) return 'Date TBD';
+    
+    const [year, month, day] = date.split('-');
+    const [hours, minutes] = time.split(':');
+    
+    const dateObj = new Date(year, month - 1, day, hours, minutes);
+    
+    return dateObj.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const filteredSchedulesList = getFilteredSchedules();
 
   if (loading) {
     return (
@@ -257,14 +287,7 @@ const Admin_Schedules = ({ sidebarOpen }) => {
         </div>
 
         {error && (
-          <div className="error-message" style={{ 
-            background: '#fee', 
-            border: '1px solid #fcc', 
-            padding: '10px', 
-            borderRadius: '4px', 
-            margin: '10px 0',
-            color: '#c33'
-          }}>
+          <div className="error-message">
             {error}
           </div>
         )}
@@ -293,7 +316,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                 <div className="bracket-form-container">
                   <h2>Create New Schedule</h2>
                   <form className="bracket-form" onSubmit={handleSubmit}>
-                    {/* Event Selection */}
                     <div className="bracket-form-group">
                       <label htmlFor="eventId">Select Event *</label>
                       <select
@@ -317,7 +339,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                       )}
                     </div>
 
-                    {/* Bracket Selection */}
                     {formData.eventId && (
                       <div className="bracket-form-group">
                         <label htmlFor="bracketId">Select Bracket *</label>
@@ -343,7 +364,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                       </div>
                     )}
 
-                    {/* Match Selection */}
                     {formData.bracketId && (
                       <div className="bracket-form-group">
                         <label htmlFor="matchId">Select Match *</label>
@@ -385,7 +405,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                       </div>
                     )}
 
-                    {/* Date and Time */}
                     <div className="bracket-form-row">
                       <div className="bracket-form-group">
                         <label htmlFor="date">Date *</label>
@@ -412,7 +431,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                       </div>
                     </div>
 
-                    {/* Venue */}
                     <div className="bracket-form-group">
                       <label htmlFor="venue">Venue *</label>
                       <input 
@@ -426,7 +444,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                       />
                     </div>
 
-                    {/* Description */}
                     <div className="bracket-form-group">
                       <label htmlFor="description">Additional Notes</label>
                       <textarea 
@@ -439,7 +456,6 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                       />
                     </div>
 
-                    {/* Actions */}
                     <div className="bracket-form-actions">
                       <button 
                         type="submit" 
@@ -471,68 +487,73 @@ const Admin_Schedules = ({ sidebarOpen }) => {
 
             {/* View Schedules */}
             {activeTab === "view" && (
-              <div className="bracket-view-section">
-                <h2>All Schedules</h2>
-                {schedules.length === 0 ? (
-                  <div className="bracket-no-brackets">
-                    <p>No schedules yet. Create one to get started!</p>
-                    <button 
-                      className="bracket-submit-btn" 
-                      onClick={() => setActiveTab("create")}
-                    >
-                      Create Schedule
+              <>
+                {/* Filters Section */}
+                <div className="bracket-filters-section">
+                  <div className="bracket-filters">
+                    <div className="filter-group">
+                      <label htmlFor="filterEvent">Event:</label>
+                      <select
+                        id="filterEvent"
+                        value={filterEvent}
+                        onChange={(e) => setFilterEvent(e.target.value)}
+                      >
+                        <option value="">All Events</option>
+                        {events.map(ev => (
+                          <option key={ev.id} value={ev.id}>
+                            {ev.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="filter-group">
+                      <label htmlFor="filterDate">Date:</label>
+                      <input
+                        type="date"
+                        id="filterDate"
+                        value={filterDate}
+                        onChange={(e) => setFilterDate(e.target.value)}
+                      />
+                    </div>
+
+                    <button className="clear-filters-btn" onClick={handleClearFilters}>
+                      Clear Filters
                     </button>
                   </div>
-                ) : (
-                  <div className="bracket-grid">
-                    {schedules.map((schedule) => {
-  // Format date properly
-  const formatScheduleDateTime = (date, time) => {
-  if (!date || !time) return 'Date TBD';
-  
-  // date is in YYYY-MM-DD format, time is in HH:MM format
-  const [year, month, day] = date.split('-');
-  const [hours, minutes] = time.split(':');
-  
-  const dateObj = new Date(year, month - 1, day, hours, minutes);
-  
-  return dateObj.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
-};
-  
-  return (
-    <div key={schedule.id} className="bracket-card schedule-card">
-      <div className="bracket-card-header">
-        <h3>
-          {schedule.team1_name && schedule.team2_name 
-            ? `${schedule.team1_name} vs ${schedule.team2_name}`
-            : "Match Details TBD"
-          }
-        </h3>
-        <span className={`bracket-sport-badge bracket-sport-${schedule.sport_type || "default"}`}>
-          {schedule.sport_type ? capitalize(schedule.sport_type) : "Unknown"}
-        </span>
-      </div>
-      <div className="bracket-card-info">
-        <div><strong>Event:</strong> {schedule.event_name || "Unknown"}</div>
-        <div><strong>Bracket:</strong> {schedule.bracket_name || "Unknown"}</div>
-        {schedule.round_number && (
-          <div><strong>Round:</strong> {formatRoundDisplay(schedule)}</div>
-        )}
-        <div className="schedule-datetime">
-          <strong>Date & Time:</strong> {formatScheduleDateTime(schedule.date, schedule.time)}
-        </div>
-                            <div className="schedule-venue">
-                              <strong>Venue:</strong> {schedule.venue}
-                            </div>
+                </div>
+
+                <div className="bracket-view-section">
+                  <h2>All Schedules</h2>
+                  {filteredSchedulesList.length === 0 ? (
+                    <div className="bracket-no-brackets">
+                      <p>No schedules found.</p>
+                    </div>
+                  ) : (
+                    <div className="bracket-grid">
+                      {filteredSchedulesList.map((schedule) => (
+                        <div key={schedule.id} className="bracket-card schedule-card">
+                          <div className="bracket-card-header">
+                            <h3>
+                              {schedule.team1_name && schedule.team2_name 
+                                ? `${schedule.team1_name} vs ${schedule.team2_name}`
+                                : "Match Details TBD"
+                              }
+                            </h3>
+                            <span className={`bracket-sport-badge bracket-sport-${schedule.sport_type || "default"}`}>
+                              {schedule.sport_type ? capitalize(schedule.sport_type) : "Unknown"}
+                            </span>
+                          </div>
+                          <div className="bracket-card-info">
+                            <div><strong>Event:</strong> {schedule.event_name || "Unknown"}</div>
+                            <div><strong>Bracket:</strong> {schedule.bracket_name || "Unknown"}</div>
+                            {schedule.round_number && (
+                              <div><strong>Round:</strong> {formatRoundDisplay(schedule)}</div>
+                            )}
+                            <div><strong>Date & Time:</strong> {formatScheduleDateTime(schedule.date, schedule.time)}</div>
+                            <div><strong>Venue:</strong> {schedule.venue}</div>
                             {schedule.description && (
-                              <div className="schedule-description">
+                              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
                                 <strong>Notes:</strong> {schedule.description}
                               </div>
                             )}
@@ -546,11 +567,11 @@ const Admin_Schedules = ({ sidebarOpen }) => {
                             </button>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>

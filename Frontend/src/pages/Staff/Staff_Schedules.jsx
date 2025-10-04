@@ -2,352 +2,210 @@ import React, { useState, useEffect } from "react";
 import "../../style/Staff_SchedulePage.css";
 
 const StaffSchedulePage = ({ sidebarOpen }) => {
-  const [activeTab, setActiveTab] = useState("all");
   const [schedules, setSchedules] = useState([]);
-  const [mySchedules, setMySchedules] = useState([]);
   const [events, setEvents] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [filterEvent, setFilterEvent] = useState("");
   const [filterDate, setFilterDate] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
 
-  // Mock current user - in real app, this would come from auth context
-  useEffect(() => {
-    setCurrentUser({
-      id: 1,
-      name: "John Smith",
-      email: "john.smith@tournament.com",
-      role: "staff"
-    });
-  }, []);
-
-  // Mock data - in real app, this would come from your API
-  useEffect(() => {
-    const mockSchedules = [
-      {
-        id: 1,
-        eventId: 1,
-        eventName: "Spring Basketball Tournament 2024",
-        bracketId: 1,
-        bracketName: "Men's Division A",
-        round: "Quarterfinals",
-        teamA: "Lakers",
-        teamB: "Warriors",
-        date: "2024-03-15",
-        time: "14:00",
-        venue: "Main Arena",
-        description: "Championship quarterfinal match",
-        assignedStaff: [1, 2], // Staff IDs assigned to this game
-        createdAt: "2024-02-20"
-      },
-      {
-        id: 2,
-        eventId: 1,
-        eventName: "Spring Basketball Tournament 2024",
-        bracketId: 2,
-        bracketName: "Women's Division A",
-        round: "Semifinals",
-        teamA: "Phoenix",
-        teamB: "Storm",
-        date: "2024-03-16",
-        time: "16:30",
-        venue: "Court 2",
-        description: "Women's semifinal showdown",
-        assignedStaff: [2, 3],
-        createdAt: "2024-02-21"
-      },
-      {
-        id: 3,
-        eventId: 2,
-        eventName: "Football Championship 2024",
-        bracketId: 3,
-        bracketName: "Premier League",
-        round: "Finals",
-        teamA: "Eagles",
-        teamB: "Hawks",
-        date: "2024-03-20",
-        time: "19:00",
-        venue: "Stadium A",
-        description: "Championship final",
-        assignedStaff: [1, 3, 4],
-        createdAt: "2024-02-22"
-      },
-      {
-        id: 4,
-        eventId: 1,
-        eventName: "Spring Basketball Tournament 2024",
-        bracketId: 1,
-        bracketName: "Men's Division A",
-        round: "Finals",
-        teamA: "Celtics",
-        teamB: "Heat",
-        date: "2024-03-18",
-        time: "20:00",
-        venue: "Main Arena",
-        description: "Championship final game",
-        assignedStaff: [1, 2, 3],
-        createdAt: "2024-02-23"
-      }
-    ];
-
-    const mockEvents = [
-      { id: 1, name: "Spring Basketball Tournament 2024" },
-      { id: 2, name: "Football Championship 2024" }
-    ];
-
-    setSchedules(mockSchedules);
-    setEvents(mockEvents);
-
-    // Filter schedules assigned to current user
-    if (currentUser) {
-      const userSchedules = mockSchedules.filter(schedule => 
-        schedule.assignedStaff.includes(currentUser.id)
-      );
-      setMySchedules(userSchedules);
+  // Format round display based on bracket type and round number
+  const formatRoundDisplay = (schedule) => {
+    if (!schedule || !schedule.round_number) return "Unknown Round";
+    
+    const roundNum = schedule.round_number;
+    const bracketType = schedule.bracket_type;
+    
+    if (roundNum === 200) return 'Grand Final';
+    if (roundNum === 201) return 'Bracket Reset';
+    if (roundNum >= 200 && bracketType === 'championship') {
+      return `Championship Round ${roundNum - 199}`;
     }
-  }, [currentUser]);
+    
+    if (bracketType === 'loser' || (roundNum >= 101 && roundNum < 200)) {
+      return `LB Round ${roundNum - 100}`;
+    }
+    
+    if (bracketType === 'winner' || roundNum < 100) {
+      return `Round ${roundNum}`;
+    }
+    
+    return `Round ${roundNum}`;
+  };
+
+  // Fetch all data
+  const fetchData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [eventsRes, schedulesRes] = await Promise.all([
+        fetch("http://localhost:5000/api/events").then(res => {
+          if (!res.ok) throw new Error('Failed to fetch events');
+          return res.json();
+        }),
+        fetch("http://localhost:5000/api/schedules").then(res => {
+          if (!res.ok) throw new Error('Failed to fetch schedules');
+          return res.json();
+        })
+      ]);
+
+      setEvents(eventsRes);
+      setSchedules(schedulesRes);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(`Failed to load data: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleClearFilters = () => {
     setFilterEvent("");
     setFilterDate("");
-    setSearchTerm("");
   };
 
-  const getFilteredSchedules = (schedulesToFilter) => {
-    return schedulesToFilter.filter(schedule => {
-      const matchesEvent = !filterEvent || schedule.eventId === parseInt(filterEvent);
+  // Get filtered schedules
+  const getFilteredSchedules = () => {
+    return schedules.filter(schedule => {
+      const matchesEvent = !filterEvent || schedule.event_id === parseInt(filterEvent);
       const matchesDate = !filterDate || schedule.date === filterDate;
-      const matchesSearch = !searchTerm || 
-        schedule.teamA.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        schedule.teamB.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        schedule.venue.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        schedule.round.toLowerCase().includes(searchTerm.toLowerCase());
       
-      return matchesEvent && matchesDate && matchesSearch;
+      return matchesEvent && matchesDate;
     });
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  };
-
-  const formatTime = (timeString) => {
-    const time = new Date(`2000-01-01T${timeString}`);
-    return time.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+  const formatScheduleDateTime = (date, time) => {
+    if (!date || !time) return 'Date TBD';
+    
+    const [year, month, day] = date.split('-');
+    const [hours, minutes] = time.split(':');
+    
+    const dateObj = new Date(year, month - 1, day, hours, minutes);
+    
+    return dateObj.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
   };
 
-  const isUpcoming = (date, time) => {
-    const gameDateTime = new Date(`${date}T${time}`);
-    return gameDateTime > new Date();
-  };
+  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 
-  const getStatusBadge = (date, time) => {
-    const gameDateTime = new Date(`${date}T${time}`);
-    const now = new Date();
-    const diffHours = (gameDateTime - now) / (1000 * 60 * 60);
+  const filteredSchedules = getFilteredSchedules();
 
-    if (diffHours < 0) {
-      return <span className="status-badge completed">Completed</span>;
-    } else if (diffHours <= 2) {
-      return <span className="status-badge upcoming-soon">Starting Soon</span>;
-    } else if (diffHours <= 24) {
-      return <span className="status-badge upcoming-today">Today</span>;
-    } else {
-      return <span className="status-badge upcoming">Upcoming</span>;
-    }
-  };
+  if (loading) {
+    return (
+      <div className="admin-dashboard">
+        <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
+          <div className="dashboard-header">
+            <h1>Schedules</h1>
+            <p>Loading data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-dashboard">
       <div className={`dashboard-content ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="dashboard-header">
-          <h1>Schedule </h1>
-          <p>View tournament schedules and your assigned games</p>
+          <h1>Schedules</h1>
+          <p>View tournament schedules</p>
         </div>
 
-        <div className="schedule-content">
-          {/* Tabs */}
-          <div className="schedule-tabs">
-            <button 
-              className={`schedule-tab-button ${activeTab === "all" ? "schedule-tab-active" : ""}`}
-              onClick={() => setActiveTab("all")}
-            >
-              All Schedules ({schedules.length})
-            </button>
-            <button 
-              className={`schedule-tab-button ${activeTab === "assigned" ? "schedule-tab-active" : ""}`}
-              onClick={() => setActiveTab("assigned")}
-            >
-              My Assignments ({mySchedules.length})
-            </button>
+        {error && (
+          <div className="error-message">
+            {error}
           </div>
+        )}
 
-          {/* Filters */}
-          <div className="schedule-filters">
-            <div className="filter-group">
-              <label>Filter by Event:</label>
-              <select 
-                value={filterEvent} 
-                onChange={(e) => setFilterEvent(e.target.value)}
-              >
-                <option value="">All Events</option>
-                {events.map(event => (
-                  <option key={event.id} value={event.id}>{event.name}</option>
-                ))}
-              </select>
+        <div className="dashboard-main">
+          <div className="bracket-content">
+            {/* Filters Section */}
+            <div className="bracket-filters-section">
+              <h3>Filter Schedules</h3>
+              <div className="bracket-filters">
+                <div className="filter-group">
+                  <label htmlFor="filterEvent">Event:</label>
+                  <select
+                    id="filterEvent"
+                    value={filterEvent}
+                    onChange={(e) => setFilterEvent(e.target.value)}
+                  >
+                    <option value="">All Events</option>
+                    {events.map(ev => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label htmlFor="filterDate">Date:</label>
+                  <input
+                    type="date"
+                    id="filterDate"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                  />
+                </div>
+
+                <button className="clear-filters-btn" onClick={handleClearFilters}>
+                  Clear Filters
+                </button>
+              </div>
             </div>
 
-            <div className="filter-group">
-              <label>Filter by Date:</label>
-              <input 
-                type="date" 
-                value={filterDate} 
-                onChange={(e) => setFilterDate(e.target.value)}
-              />
-            </div>
-
-            <div className="filter-group">
-              <label>Search:</label>
-              <input 
-                type="text" 
-                placeholder="Search teams, venue, or round..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <button className="clear-filters-btn" onClick={handleClearFilters}>
-              Clear Filters
-            </button>
-          </div>
-
-          {/* Schedule Grid */}
-          <div className="schedule-view-section">
-            {activeTab === "all" ? (
-              <>
-                <h2>All Tournament Schedules</h2>
-                {getFilteredSchedules(schedules).length === 0 ? (
-                  <div className="schedule-no-schedules">
-                    <p>No schedules found matching your filters.</p>
-                  </div>
-                ) : (
-                  <div className="schedule-grid">
-                    {getFilteredSchedules(schedules).map((schedule) => (
-                      <div key={schedule.id} className="schedule-card">
-                        <div className="schedule-card-header">
-                          <h3>{schedule.teamA} vs {schedule.teamB}</h3>
-                          <div className="schedule-status">
-                            {getStatusBadge(schedule.date, schedule.time)}
-                          </div>
-                        </div>
-                        
-                        <div className="schedule-card-info">
-                          <div className="info-row">
-                            <strong>Event:</strong> {schedule.eventName}
-                          </div>
-                          <div className="info-row">
-                            <strong>Bracket:</strong> {schedule.bracketName}
-                          </div>
-                          <div className="info-row">
-                            <strong>Round:</strong> {schedule.round}
-                          </div>
-                          <div className="info-row">
-                            <strong>Date:</strong> {formatDate(schedule.date)}
-                          </div>
-                          <div className="info-row">
-                            <strong>Time:</strong> {formatTime(schedule.time)}
-                          </div>
-                          <div className="info-row">
-                            <strong>Venue:</strong> {schedule.venue}
-                          </div>
-                          {schedule.description && (
-                            <div className="info-row description">
-                              <strong>Description:</strong> {schedule.description}
-                            </div>
-                          )}
-                        </div>
-
-                        {schedule.assignedStaff.includes(currentUser?.id) && (
-                          <div className="assignment-badge">
-                            <span>✓ You are assigned to this game</span>
+            {/* View Schedules */}
+            <div className="bracket-view-section">
+              <h2>All Schedules</h2>
+              {filteredSchedules.length === 0 ? (
+                <div className="bracket-no-brackets">
+                  <p>No schedules found.</p>
+                </div>
+              ) : (
+                <div className="bracket-grid">
+                  {filteredSchedules.map((schedule) => (
+                    <div key={schedule.id} className="bracket-card schedule-card">
+                      <div className="bracket-card-header">
+                        <h3>
+                          {schedule.team1_name && schedule.team2_name 
+                            ? `${schedule.team1_name} vs ${schedule.team2_name}`
+                            : "Match Details TBD"
+                          }
+                        </h3>
+                        <span className={`bracket-sport-badge bracket-sport-${schedule.sport_type || "default"}`}>
+                          {schedule.sport_type ? capitalize(schedule.sport_type) : "Unknown"}
+                        </span>
+                      </div>
+                      <div className="bracket-card-info">
+                        <div><strong>Event:</strong> {schedule.event_name || "Unknown"}</div>
+                        <div><strong>Bracket:</strong> {schedule.bracket_name || "Unknown"}</div>
+                        {schedule.round_number && (
+                          <div><strong>Round:</strong> {formatRoundDisplay(schedule)}</div>
+                        )}
+                        <div><strong>Date & Time:</strong> {formatScheduleDateTime(schedule.date, schedule.time)}</div>
+                        <div><strong>Venue:</strong> {schedule.venue}</div>
+                        {schedule.description && (
+                          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
+                            <strong>Notes:</strong> {schedule.description}
                           </div>
                         )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <h2>My Assigned Games</h2>
-                {getFilteredSchedules(mySchedules).length === 0 ? (
-                  <div className="schedule-no-schedules">
-                    <p>No assigned games found matching your filters.</p>
-                  </div>
-                ) : (
-                  <div className="schedule-grid">
-                    {getFilteredSchedules(mySchedules).map((schedule) => (
-                      <div key={schedule.id} className="schedule-card assigned-card">
-                        <div className="schedule-card-header">
-                          <h3>{schedule.teamA} vs {schedule.teamB}</h3>
-                          <div className="schedule-status">
-                            {getStatusBadge(schedule.date, schedule.time)}
-                          </div>
-                        </div>
-                        
-                        <div className="schedule-card-info">
-                          <div className="info-row">
-                            <strong>Event:</strong> {schedule.eventName}
-                          </div>
-                          <div className="info-row">
-                            <strong>Bracket:</strong> {schedule.bracketName}
-                          </div>
-                          <div className="info-row">
-                            <strong>Round:</strong> {schedule.round}
-                          </div>
-                          <div className="info-row">
-                            <strong>Date:</strong> {formatDate(schedule.date)}
-                          </div>
-                          <div className="info-row">
-                            <strong>Time:</strong> {formatTime(schedule.time)}
-                          </div>
-                          <div className="info-row">
-                            <strong>Venue:</strong> {schedule.venue}
-                          </div>
-                          {schedule.description && (
-                            <div className="info-row description">
-                              <strong>Description:</strong> {schedule.description}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="assignment-actions">
-                          {isUpcoming(schedule.date, schedule.time) ? (
-                            <div className="upcoming-game-info">
-                              <span>🕐 Prepare for this game</span>
-                            </div>
-                          ) : (
-                            <div className="completed-game-info">
-                              <span>✅ Game completed</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
