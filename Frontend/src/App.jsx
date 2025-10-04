@@ -22,6 +22,7 @@ import StaffBrackets from "./pages/Staff/Staff_Brackets";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import EventDetails from "./pages/Admin/Admin_EventDetails";
+import ResetPassword from "./components/ResetPassword";
 
 import UserTeamsPage from "./pages/Users/User_TeamPage";
 import UserStatsPage from "./pages/Users/User_StatsPage";
@@ -41,6 +42,7 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Homepage />} />
           <Route path="/Register&Login" element={<RegisterAndLoginPage />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/teams" element={<UserTeamsPage />} />
           <Route path="/stats" element={<UserStatsPage />} />
