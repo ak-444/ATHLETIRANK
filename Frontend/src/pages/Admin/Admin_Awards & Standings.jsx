@@ -3,200 +3,106 @@ import { FaTrophy, FaMedal, FaStar, FaCrown, FaDownload, FaSearch } from "react-
 import "../../style/Admin_Awards & Standing.css";
 
 const AdminAwardsStandings = ({ sidebarOpen }) => {
-  const [activeTab, setActiveTab] = useState("standings");
+  const [activeTab, setActiveTab] = useState("tournaments");
   const [events, setEvents] = useState([]);
+  const [brackets, setBrackets] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedBracket, setSelectedBracket] = useState(null);
   const [standings, setStandings] = useState([]);
   const [mvpData, setMvpData] = useState(null);
-  const [awards, setAwards] = useState([]);
+  const [awards, setAwards] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [contentTab, setContentTab] = useState("standings");
 
-  // Mock data - replace with actual API calls
-  useEffect(() => {
-    // Mock events data
-    setEvents([
-      { id: 1, name: "Inter-School Basketball Championship", sport: "basketball", status: "completed", start_date: "2023-10-01", end_date: "2023-10-15" },
-      { id: 2, name: "Volleyball Tournament 2023", sport: "volleyball", status: "completed", start_date: "2023-11-01", end_date: "2023-11-10" },
-      { id: 3, name: "Summer Sports Festival", sport: "basketball", status: "ongoing", start_date: "2023-12-01", end_date: "2023-12-20" }
-    ]);
-  }, []);
-
-  // Handle event selection
-  const handleEventSelect = (event) => {
-    setSelectedEvent(event);
-    setLoading(true);
-    
-    // Mock standings data
-    setTimeout(() => {
-      if (event.sport === "basketball") {
-        setStandings([
-          { 
-            position: 1, 
-            team: "Phoenix Warriors", 
-            wins: 8, 
-            losses: 1, 
-            points_for: 720, 
-            points_against: 650, 
-            point_diff: "+70",
-            win_percentage: "88.9%"
-          },
-          { 
-            position: 2, 
-            team: "Thunder Hawks", 
-            wins: 7, 
-            losses: 2, 
-            points_for: 680, 
-            points_against: 640, 
-            point_diff: "+40",
-            win_percentage: "77.8%"
-          },
-          { 
-            position: 3, 
-            team: "Storm Eagles", 
-            wins: 6, 
-            losses: 3, 
-            points_for: 645, 
-            points_against: 620, 
-            point_diff: "+25",
-            win_percentage: "66.7%"
-          },
-          { 
-            position: 4, 
-            team: "Fire Dragons", 
-            wins: 5, 
-            losses: 4, 
-            points_for: 590, 
-            points_against: 595, 
-            point_diff: "-5",
-            win_percentage: "55.6%"
-          },
-          { 
-            position: 5, 
-            team: "Ice Wolves", 
-            wins: 3, 
-            losses: 6, 
-            points_for: 540, 
-            points_against: 580, 
-            point_diff: "-40",
-            win_percentage: "33.3%"
-          },
-          { 
-            position: 6, 
-            team: "Lightning Bolts", 
-            wins: 2, 
-            losses: 7, 
-            points_for: 510, 
-            points_against: 630, 
-            point_diff: "-120",
-            win_percentage: "22.2%"
-          }
-        ]);
-
-        // Mock MVP data
-        setMvpData({
-          player_name: "Marcus Johnson",
-          team: "Phoenix Warriors",
-          jersey_number: 23,
-          games_played: 9,
-          points_per_game: 28.5,
-          assists_per_game: 8.2,
-          rebounds_per_game: 12.1,
-          steals_per_game: 2.8,
-          blocks_per_game: 1.5,
-          field_goal_percentage: 58.2,
-          three_point_percentage: 42.1,
-          free_throw_percentage: 87.5,
-          total_points: 257,
-          total_assists: 74,
-          total_rebounds: 109
-        });
-
-        // Mock awards data
-        setAwards([
-          { category: "Most Valuable Player", winner: "Marcus Johnson", team: "Phoenix Warriors", stat: "28.5 PPG" },
-          { category: "Best Shooter", winner: "Sarah Chen", team: "Thunder Hawks", stat: "47.3% 3PT" },
-          { category: "Best Defender", winner: "Alex Rodriguez", team: "Storm Eagles", stat: "3.2 STL/G" },
-          { category: "Best Rookie", winner: "Jordan Smith", team: "Fire Dragons", stat: "18.5 PPG" },
-          { category: "Team Captain Award", winner: "Elena Vasquez", team: "Phoenix Warriors", stat: "Leadership" },
-          { category: "Sportsmanship Award", winner: "David Kim", team: "Ice Wolves", stat: "Fair Play" }
-        ]);
-      } else {
-        // Volleyball standings
-        setStandings([
-          { 
-            position: 1, 
-            team: "Spike Masters", 
-            wins: 12, 
-            losses: 2, 
-            sets_for: 38, 
-            sets_against: 15, 
-            set_ratio: "2.53",
-            win_percentage: "85.7%"
-          },
-          { 
-            position: 2, 
-            team: "Net Crushers", 
-            wins: 10, 
-            losses: 4, 
-            sets_for: 35, 
-            sets_against: 22, 
-            set_ratio: "1.59",
-            win_percentage: "71.4%"
-          },
-          { 
-            position: 3, 
-            team: "Block Busters", 
-            wins: 8, 
-            losses: 6, 
-            sets_for: 32, 
-            sets_against: 28, 
-            set_ratio: "1.14",
-            win_percentage: "57.1%"
-          }
-        ]);
-
-        setMvpData({
-          player_name: "Isabella Martinez",
-          team: "Spike Masters",
-          jersey_number: 7,
-          games_played: 14,
-          kills_per_game: 18.2,
-          assists_per_game: 4.8,
-          digs_per_game: 12.5,
-          blocks_per_game: 2.1,
-          aces_per_game: 3.2,
-          hitting_percentage: 0.421,
-          service_percentage: 92.8,
-          total_kills: 255,
-          total_assists: 67,
-          total_digs: 175
-        });
-
-        setAwards([
-          { category: "Most Valuable Player", winner: "Isabella Martinez", team: "Spike Masters", stat: "18.2 K/G" },
-          { category: "Best Setter", winner: "Anna Thompson", team: "Net Crushers", stat: "12.8 AST/G" },
-          { category: "Best Libero", winner: "Maria Santos", team: "Block Busters", stat: "15.5 DIG/G" },
-          { category: "Best Server", winner: "Jessica Liu", team: "Spike Masters", stat: "4.2 ACE/G" },
-          { category: "Best Rookie", winner: "Sophie Brown", team: "Net Crushers", stat: "12.1 K/G" }
-        ]);
-      }
-      setLoading(false);
-    }, 1000);
+  // Safe number formatter
+  const safeNumber = (value, decimals = 1) => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : Number(num.toFixed(decimals));
   };
 
-  // Filter standings based on search
+  useEffect(() => {
+    fetchCompletedEvents();
+  }, []);
+
+  const fetchCompletedEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/awards/events/completed");
+      const data = await res.json();
+      setEvents(data);
+    } catch (err) {
+      setError("Failed to load completed events");
+      console.error("Error fetching events:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEventSelect = async (event) => {
+    setSelectedEvent(event);
+    setSelectedBracket(null);
+    setStandings([]);
+    setMvpData(null);
+    setAwards(null);
+    setActiveTab("brackets");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/awards/events/${event.id}/completed-brackets`);
+      const data = await res.json();
+      setBrackets(data);
+      
+      if (data.length === 0) {
+        setError("No completed brackets found for this event.");
+      }
+    } catch (err) {
+      setError("Failed to load brackets: " + err.message);
+      console.error("Error loading brackets:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBracketSelect = async (bracket) => {
+    setSelectedBracket(bracket);
+    setActiveTab("results");
+    setContentTab("standings");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const standingsRes = await fetch(`http://localhost:5000/api/awards/brackets/${bracket.id}/standings`);
+      const standingsData = await standingsRes.json();
+      setStandings(standingsData.standings || []);
+
+      const awardsRes = await fetch(`http://localhost:5000/api/awards/brackets/${bracket.id}/mvp-awards`);
+      const awardsData = await awardsRes.json();
+      
+      console.log("Awards data received:", awardsData);
+      
+      setMvpData(awardsData.awards?.mvp || null);
+      setAwards(awardsData.awards || null);
+    } catch (err) {
+      setError("Failed to load awards data: " + err.message);
+      console.error("Error loading awards:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredStandings = standings.filter(team =>
     team.team.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Export standings to CSV
   const exportStandings = () => {
-    if (standings.length === 0) return;
+    if (standings.length === 0 || !selectedBracket) return;
     
     let csvContent = "data:text/csv;charset=utf-8,";
     
-    if (selectedEvent?.sport === "basketball") {
+    if (selectedBracket.sport_type === "basketball") {
       csvContent += "Position,Team,Wins,Losses,Points For,Points Against,Point Diff,Win%\n";
       standings.forEach(team => {
         csvContent += `${team.position},${team.team},${team.wins},${team.losses},${team.points_for},${team.points_against},${team.point_diff},${team.win_percentage}\n`;
@@ -211,10 +117,102 @@ const AdminAwardsStandings = ({ sidebarOpen }) => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${selectedEvent?.name}_standings.csv`);
+    link.setAttribute("download", `${selectedEvent?.name}_${selectedBracket?.name}_standings.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const getAwardsForDisplay = () => {
+    if (!awards || !selectedBracket) return [];
+    
+    const awardsArray = [];
+    
+    if (selectedBracket.sport_type === "basketball") {
+      if (awards.mvp) {
+        awardsArray.push({
+          category: "Most Valuable Player",
+          winner: awards.mvp.player_name || 'Unknown',
+          team: awards.mvp.team_name || 'Unknown',
+          stat: `${safeNumber(awards.mvp.ppg)} PPG`
+        });
+      }
+      if (awards.best_playmaker) {
+        awardsArray.push({
+          category: "Best Playmaker",
+          winner: awards.best_playmaker.player_name || 'Unknown',
+          team: awards.best_playmaker.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_playmaker.apg)} APG`
+        });
+      }
+      if (awards.best_defender) {
+        awardsArray.push({
+          category: "Best Defender",
+          winner: awards.best_defender.player_name || 'Unknown',
+          team: awards.best_defender.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_defender.spg)} SPG`
+        });
+      }
+      if (awards.best_rebounder) {
+        awardsArray.push({
+          category: "Best Rebounder",
+          winner: awards.best_rebounder.player_name || 'Unknown',
+          team: awards.best_rebounder.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_rebounder.rpg)} RPG`
+        });
+      }
+      if (awards.best_blocker) {
+        awardsArray.push({
+          category: "Best Blocker",
+          winner: awards.best_blocker.player_name || 'Unknown',
+          team: awards.best_blocker.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_blocker.bpg)} BPG`
+        });
+      }
+    } else {
+      if (awards.mvp) {
+        awardsArray.push({
+          category: "Most Valuable Player",
+          winner: awards.mvp.player_name || 'Unknown',
+          team: awards.mvp.team_name || 'Unknown',
+          stat: `${safeNumber(awards.mvp.kpg)} K/G`
+        });
+      }
+      if (awards.best_blocker) {
+        awardsArray.push({
+          category: "Best Blocker",
+          winner: awards.best_blocker.player_name || 'Unknown',
+          team: awards.best_blocker.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_blocker.bpg)} BPG, ${safeNumber(awards.best_blocker.hitting_percentage)}% Hit`
+        });
+      }
+      if (awards.best_setter) {
+        awardsArray.push({
+          category: "Best Setter",
+          winner: awards.best_setter.player_name || 'Unknown',
+          team: awards.best_setter.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_setter.apg)} A/G`
+        });
+      }
+      if (awards.best_libero) {
+        awardsArray.push({
+          category: "Best Libero",
+          winner: awards.best_libero.player_name || 'Unknown',
+          team: awards.best_libero.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_libero.dpg)} D/G, ${safeNumber(awards.best_libero.reception_percentage)}% Rec`
+        });
+      }
+      if (awards.best_server) {
+        awardsArray.push({
+          category: "Best Server",
+          winner: awards.best_server.player_name || 'Unknown',
+          team: awards.best_server.team_name || 'Unknown',
+          stat: `${safeNumber(awards.best_server.acepg)} ACE/G, ${safeNumber(awards.best_server.service_percentage)}% Srv`
+        });
+      }
+    }
+    
+    return awardsArray.filter(a => a.winner && a.winner !== 'Unknown');
   };
 
   return (
@@ -226,82 +224,144 @@ const AdminAwardsStandings = ({ sidebarOpen }) => {
         </div>
 
         <div className="dashboard-main">
-          <div className="awards_standings_content">
-            {/* Event Selection */}
-            {!selectedEvent && (
-              <div className="awards_standings_event_selection">
-                <h2>Select Tournament Event</h2>
-                <div className="awards_standings_event_grid">
-                  {events.map(event => (
-                    <div 
-                      key={event.id} 
-                      className="awards_standings_event_card"
-                      onClick={() => handleEventSelect(event)}
-                    >
-                      <div className="awards_standings_event_header">
-                        <h3>{event.name}</h3>
-                        <span className={`awards_standings_sport_badge awards_standings_sport_${event.sport}`}>
-                          {event.sport.charAt(0).toUpperCase() + event.sport.slice(1)}
-                        </span>
-                      </div>
-                      <div className="awards_standings_event_info">
-                        <div><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</div>
-                        <div><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</div>
-                        <div><strong>Status:</strong> 
-                          <span className={`awards_standings_status ${event.status}`}>
-                            {event.status}
+          <div className="bracket-content">
+            <div className="bracket-tabs">
+              <button
+                className={`bracket-tab-button ${activeTab === "tournaments" ? "bracket-tab-active" : ""}`}
+                onClick={() => setActiveTab("tournaments")}
+              >
+                Select Tournament
+              </button>
+              {selectedEvent && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "brackets" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("brackets")}
+                >
+                  {selectedEvent.name} - Brackets
+                </button>
+              )}
+              {selectedBracket && (
+                <button
+                  className={`bracket-tab-button ${activeTab === "results" ? "bracket-tab-active" : ""}`}
+                  onClick={() => setActiveTab("results")}
+                >
+                  {selectedBracket.name} - Results
+                </button>
+              )}
+            </div>
+
+            {activeTab === "tournaments" && (
+              <div className="bracket-view-section">
+                <h2>Select Completed Tournament</h2>
+                {loading ? (
+                  <div className="awards_standings_loading">
+                    <div className="awards_standings_spinner"></div>
+                    <p>Loading tournaments...</p>
+                  </div>
+                ) : events.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No completed tournaments found. Complete a tournament first to view awards and standings.</p>
+                  </div>
+                ) : (
+                  <div className="bracket-grid">
+                    {events.map(event => (
+                      <div 
+                        key={event.id} 
+                        className="bracket-card"
+                        onClick={() => handleEventSelect(event)}
+                      >
+                        <div className="bracket-card-header">
+                          <h3>{event.name}</h3>
+                          <span className={`bracket-sport-badge ${event.sport === 'volleyball' ? 'bracket-sport-volleyball' : 'bracket-sport-basketball'}`}>
+                            {event.sport || 'MULTI-SPORT'}
                           </span>
                         </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Start:</strong> {new Date(event.start_date).toLocaleDateString()}</div>
+                          <div><strong>End:</strong> {new Date(event.end_date).toLocaleDateString()}</div>
+                          <div><strong>Status:</strong> 
+                            <span className="status-completed">COMPLETED</span>
+                          </div>
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button className="bracket-view-btn">View Brackets</button>
+                        </div>
                       </div>
-                      <div className="awards_standings_event_actions">
-                        <button className="awards_standings_view_btn">
-                          View Results
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Main Content */}
-            {selectedEvent && (
-              <>
-                {/* Event Header */}
-                <div className="awards_standings_selected_event">
-                  <div className="awards_standings_event_title">
-                    <h2>{selectedEvent.name}</h2>
-                    <button 
-                      className="awards_standings_back_btn"
-                      onClick={() => {setSelectedEvent(null); setStandings([]); setMvpData(null); setAwards([]);}}
-                    >
-                      ← Back to Events
-                    </button>
+            {activeTab === "brackets" && selectedEvent && (
+              <div className="bracket-view-section">
+                <h2>Select Bracket - {selectedEvent.name}</h2>
+                {loading ? (
+                  <div className="awards_standings_loading">
+                    <div className="awards_standings_spinner"></div>
+                    <p>Loading brackets...</p>
                   </div>
-                  <div className="awards_standings_event_details">
-                    <span><strong>Sport:</strong> {selectedEvent.sport}</span>
-                    <span><strong>Status:</strong> {selectedEvent.status}</span>
-                    <span><strong>Duration:</strong> {new Date(selectedEvent.start_date).toLocaleDateString()} - {new Date(selectedEvent.end_date).toLocaleDateString()}</span>
+                ) : error ? (
+                  <div className="bracket-error"><p>{error}</p></div>
+                ) : brackets.length === 0 ? (
+                  <div className="bracket-no-brackets">
+                    <p>No completed brackets found for this event.</p>
+                  </div>
+                ) : (
+                  <div className="bracket-grid">
+                    {brackets.map(bracket => (
+                      <div 
+                        key={bracket.id} 
+                        className="bracket-card"
+                        onClick={() => handleBracketSelect(bracket)}
+                      >
+                        <div className="bracket-card-header">
+                          <h3>{bracket.name}</h3>
+                          <span className={`bracket-sport-badge bracket-sport-${bracket.sport_type}`}>
+                            {bracket.sport_type}
+                          </span>
+                        </div>
+                        <div className="bracket-card-info">
+                          <div><strong>Champion:</strong> {bracket.winner_team_name}</div>
+                          <div><strong>Type:</strong> {bracket.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}</div>
+                        </div>
+                        <div className="bracket-card-actions">
+                          <button className="bracket-view-btn">View Results</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "results" && selectedEvent && selectedBracket && (
+              <div className="bracket-visualization-section">
+                <div className="event-details-header">
+                  <h2>{selectedEvent.name} - {selectedBracket.name} Results</h2>
+                  <div className="event-details-info">
+                    <span><strong>Sport:</strong> {selectedBracket.sport_type}</span>
+                    <span><strong>Champion:</strong> {selectedBracket.winner_team_name}</span>
+                    <span><strong>Type:</strong> {selectedBracket.elimination_type === 'double' ? 'Double Elimination' : 'Single Elimination'}</span>
                   </div>
                 </div>
 
-                {/* Tabs */}
                 <div className="awards_standings_tabs">
                   <button
-                    className={`awards_standings_tab_button ${activeTab === "standings" ? "awards_standings_tab_active" : ""}`}
-                    onClick={() => setActiveTab("standings")}
+                    className={`awards_standings_tab_button ${contentTab === "standings" ? "awards_standings_tab_active" : ""}`}
+                    onClick={() => setContentTab("standings")}
                   >
                     <FaTrophy /> Team Standings
                   </button>
                   <button
-                    className={`awards_standings_tab_button ${activeTab === "mvp" ? "awards_standings_tab_active" : ""}`}
-                    onClick={() => setActiveTab("mvp")}
+                    className={`awards_standings_tab_button ${contentTab === "mvp" ? "awards_standings_tab_active" : ""}`}
+                    onClick={() => setContentTab("mvp")}
                   >
                     <FaCrown /> Tournament MVP
                   </button>
                   <button
-                    className={`awards_standings_tab_button ${activeTab === "awards" ? "awards_standings_tab_active" : ""}`}
-                    onClick={() => setActiveTab("awards")}
+                    className={`awards_standings_tab_button ${contentTab === "awards" ? "awards_standings_tab_active" : ""}`}
+                    onClick={() => setContentTab("awards")}
                   >
                     <FaMedal /> Awards
                   </button>
@@ -312,10 +372,11 @@ const AdminAwardsStandings = ({ sidebarOpen }) => {
                     <div className="awards_standings_spinner"></div>
                     <p>Loading tournament data...</p>
                   </div>
+                ) : error ? (
+                  <div className="bracket-error"><p>{error}</p></div>
                 ) : (
                   <>
-                    {/* Team Standings Tab */}
-                    {activeTab === "standings" && (
+                    {contentTab === "standings" && (
                       <div className="awards_standings_tab_content">
                         <div className="awards_standings_toolbar">
                           <div className="awards_standings_search_container">
@@ -341,7 +402,7 @@ const AdminAwardsStandings = ({ sidebarOpen }) => {
                                 <th>Team</th>
                                 <th>W</th>
                                 <th>L</th>
-                                {selectedEvent.sport === "basketball" ? (
+                                {selectedBracket.sport_type === "basketball" ? (
                                   <>
                                     <th>PF</th>
                                     <th>PA</th>
@@ -362,7 +423,7 @@ const AdminAwardsStandings = ({ sidebarOpen }) => {
                                 <tr key={index} className={team.position <= 3 ? `awards_standings_podium_${team.position}` : ""}>
                                   <td className="awards_standings_rank">
                                     {team.position <= 3 && (
-                                      <span className={`awards_standings_medal awards_standings_medal_${team.position}`}>
+                                      <span className={`awards_standings_medal`}>
                                         {team.position === 1 ? "🥇" : team.position === 2 ? "🥈" : "🥉"}
                                       </span>
                                     )}
@@ -373,11 +434,11 @@ const AdminAwardsStandings = ({ sidebarOpen }) => {
                                   </td>
                                   <td>{team.wins}</td>
                                   <td>{team.losses}</td>
-                                  {selectedEvent.sport === "basketball" ? (
+                                  {selectedBracket.sport_type === "basketball" ? (
                                     <>
                                       <td>{team.points_for}</td>
                                       <td>{team.points_against}</td>
-                                      <td className={team.point_diff.startsWith('+') ? 'awards_standings_positive' : 'awards_standings_negative'}>
+                                      <td className={String(team.point_diff).startsWith('+') ? 'awards_standings_positive' : String(team.point_diff).startsWith('-') ? 'awards_standings_negative' : ''}>
                                         {team.point_diff}
                                       </td>
                                     </>
@@ -397,189 +458,165 @@ const AdminAwardsStandings = ({ sidebarOpen }) => {
                       </div>
                     )}
 
-                    {/* MVP Tab */}
-                    {activeTab === "mvp" && mvpData && (
+                    {contentTab === "mvp" && (
                       <div className="awards_standings_tab_content">
-                        <div className="awards_standings_mvp_section">
-                          <div className="awards_standings_mvp_header">
-                            <div className="awards_standings_mvp_crown">
-                              <FaCrown />
-                            </div>
-                            <h2>Tournament Most Valuable Player</h2>
+                        {!mvpData ? (
+                          <div className="bracket-no-brackets">
+                            <p>No MVP data available. Make sure player statistics have been recorded for completed matches.</p>
                           </div>
-                          
-                          <div className="awards_standings_mvp_card">
-                            <div className="awards_standings_mvp_info">
-                              <div className="awards_standings_mvp_name_section">
-                                <h3>{mvpData.player_name}</h3>
-                                <span className="awards_standings_mvp_team">{mvpData.team}</span>
-                                <span className="awards_standings_mvp_jersey">#{mvpData.jersey_number}</span>
+                        ) : (
+                          <div className="awards_standings_mvp_section">
+                            <div className="awards_standings_mvp_header">
+                              <div className="awards_standings_mvp_crown">
+                                <FaCrown />
                               </div>
-                              
-                              <div className="awards_standings_mvp_stats_grid">
-                                <div className="awards_standings_stat_card">
-                                  <div className="awards_standings_stat_value">{mvpData.games_played}</div>
-                                  <div className="awards_standings_stat_label">Games Played</div>
+                              <h2>Tournament Most Valuable Player</h2>
+                            </div>
+                            
+                            <div className="awards_standings_mvp_card">
+                              <div className="awards_standings_mvp_info">
+                                <div className="awards_standings_mvp_name_section">
+                                  <h3>{mvpData.player_name || 'Unknown Player'}</h3>
+                                  <span className="awards_standings_mvp_team">{mvpData.team_name || 'Unknown Team'}</span>
+                                  <span className="awards_standings_mvp_jersey">#{mvpData.jersey_number || 'N/A'}</span>
                                 </div>
+                                
+                                <div className="awards_standings_mvp_stats_grid">
+                                  <div className="awards_standings_stat_card">
+                                    <div className="awards_standings_stat_value">{mvpData.games_played || 0}</div>
+                                    <div className="awards_standings_stat_label">Games Played</div>
+                                  </div>
 
-                                {selectedEvent.sport === "basketball" ? (
-                                  <>
-                                    <div className="awards_standings_stat_card awards_standings_highlight">
-                                      <div className="awards_standings_stat_value">{mvpData.points_per_game}</div>
-                                      <div className="awards_standings_stat_label">PPG</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.assists_per_game}</div>
-                                      <div className="awards_standings_stat_label">APG</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.rebounds_per_game}</div>
-                                      <div className="awards_standings_stat_label">RPG</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.steals_per_game}</div>
-                                      <div className="awards_standings_stat_label">SPG</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.blocks_per_game}</div>
-                                      <div className="awards_standings_stat_label">BPG</div>
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="awards_standings_stat_card awards_standings_highlight">
-                                      <div className="awards_standings_stat_value">{mvpData.kills_per_game}</div>
-                                      <div className="awards_standings_stat_label">K/G</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.assists_per_game}</div>
-                                      <div className="awards_standings_stat_label">A/G</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.digs_per_game}</div>
-                                      <div className="awards_standings_stat_label">D/G</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.blocks_per_game}</div>
-                                      <div className="awards_standings_stat_label">B/G</div>
-                                    </div>
-                                    <div className="awards_standings_stat_card">
-                                      <div className="awards_standings_stat_value">{mvpData.aces_per_game}</div>
-                                      <div className="awards_standings_stat_label">Ace/G</div>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-
-                              {/* Shooting/Hitting Percentages */}
-                              <div className="awards_standings_percentage_section">
-                                <h4>Performance Percentages</h4>
-                                <div className="awards_standings_percentage_grid">
-                                  {selectedEvent.sport === "basketball" ? (
+                                  {selectedBracket.sport_type === "basketball" ? (
                                     <>
-                                      <div className="awards_standings_percentage_card">
-                                        <div className="awards_standings_percentage_bar">
-                                          <div 
-                                            className="awards_standings_percentage_fill"
-                                            style={{ width: `${mvpData.field_goal_percentage}%` }}
-                                          ></div>
-                                        </div>
-                                        <div className="awards_standings_percentage_label">
-                                          <span>Field Goal %</span>
-                                          <strong>{mvpData.field_goal_percentage}%</strong>
-                                        </div>
+                                      <div className="awards_standings_stat_card awards_standings_highlight">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.ppg)}</div>
+                                        <div className="awards_standings_stat_label">PPG</div>
                                       </div>
-                                      <div className="awards_standings_percentage_card">
-                                        <div className="awards_standings_percentage_bar">
-                                          <div 
-                                            className="awards_standings_percentage_fill"
-                                            style={{ width: `${mvpData.three_point_percentage}%` }}
-                                          ></div>
-                                        </div>
-                                        <div className="awards_standings_percentage_label">
-                                          <span>3-Point %</span>
-                                          <strong>{mvpData.three_point_percentage}%</strong>
-                                        </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.apg)}</div>
+                                        <div className="awards_standings_stat_label">APG</div>
                                       </div>
-                                      <div className="awards_standings_percentage_card">
-                                        <div className="awards_standings_percentage_bar">
-                                          <div 
-                                            className="awards_standings_percentage_fill"
-                                            style={{ width: `${mvpData.free_throw_percentage}%` }}
-                                          ></div>
-                                        </div>
-                                        <div className="awards_standings_percentage_label">
-                                          <span>Free Throw %</span>
-                                          <strong>{mvpData.free_throw_percentage}%</strong>
-                                        </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.rpg)}</div>
+                                        <div className="awards_standings_stat_label">RPG</div>
+                                      </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.spg)}</div>
+                                        <div className="awards_standings_stat_label">SPG</div>
+                                      </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.bpg)}</div>
+                                        <div className="awards_standings_stat_label">BPG</div>
+                                      </div>
+                                      <div className="awards_standings_stat_card awards_standings_highlight">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.mvp_score, 2)}</div>
+                                        <div className="awards_standings_stat_label">MVP Score</div>
                                       </div>
                                     </>
                                   ) : (
                                     <>
-                                      <div className="awards_standings_percentage_card">
-                                        <div className="awards_standings_percentage_bar">
-                                          <div 
-                                            className="awards_standings_percentage_fill"
-                                            style={{ width: `${(mvpData.hitting_percentage * 100)}%` }}
-                                          ></div>
-                                        </div>
-                                        <div className="awards_standings_percentage_label">
-                                          <span>Hitting %</span>
-                                          <strong>{(mvpData.hitting_percentage * 100).toFixed(1)}%</strong>
-                                        </div>
+                                      <div className="awards_standings_stat_card awards_standings_highlight">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.kpg)}</div>
+                                        <div className="awards_standings_stat_label">K/G</div>
                                       </div>
-                                      <div className="awards_standings_percentage_card">
-                                        <div className="awards_standings_percentage_bar">
-                                          <div 
-                                            className="awards_standings_percentage_fill"
-                                            style={{ width: `${mvpData.service_percentage}%` }}
-                                          ></div>
-                                        </div>
-                                        <div className="awards_standings_percentage_label">
-                                          <span>Service %</span>
-                                          <strong>{mvpData.service_percentage}%</strong>
-                                        </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.apg)}</div>
+                                        <div className="awards_standings_stat_label">A/G</div>
+                                      </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.dpg)}</div>
+                                        <div className="awards_standings_stat_label">D/G</div>
+                                      </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.bpg)}</div>
+                                        <div className="awards_standings_stat_label">B/G</div>
+                                      </div>
+                                      <div className="awards_standings_stat_card">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.acepg)}</div>
+                                        <div className="awards_standings_stat_label">Ace/G</div>
+                                      </div>
+                                      <div className="awards_standings_stat_card awards_standings_highlight">
+                                        <div className="awards_standings_stat_value">{safeNumber(mvpData.mvp_score, 2)}</div>
+                                        <div className="awards_standings_stat_label">MVP Score</div>
                                       </div>
                                     </>
                                   )}
                                 </div>
+
+                                {selectedBracket.sport_type === "volleyball" && (
+                                  <div className="awards_standings_percentage_section">
+                                    <h4>Performance Percentages</h4>
+                                    <div className="awards_standings_percentage_grid">
+                                      <div className="awards_standings_percentage_card">
+                                        <div className="awards_standings_percentage_bar">
+                                          <div 
+                                            className="awards_standings_percentage_fill"
+                                            style={{ width: `${Math.min(Math.max(mvpData.hitting_percentage || 0, 0), 100)}%` }}
+                                          ></div>
+                                        </div>
+                                        <div className="awards_standings_percentage_label">
+                                          <span>Hitting %</span>
+                                          <strong>{safeNumber(mvpData.hitting_percentage)}%</strong>
+                                        </div>
+                                      </div>
+                                      <div className="awards_standings_percentage_card">
+                                        <div className="awards_standings_percentage_bar">
+                                          <div 
+                                            className="awards_standings_percentage_fill"
+                                            style={{ width: `${Math.min(Math.max(mvpData.service_percentage || 0, 0), 100)}%` }}
+                                          ></div>
+                                        </div>
+                                        <div className="awards_standings_percentage_label">
+                                          <span>Service %</span>
+                                          <strong>{safeNumber(mvpData.service_percentage)}%</strong>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
 
-                    {/* Awards Tab */}
-                    {activeTab === "awards" && (
+                    {contentTab === "awards" && (
                       <div className="awards_standings_tab_content">
-                        <div className="awards_standings_awards_section">
-                          <h2>Tournament Awards</h2>
-                          <div className="awards_standings_awards_grid">
-                            {awards.map((award, index) => (
-                              <div key={index} className="awards_standings_award_card">
-                                <div className="awards_standings_award_icon">
-                                  {index === 0 ? <FaCrown /> : <FaStar />}
-                                </div>
-                                <div className="awards_standings_award_content">
-                                  <h4>{award.category}</h4>
-                                  <div className="awards_standings_award_winner">
-                                    <strong>{award.winner}</strong>
-                                    <span>{award.team}</span>
-                                  </div>
-                                  <div className="awards_standings_award_stat">
-                                    {award.stat}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                        {!awards || getAwardsForDisplay().length === 0 ? (
+                          <div className="bracket-no-brackets">
+                            <p>No awards data available. Make sure player statistics have been recorded for completed matches.</p>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="awards_standings_awards_section">
+                            <h2>Tournament Awards</h2>
+                            <div className="awards_standings_awards_grid">
+                              {getAwardsForDisplay().map((award, index) => (
+                                <div key={index} className="awards_standings_award_card">
+                                  <div className="awards_standings_award_icon">
+                                    {index === 0 ? <FaCrown /> : <FaStar />}
+                                  </div>
+                                  <div className="awards_standings_award_content">
+                                    <h4>{award.category}</h4>
+                                    <div className="awards_standings_award_winner">
+                                      <strong>{award.winner}</strong>
+                                      <span>{award.team}</span>
+                                    </div>
+                                    <div className="awards_standings_award_stat">
+                                      {award.stat}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>

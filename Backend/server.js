@@ -16,6 +16,7 @@ const bracketTeamRoutes = require('./routes/bracketTeams');
 const statsRouter = require("./routes/stats");
 const scheduleRoutes = require('./routes/schedule');
 const matchesRoutes = require('./routes/matches'); // Add this
+const awardsRoutes = require('./routes/awards');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -41,6 +42,7 @@ app.use('/api/bracketTeams', bracketTeamRoutes);
 app.use("/api/stats", statsRouter);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/matches', matchesRoutes); // Add this
+app.use('/api/awards', awardsRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

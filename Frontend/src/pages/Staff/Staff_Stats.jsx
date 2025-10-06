@@ -58,6 +58,29 @@ const StaffStats = ({ sidebarOpen }) => {
     volleyball_assists: [0, 0, 0, 0, 0],
   };
 
+  // Calculate hitting percentage for volleyball
+  const calculateHittingPercentage = (player) => {
+    const kills = player.kills ? player.kills.reduce((a, b) => a + b, 0) : 0;
+    const attempts = player.attack_attempts ? player.attack_attempts.reduce((a, b) => a + b, 0) : 0;
+    const errors = player.attack_errors ? player.attack_errors.reduce((a, b) => a + b, 0) : 0;
+    
+    if (attempts === 0) return "0.00%";
+    return (((kills - errors) / attempts) * 100).toFixed(2) + "%";
+  };
+
+  // Calculate basketball percentage (rebounds/assists) - max 100%
+  const calculateBasketballPercentage = (stat, maxValue = 10) => {
+    const total = stat ? stat.reduce((a, b) => a + b, 0) : 0;
+    const percentage = Math.min((total / maxValue) * 100, 100);
+    return percentage.toFixed(1) + "%";
+  };
+
+  // Check if player is fouled out (5 or more fouls)
+  const isPlayerFouledOut = (player) => {
+    const totalFouls = player.fouls ? player.fouls.reduce((a, b) => a + b, 0) : 0;
+    return totalFouls >= 5;
+  };
+
   // Updated groupGamesByRound function with Reset Final support
   const groupGamesByRound = (games) => {
     const grouped = {};
@@ -600,16 +623,6 @@ const StaffStats = ({ sidebarOpen }) => {
     }
   };
 
-  // Calculate hitting percentage for volleyball
-  const calculateHittingPercentage = (player) => {
-    const kills = player.kills ? player.kills.reduce((a, b) => a + b, 0) : 0;
-    const attempts = player.attack_attempts ? player.attack_attempts.reduce((a, b) => a + b, 0) : 0;
-    const errors = player.attack_errors ? player.attack_errors.reduce((a, b) => a + b, 0) : 0;
-    
-    if (attempts === 0) return "0.00%";
-    return (((kills - errors) / attempts) * 100).toFixed(2) + "%";
-  };
-
   // Save statistics - UPDATED: Handle bracket reset notifications
   const saveStatistics = async () => {
     if (!selectedGame) return;
@@ -1060,6 +1073,28 @@ const StaffStats = ({ sidebarOpen }) => {
                 {player.points.reduce((a, b) => a + b, 0)}
               </div>
             </div>
+
+            {/* New Basketball Percentage Stats */}
+            <div className="stat-group percentage-stats">
+              <label>Reb%</label>
+              <div className="percentage-display">
+                {calculateBasketballPercentage(player.rebounds, 20)}
+              </div>
+            </div>
+
+            <div className="stat-group percentage-stats">
+              <label>Ast%</label>
+              <div className="percentage-display">
+                {calculateBasketballPercentage(player.assists, 15)}
+              </div>
+            </div>
+
+            {/* Fouled Out Indicator */}
+            {isPlayerFouledOut(player) && (
+              <div className="stat-group fouled-out-indicator">
+                <div className="fouled-out-display">Fouled Out</div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="stats-grid volleyball-stats">
@@ -1090,10 +1125,17 @@ const StaffStats = ({ sidebarOpen }) => {
               </div>
             ))}
             
-            <div className="stat-group total-stats">
+            <div className="stat-group percentage-stats">
               <label>Hit%</label>
-              <div className="total-display">
+              <div className="percentage-display">
                 {calculateHittingPercentage(player)}
+              </div>
+            </div>
+
+            <div className="stat-group total-stats">
+              <label>Total Kills</label>
+              <div className="total-display">
+                {player.kills ? player.kills.reduce((a, b) => a + b, 0) : 0}
               </div>
             </div>
           </div>
@@ -1475,11 +1517,14 @@ const StaffStats = ({ sidebarOpen }) => {
                             return (
                               <div
                                 key={player.player_id}
-                                className="bracket-card player-card"
+                                className={`bracket-card player-card ${isPlayerFouledOut(player) ? 'fouled-out-player' : ''}`}
                               >
                                 <div className="bracket-card-header">
                                   <h4>{player.player_name}</h4>
                                   <span className="player-jersey">#{player.jersey_number}</span>
+                                  {isPlayerFouledOut(player) && (
+                                    <span className="fouled-out-badge">Fouled Out</span>
+                                  )}
                                 </div>
                                 <div className="bracket-card-info">
                                   {renderStatInputs(player, globalIndex)}
@@ -1503,11 +1548,14 @@ const StaffStats = ({ sidebarOpen }) => {
                             return (
                               <div
                                 key={player.player_id}
-                                className="bracket-card player-card"
+                                className={`bracket-card player-card ${isPlayerFouledOut(player) ? 'fouled-out-player' : ''}`}
                               >
                                 <div className="bracket-card-header">
                                   <h4>{player.player_name}</h4>
                                   <span className="player-jersey">#{player.jersey_number}</span>
+                                  {isPlayerFouledOut(player) && (
+                                    <span className="fouled-out-badge">Fouled Out</span>
+                                  )}
                                 </div>
                                 <div className="bracket-card-info">
                                   {renderStatInputs(player, globalIndex)}

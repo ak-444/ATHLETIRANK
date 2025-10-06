@@ -1,7 +1,28 @@
-/* Admin Awards & Standings Page CSS */
+/* Admin Awards & Standings Page CSS - Matching Admin Events Design */
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --background-primary: #0a0f1c;
+  --background-secondary: #1a2332;
+  --background-card: #0f172a;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #2d3748;
+  --border-focus: #3b82f6;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* Main content wrapper */
-.awards_standings_content {
+.bracket-content {
   background: var(--background-card);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
@@ -9,176 +30,223 @@
   overflow: hidden;
 }
 
-/* Event Selection */
-.awards_standings_event_selection {
+/* Main Tabs */
+.bracket-tabs {
+  display: flex;
+  background: var(--background-primary);
+  border-bottom: 2px solid var(--border-color);
+  padding: 0 20px;
+}
+
+.bracket-tab-button {
+  background: transparent;
+  border: none;
+  padding: 15px 30px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  font-size: 16px;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+}
+
+.bracket-tab-button:hover {
+  color: var(--text-primary);
+}
+
+.bracket-tab-active {
+  color: var(--primary-color) !important;
+  border-bottom-color: var(--primary-color) !important;
+  font-weight: 600;
+}
+
+/* View Section */
+.bracket-view-section {
   padding: 40px;
 }
 
-.awards_standings_event_selection h2 {
+.bracket-view-section h2 {
   margin-bottom: 30px;
   color: var(--text-primary);
   font-size: 28px;
   font-weight: 700;
-  text-align: center;
+  text-align: left;
 }
 
-.awards_standings_event_grid {
+/* Bracket Grid */
+.bracket-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 24px;
   margin-top: 30px;
 }
 
-.awards_standings_event_card {
+/* Bracket Card */
+.bracket-card {
   background: var(--background-secondary);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
   padding: 24px;
   transition: var(--transition);
   cursor: pointer;
 }
 
-.awards_standings_event_card:hover {
-  border-color: var(--primary-color);
+.bracket-card:hover {
   box-shadow: var(--shadow-medium);
-  transform: translateY(-4px);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
 }
 
-.awards_standings_event_header {
+.bracket-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 16px;
 }
 
-.awards_standings_event_header h3 {
+.bracket-card-header h3 {
   color: var(--text-primary);
   font-size: 20px;
   font-weight: 600;
   margin: 0;
   flex: 1;
+  margin-right: 12px;
 }
 
-.awards_standings_sport_badge {
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
+.bracket-sport-badge {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.8em;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  white-space: nowrap;
 }
 
-.awards_standings_sport_basketball {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+.bracket-sport-basketball {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
   color: white;
 }
 
-.awards_standings_sport_volleyball {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+.bracket-sport-volleyball {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
   color: white;
 }
 
-.awards_standings_event_info {
+.bracket-card-info {
   margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  line-height: 1.6;
 }
 
-.awards_standings_event_info div {
+.bracket-card-info > div {
+  margin-bottom: 8px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 0.95em;
 }
 
-.awards_standings_status {
-  margin-left: 8px;
-  padding: 2px 8px;
+.bracket-card-info strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.status-completed {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  padding: 4px 10px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+  white-space: nowrap;
+  margin-left: 8px;
 }
 
-.awards_standings_status.completed {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
-}
-
-.awards_standings_status.ongoing {
-  background: rgba(249, 115, 22, 0.2);
-  color: #f97316;
-}
-
-.awards_standings_event_actions {
+.bracket-card-actions {
   display: flex;
-  justify-content: flex-end;
+  gap: 12px;
 }
 
-.awards_standings_view_btn {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+.bracket-view-btn {
+  background: var(--primary-color);
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 16px;
   border-radius: var(--border-radius);
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
+  flex: 1;
 }
 
-.awards_standings_view_btn:hover {
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+.bracket-view-btn:hover {
+  background: var(--primary-hover);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-light);
 }
 
-/* Selected Event Header */
-.awards_standings_selected_event {
-  background: var(--background-secondary);
-  border-bottom: 2px solid var(--border-color);
-  padding: 24px 40px;
+/* No Brackets State */
+.bracket-no-brackets {
+  text-align: center;
+  padding: 60px 40px;
+  color: var(--text-muted);
 }
 
-.awards_standings_event_title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+.bracket-no-brackets p {
+  margin-bottom: 20px;
+  font-size: 16px;
 }
 
-.awards_standings_event_title h2 {
+/* Error State */
+.bracket-error {
+  text-align: center;
+  padding: 40px;
+  color: var(--error-color);
+}
+
+/* Results Section */
+.bracket-visualization-section {
+  padding: 0;
+}
+
+/* Event Details Header */
+.event-details-header {
+  text-align: center;
+  margin-bottom: 0;
+  padding: 30px 40px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.event-details-header h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
   color: var(--text-primary);
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
 }
 
-.awards_standings_back_btn {
-  background: var(--background-primary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  padding: 8px 16px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: var(--transition);
-  font-size: 14px;
-}
-
-.awards_standings_back_btn:hover {
-  background: var(--border-color);
-  color: var(--text-primary);
-}
-
-.awards_standings_event_details {
+.event-details-info {
   display: flex;
-  gap: 32px;
+  justify-content: center;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
-.awards_standings_event_details span {
-  color: var(--text-secondary);
+.event-details-info span {
+  background: var(--background-secondary);
+  padding: 8px 16px;
+  border-radius: 20px;
   font-size: 14px;
+  color: var(--text-secondary);
 }
 
-/* Tabs */
+.event-details-info strong {
+  color: var(--text-primary);
+  margin-right: 5px;
+}
+
+/* Content Tabs */
 .awards_standings_tabs {
   display: flex;
   background: var(--background-primary);
@@ -188,11 +256,11 @@
 .awards_standings_tab_button {
   background: transparent;
   border: none;
-  padding: 16px 24px;
-  color: var(--text-secondary);
+  padding: 15px 30px;
+  color: var(--text-muted);
   cursor: pointer;
   transition: var(--transition);
-  font-weight: 600;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -201,14 +269,13 @@
 }
 
 .awards_standings_tab_button:hover {
-  background: rgba(59, 130, 246, 0.1);
   color: var(--text-primary);
 }
 
 .awards_standings_tab_active {
-  background: rgba(59, 130, 246, 0.15) !important;
   color: var(--primary-color) !important;
   border-bottom-color: var(--primary-color) !important;
+  font-weight: 600;
 }
 
 /* Tab Content */
@@ -255,19 +322,18 @@
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
-  min-width: 300px;
+  width: 250px;
 }
 
 .awards_standings_search_input {
-  padding: 12px 16px 12px 40px;
+  width: 100%;
+  padding: 10px 15px 10px 40px;
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  font-size: 16px;
+  font-size: 14px;
   background-color: var(--background-secondary);
   color: var(--text-primary);
   transition: var(--transition);
-  width: 100%;
 }
 
 .awards_standings_search_input:focus {
@@ -276,31 +342,39 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.awards_standings_search_input::placeholder {
+  color: var(--text-muted);
+}
+
 .awards_standings_search_icon {
   position: absolute;
   left: 12px;
   color: var(--text-muted);
   z-index: 1;
+  width: 16px;
+  height: 16px;
 }
 
 .awards_standings_export_btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
   display: flex;
   align-items: center;
   gap: 8px;
+  background: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
   white-space: nowrap;
 }
 
 .awards_standings_export_btn:hover {
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  background: #059669;
   transform: translateY(-2px);
+  box-shadow: var(--shadow-light);
 }
 
 /* Standings Table */
@@ -319,24 +393,25 @@
 .awards_standings_table th {
   background: var(--background-primary);
   color: var(--text-primary);
-  font-weight: 700;
+  font-weight: 600;
   text-align: left;
-  padding: 16px;
-  border-bottom: 2px solid var(--border-color);
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
 }
 
 .awards_standings_table td {
-  padding: 16px;
+  padding: 12px 15px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 16px;
 }
 
-.awards_standings_table tr:hover {
-  background: rgba(59, 130, 246, 0.05);
+.awards_standings_table tr:last-child td {
+  border-bottom: none;
+}
+
+.awards_standings_table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .awards_standings_podium_1 {
@@ -643,10 +718,29 @@
   font-size: 14px;
 }
 
+/* Scrollbar */
+.awards_standings_table_container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.awards_standings_table_container::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.awards_standings_table_container::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.awards_standings_table_container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .awards_standings_event_grid {
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  .bracket-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   }
   
   .awards_standings_mvp_stats_grid {
@@ -655,23 +749,39 @@
 }
 
 @media (max-width: 768px) {
+  .bracket-view-section {
+    padding: 20px;
+  }
+  
   .awards_standings_tab_content {
     padding: 20px;
   }
   
-  .awards_standings_selected_event {
+  .event-details-header {
     padding: 20px;
   }
   
-  .awards_standings_event_title {
+  .event-details-info {
     flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+    align-items: center;
+    gap: 10px;
   }
   
-  .awards_standings_event_details {
+  .bracket-tabs {
     flex-direction: column;
-    gap: 8px;
+    padding: 0;
+  }
+  
+  .bracket-tab-button {
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    border-right: none;
+    padding: 12px 20px;
+  }
+  
+  .bracket-tab-button.bracket-tab-active {
+    border-bottom-color: var(--border-color);
+    border-left: 4px solid var(--primary-color);
   }
   
   .awards_standings_toolbar {
@@ -680,7 +790,7 @@
   }
   
   .awards_standings_search_container {
-    min-width: auto;
+    width: 100%;
   }
   
   .awards_standings_table {
@@ -713,45 +823,37 @@
     grid-template-columns: 1fr;
   }
   
-  .awards_standings_event_grid {
+  .bracket-grid {
     grid-template-columns: 1fr;
   }
-}
-
-@media (max-width: 480px) {
+  
   .awards_standings_tabs {
     flex-direction: column;
   }
   
   .awards_standings_tab_button {
-    justify-content: center;
-    border-bottom: none;
-    border-right: 3px solid transparent;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    border-right: none;
+    padding: 12px 20px;
   }
   
-  .awards_standings_tab_active {
-    border-bottom: none !important;
-    border-right-color: var(--primary-color) !important;
+  .awards_standings_tab_button.awards_standings_tab_active {
+    border-bottom-color: var(--border-color);
+    border-left: 4px solid var(--primary-color);
   }
 }
 
-/* CSS Variables (if not already defined) */
-:root {
-  --primary-color: #3b82f6;
-  --primary-hover: #2563eb;
-  --error-color: #ef4444;
-  --success-color: #22c55e;
-  --background-primary: #0a0f1c;
-  --background-secondary: #1a2332;
-  --background-card: #0f172a;
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --border-color: #2d3748;
-  --border-focus: #3b82f6;
-  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.2);
-  --border-radius: 8px;
-  --border-radius-lg: 12px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+@media (max-width: 480px) {
+  .bracket-view-section h2 {
+    font-size: 22px;
+  }
+  
+  .bracket-card {
+    padding: 20px;
+  }
+  
+  .awards_standings_export_btn span {
+    display: none;
+  }
 }
