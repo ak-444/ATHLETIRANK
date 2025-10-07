@@ -16,14 +16,39 @@ const Register = ({ setCurrentView }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState({
+        hasMinLength: false,
+        hasUppercase: false,
+        hasLowercase: false,
+        hasNumber: false,
+        hasSpecialChar: false
+    });
 
     
     const { register } = useAuth();
 
+    // Validate password strength
+    const validatePasswordStrength = (password) => {
+        return {
+            hasMinLength: password.length >= 8,
+            hasUppercase: /[A-Z]/.test(password),
+            hasLowercase: /[a-z]/.test(password),
+            hasNumber: /[0-9]/.test(password),
+            hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+    };
+
     const handleChange = (e) => {
+        const { name, value } = e.target;
+        
+        // Update password strength indicators when password changes
+        if (name === 'password') {
+            setPasswordStrength(validatePasswordStrength(value));
+        }
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: value
         });
     };
 
@@ -67,9 +92,9 @@ const Register = ({ setCurrentView }) => {
         setSuccess('');
 
         console.log('Submitting form:', {
-        ...formData,
-        universityId: formData.universityId ? formData.universityId.name : 'No file'
-    });
+            ...formData,
+            universityId: formData.universityId ? formData.universityId.name : 'No file'
+        });
 
         // Validation
         if (formData.password !== formData.confirmPassword) {
@@ -77,8 +102,26 @@ const Register = ({ setCurrentView }) => {
             return;
         }
 
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
+        // Strong password validation
+        const strength = validatePasswordStrength(formData.password);
+        if (!strength.hasMinLength) {
+            setError('Password must be at least 8 characters long');
+            return;
+        }
+        if (!strength.hasUppercase) {
+            setError('Password must contain at least one uppercase letter');
+            return;
+        }
+        if (!strength.hasLowercase) {
+            setError('Password must contain at least one lowercase letter');
+            return;
+        }
+        if (!strength.hasNumber) {
+            setError('Password must contain at least one number');
+            return;
+        }
+        if (!strength.hasSpecialChar) {
+            setError('Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)');
             return;
         }
 
@@ -101,6 +144,13 @@ const Register = ({ setCurrentView }) => {
                 confirmPassword: '',
                 role: 'staff',
                 universityId: null
+            });
+            setPasswordStrength({
+                hasMinLength: false,
+                hasUppercase: false,
+                hasLowercase: false,
+                hasNumber: false,
+                hasSpecialChar: false
             });
         } catch (error) {
             setError(error.message);
@@ -197,6 +247,29 @@ const Register = ({ setCurrentView }) => {
                                 onChange={handleChange}
                                 required
                             />
+                            {/* Password Strength Indicators */}
+                            {formData.password && (
+                                <div className="password-requirements">
+                                    <p className="requirements-title">Password must contain:</p>
+                                    <ul className="requirements-list">
+                                        <li className={passwordStrength.hasMinLength ? 'valid' : 'invalid'}>
+                                            {passwordStrength.hasMinLength ? '✓' : '✗'} At least 8 characters
+                                        </li>
+                                        <li className={passwordStrength.hasUppercase ? 'valid' : 'invalid'}>
+                                            {passwordStrength.hasUppercase ? '✓' : '✗'} One uppercase letter
+                                        </li>
+                                        <li className={passwordStrength.hasLowercase ? 'valid' : 'invalid'}>
+                                            {passwordStrength.hasLowercase ? '✓' : '✗'} One lowercase letter
+                                        </li>
+                                        <li className={passwordStrength.hasNumber ? 'valid' : 'invalid'}>
+                                            {passwordStrength.hasNumber ? '✓' : '✗'} One number
+                                        </li>
+                                        <li className={passwordStrength.hasSpecialChar ? 'valid' : 'invalid'}>
+                                            {passwordStrength.hasSpecialChar ? '✓' : '✗'} One special character (!@#$%^&*)
+                                        </li>
+                                    </ul>
+                                </div>
+                            )}
                         </div>
 
                         <div className="form-group">
@@ -263,11 +336,11 @@ const Register = ({ setCurrentView }) => {
                         </button>
                     </form>
                     <Link 
-                    to="/" 
-                    className="back-to-home-btn"
-                >
-                    Back to Home
-                </Link>
+                        to="/" 
+                        className="back-to-home-btn"
+                    >
+                        Back to Home
+                    </Link>
                 </div>
             </div>
         </div>

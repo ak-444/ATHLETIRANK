@@ -28,6 +28,7 @@ import UserTeamsPage from "./pages/Users/User_TeamPage";
 import UserStatsPage from "./pages/Users/User_StatsPage";
 import User_BracketPage from "./pages/Users/User_BracketPage";
 import UserSchedulePage from "./pages/Users/User_Schedule";
+import UserAwardsStandings from "./pages/Users/User_Awards&Standings";
 
 import "./style/app.css";
 
@@ -48,6 +49,8 @@ function App() {
           <Route path="/stats" element={<UserStatsPage />} />
           <Route path="/brackets" element={<User_BracketPage />} />
           <Route path="/schedules" element={<UserSchedulePage />} />
+          <Route path="/awards%standings" element={<UserAwardsStandings />} />
+
 
           {/* Admin protected routes */}
           <Route element={<ProtectedRoute requiredRole="admin" />}>

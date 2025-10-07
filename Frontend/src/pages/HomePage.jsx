@@ -127,6 +127,7 @@ const Homepage = () => {
                         <li><Link to="/stats" className="nav-link" onClick={toggleNav}>Statistics</Link></li>
                         <li><Link to="/teams" className="nav-link" onClick={toggleNav}>Teams</Link></li>
                         <li><Link to="/schedules" className="nav-link" onClick={toggleNav}>Schedules</Link></li>
+                        <li><Link to="/awards%standings" className="nav-link" onClick={toggleNav}>Awards & Standings</Link></li>
                     </ul>
                 </div>
 
