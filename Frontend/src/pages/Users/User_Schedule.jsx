@@ -6,6 +6,7 @@ import { MdSchedule } from "react-icons/md";
 const UserSchedulePage = () => {
   const navigate = useNavigate();
   const [schedules, setSchedules] = useState([]);
+  const [teams, setTeams] = useState([]); // Add teams state
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSport, setSelectedSport] = useState("");
@@ -81,6 +82,20 @@ const UserSchedulePage = () => {
     };
   };
 
+  // Fetch teams data to get win-loss records
+  const fetchTeams = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/user-stats/teams");
+      if (!response.ok) {
+        throw new Error("Failed to fetch teams");
+      }
+      const data = await response.json();
+      setTeams(data);
+    } catch (err) {
+      console.error("Error fetching teams:", err);
+    }
+  };
+
   // Fetch schedules and events on component mount
   useEffect(() => {
     const fetchData = async () => {
@@ -96,6 +111,9 @@ const UserSchedulePage = () => {
         
         setSchedules(schedulesData);
         setEvents(eventsData);
+        
+        // Fetch teams data for win-loss records
+        await fetchTeams();
       } catch (err) {
         console.error("Error fetching data:", err);
       } finally {
@@ -104,6 +122,26 @@ const UserSchedulePage = () => {
     };
     fetchData();
   }, []);
+
+  // Get team record by team name
+  const getTeamRecord = (teamName) => {
+    if (!teamName) return { wins: 0, losses: 0 };
+    
+    const team = teams.find(t => 
+      t.name.toLowerCase() === teamName.toLowerCase()
+    );
+    
+    return {
+      wins: team?.wins || 0,
+      losses: team?.losses || 0
+    };
+  };
+
+  // Format team record for display
+  const formatTeamRecord = (teamName) => {
+    const record = getTeamRecord(teamName);
+    return `(${record.wins} - ${record.losses})`;
+  };
 
   // Filter schedules based on search, sport, and event selection
   const filteredSchedules = schedules.filter(schedule => {
@@ -248,7 +286,9 @@ const UserSchedulePage = () => {
                         <div className="teams-container-new">
                           <div className="team-new">
                             <div className="team-name-new">{schedule.team1_name || "TBD"}</div>
-                            <div className="team-record">(0 - 0)</div>
+                            <div className="team-record">
+                              {formatTeamRecord(schedule.team1_name)}
+                            </div>
                           </div>
                           
                           <div className="vs-section-new">
@@ -257,7 +297,9 @@ const UserSchedulePage = () => {
                           
                           <div className="team-new">
                             <div className="team-name-new">{schedule.team2_name || "TBD"}</div>
-                            <div className="team-record">(0 - 0)</div>
+                            <div className="team-record">
+                              {formatTeamRecord(schedule.team2_name)}
+                            </div>
                           </div>
                         </div>
                         
@@ -290,7 +332,7 @@ const UserSchedulePage = () => {
         </div>
       </div>
 
-      {/* Schedule Detail Modal */}
+      {/* Schedule Detail Modal - Updated with team records */}
       {selectedSchedule && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -311,11 +353,17 @@ const UserSchedulePage = () => {
                 <div className="teams-display">
                   <div className="team-side">
                     <h3>{selectedSchedule.team1_name || "TBD"}</h3>
+                    <div className="team-record-modal">
+                      {formatTeamRecord(selectedSchedule.team1_name)}
+                    </div>
                     <span className="team-label">Team 1</span>
                   </div>
                   <div className="vs-divider">VS</div>
                   <div className="team-side">
                     <h3>{selectedSchedule.team2_name || "TBD"}</h3>
+                    <div className="team-record-modal">
+                      {formatTeamRecord(selectedSchedule.team2_name)}
+                    </div>
                     <span className="team-label">Team 2</span>
                   </div>
                 </div>

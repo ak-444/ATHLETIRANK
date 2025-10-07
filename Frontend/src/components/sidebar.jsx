@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "../style/sidebar.css";
@@ -23,6 +23,13 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
     const handleLogout = () => {
         logout();
         navigate("/");
+    };
+
+    const handleNavClick = () => {
+        // Close sidebar on mobile when any navigation link is clicked
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
     };
 
     const adminMenuItems = [
@@ -188,9 +195,10 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
                                 initial="hidden"
                                 animate="visible"
                             >
-                                <a 
-                                    href={item.path} 
+                                <Link 
+                                    to={item.path} 
                                     className={`sidebar-nav-link ${location.pathname === item.path ? 'active' : ''}`}
+                                    onClick={handleNavClick}
                                 >
                                     <motion.span 
                                         className="sidebar-nav-icon"
@@ -213,7 +221,7 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
                                             </motion.span>
                                         )}
                                     </AnimatePresence>
-                                </a>
+                                </Link>
                             </motion.li>
                         ))}
                     </ul>
@@ -222,7 +230,10 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
                 {/* Footer */}
                 <div className="sidebar-footer">
                     <motion.button 
-                        onClick={handleLogout} 
+                        onClick={() => {
+                            handleLogout();
+                            handleNavClick();
+                        }} 
                         className="sidebar-nav-link logout-link"
                         whileHover={{ x: 2 }}
                         whileTap={{ scale: 0.98 }}

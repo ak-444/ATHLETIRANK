@@ -361,11 +361,11 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+ 
+  
   z-index: 999;
   display: none;
-  animation: fadeIn 0.08s linear;
+  
 }
 
 @keyframes fadeIn {
@@ -385,26 +385,33 @@
     width: 36px;
     height: 36px;
     font-size: 16px;
+    z-index: 1002; /* Increase z-index to be above overlay */
   }
 
   .sidebar-content {
     width: 280px;
     transform: translateX(-100%);
     transition: transform 0.08s linear;
+    z-index: 1001; /* Ensure sidebar is above overlay */
   }
 
   .sidebar-closed {
     width: 280px;
     transform: translateX(-100%);
+    pointer-events: none; /* Prevent clicks when closed */
   }
 
   .sidebar-open {
     width: 280px;
     transform: translateX(0);
+    pointer-events: auto; /* Allow clicks when open */
   }
 
   .sidebar-overlay {
     display: block;
+    background: rgba(0, 0, 0, 0.5); /* Add background color */
+    backdrop-filter: blur(2px); /* Optional: Add blur effect */
+    z-index: 1000;
   }
 
   .sidebar-header {
@@ -415,6 +422,13 @@
     width: 36px;
     height: 36px;
     font-size: 15px;
+  }
+
+  /* Ensure navigation links are clickable */
+  .sidebar-nav-link {
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
   }
 }
 
