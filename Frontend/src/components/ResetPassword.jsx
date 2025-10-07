@@ -101,9 +101,35 @@ const ResetPassword = () => {
 
     if (tokenValid === null) {
         return (
-            <div className="auth-container">
-                <div className="auth-card">
-                    <div className="auth-header">
+            <div className="reset-password-page">
+                <div className="reset-password-container">
+                    <div className="reset-password-card">
+                        <div className="reset-password-header">
+                            <div className="logo">
+                                <img 
+                                    src={universityLogo} 
+                                    alt="Arellano University Logo" 
+                                    className="logo-image"
+                                />
+                            </div>
+                            <h1 className="brand-name">Arellano University</h1>
+                            <p className="brand-subtitle">ATHLETIRANK</p>
+                        </div>
+                        <div className="reset-password-form-container">
+                            <h2 className="reset-password-title">Verifying Reset Link...</h2>
+                            <div className="loading-spinner">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="reset-password-page">
+            <div className="reset-password-container">
+                <div className="reset-password-card">
+                    <div className="reset-password-header">
                         <div className="logo">
                             <img 
                                 src={universityLogo} 
@@ -114,96 +140,74 @@ const ResetPassword = () => {
                         <h1 className="brand-name">Arellano University</h1>
                         <p className="brand-subtitle">ATHLETIRANK</p>
                     </div>
-                    <div className="auth-form-container">
-                        <h2 className="form-title">Verifying Reset Link...</h2>
-                        <div className="loading-spinner">Loading...</div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
-    return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <div className="auth-header">
-                    <div className="logo">
-                        <img 
-                            src={universityLogo} 
-                            alt="Arellano University Logo" 
-                            className="logo-image"
-                        />
-                    </div>
-                    <h1 className="brand-name">Arellano University</h1>
-                    <p className="brand-subtitle">ATHLETIRANK</p>
-                </div>
-
-                <div className="auth-form-container">
-                    <h2 className="form-title">Reset Your Password</h2>
-                    
-                    {message && (
-                        <div className={`message ${message.includes('successfully') ? 'success-message' : 'error-message'}`}>
-                            {message}
-                        </div>
-                    )}
-                    
-                    {tokenValid ? (
-                        <form className="auth-form" onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label className="form-label">New Password:</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    className="form-input"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    placeholder="Enter new password"
-                                    required
-                                    minLength="8"
-                                />
+                    <div className="reset-password-form-container">
+                        <h2 className="reset-password-title">Reset Your Password</h2>
+                        
+                        {message && (
+                            <div className={`message ${message.includes('successfully') ? 'success-message' : 'error-message'}`}>
+                                {message}
                             </div>
+                        )}
+                        
+                        {tokenValid ? (
+                            <form className="reset-password-form" onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label className="form-label">New Password:</label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        className="form-input"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        placeholder="Enter new password"
+                                        required
+                                        minLength="8"
+                                    />
+                                </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Confirm Password:</label>
-                                <input
-                                    type="password"
-                                    name="confirmPassword"
-                                    className="form-input"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    placeholder="Confirm new password"
-                                    required
-                                    minLength="8"
-                                />
+                                <div className="form-group">
+                                    <label className="form-label">Confirm Password:</label>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        className="form-input"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        placeholder="Confirm new password"
+                                        required
+                                        minLength="8"
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="reset-password-btn"
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Resetting Password...' : 'Reset Password'}
+                                </button>
+                            </form>
+                        ) : (
+                            <div className="error-message">
+                                <p>This reset link is invalid or has expired.</p>
+                                <button 
+                                    onClick={() => navigate('/Register&Login')}
+                                    className="reset-password-btn"
+                                    style={{ marginTop: '1rem' }}
+                                >
+                                    Back to Login
+                                </button>
                             </div>
-
-                            <button
-                                type="submit"
-                                className="submit-btn"
-                                disabled={loading}
-                            >
-                                {loading ? 'Resetting Password...' : 'Reset Password'}
-                            </button>
-                        </form>
-                    ) : (
-                        <div className="error-message">
-                            <p>This reset link is invalid or has expired.</p>
-                            <button 
-                                onClick={() => navigate('/Register&Login')}
-                                className="submit-btn"
-                                style={{ marginTop: '1rem' }}
-                            >
-                                Back to Login
-                            </button>
-                        </div>
-                    )}
-                    
-                    <button 
-                        onClick={() => navigate('/Register&Login')}
-                        className="back-to-home-btn"
-                    >
-                        Back to Login
-                    </button>
+                        )}
+                        
+                        <button 
+                            onClick={() => navigate('/Register&Login')}
+                            className="back-to-home-btn"
+                        >
+                            Back to Login
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
