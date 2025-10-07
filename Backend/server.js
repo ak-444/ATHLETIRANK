@@ -17,6 +17,7 @@ const statsRouter = require("./routes/stats");
 const scheduleRoutes = require('./routes/schedule');
 const matchesRoutes = require('./routes/matches'); // Add this
 const awardsRoutes = require('./routes/awards');
+const statsUsersRoutes = require('./routes/stats_users');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,6 +44,7 @@ app.use("/api/stats", statsRouter);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/matches', matchesRoutes); // Add this
 app.use('/api/awards', awardsRoutes);
+app.use('/api', statsUsersRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {
@@ -69,6 +71,7 @@ app.listen(PORT, () => {
     console.log(`👥 Admin routes available at: http://localhost:${PORT}/api/admin/`);
     console.log(`🏀 Teams routes available at: http://localhost:${PORT}/api/teams/`);
     console.log(`👤 Players routes available at: http://localhost:${PORT}/api/players/`);
+    console.log(`📈 User Stats routes available at: http://localhost:${PORT}/api/teams/stats`);
 });
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
