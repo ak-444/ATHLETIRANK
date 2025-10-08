@@ -214,16 +214,7 @@ const UserSchedulePage = () => {
             />
           </div>
           <div className="filter-section">
-            <select
-              value={selectedEvent}
-              onChange={(e) => setSelectedEvent(e.target.value)}
-              className="event-filter"
-            >
-              <option value="">All Events</option>
-              {events.map(event => (
-                <option key={event.id} value={event.id}>{event.name}</option>
-              ))}
-            </select>
+          
             <select
               value={selectedSport}
               onChange={(e) => setSelectedSport(e.target.value)}

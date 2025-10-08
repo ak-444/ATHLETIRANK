@@ -687,3 +687,19 @@
     flex: 0 0 280px;
   }
 }
+
+/* Plain text VS on mobile */
+@media (max-width: 768px) {
+  .double-bracket .vs-text,
+  .enhanced-bracket-wrapper .vs-text,
+  .double-bracket .bye-text,
+  .enhanced-bracket-wrapper .bye-text {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 0.9em !important;
+    font-weight: 500 !important;
+  }
+}
