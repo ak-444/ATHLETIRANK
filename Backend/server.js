@@ -54,6 +54,15 @@ app.get('/api/test', (req, res) => {
     });
 });
 
+// Health check route for Railway
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Global error handler:', error);
@@ -63,15 +72,17 @@ app.use((error, req, res, next) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📊 Test your API at: http://localhost:${PORT}/api/test`);
-    console.log(`📁 Uploads accessible at: http://localhost:${PORT}/uploads/`);
-    console.log(`👥 Admin routes available at: http://localhost:${PORT}/api/admin/`);
-    console.log(`🏀 Teams routes available at: http://localhost:${PORT}/api/teams/`);
-    console.log(`👤 Players routes available at: http://localhost:${PORT}/api/players/`);
-    console.log(`📈 User Stats routes available at: http://localhost:${PORT}/api/teams/stats`);
+// Start server - FIXED FOR RAILWAY
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
+app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📊 Test your API at: http://${HOST}:${PORT}/api/test`);
+    console.log(`❤️ Health check at: http://${HOST}:${PORT}/health`);
+    console.log(`👥 Admin routes available at: http://${HOST}:${PORT}/api/admin/`);
+    console.log(`🏀 Teams routes available at: http://${HOST}:${PORT}/api/teams/`);
+    console.log(`👤 Players routes available at: http://${HOST}:${PORT}/api/players/`);
 });
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
