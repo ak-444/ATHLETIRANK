@@ -2,7 +2,6 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 const multer = require('multer');
 const path = require('path');
 const { pool } = require('../config/database');
@@ -13,22 +12,24 @@ const { storage, cloudinary } = require('../config/cloudinary');
 const router = express.Router();
 
 // ===== EMAIL CONFIGURATION =====
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    }
-});
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Verify email configuration on startup
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log('❌ Email configuration error:', error);
-    } else {
-        console.log('✅ Email server is ready to send messages');
+async function sendEmail({ to, subject, html }) {
+    try {
+        const data = await resend.emails.send({
+            from: 'AthletiRank <noreply@athletirank.com>',
+            to,
+            subject,
+            html,
+        });
+        console.log(`✅ Email sent via Resend to ${to}`);
+        return data;
+    } catch (error) {
+        console.error('❌ Resend email error:', error);
+        throw error;
     }
-});
+}
 
 // ===== FILE UPLOAD CONFIGURATION (CLOUDINARY) =====
 const upload = multer({ 
@@ -347,9 +348,8 @@ router.post('/forgot-password', async (req, res) => {
         // Create reset URL
         const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
 
-        // Email template
-        const mailOptions = {
-            from: `"Arellano University ATHLETIRANK" <${process.env.EMAIL_USER}>`,
+        // Send email using Resend
+        await sendEmail({
             to: user.email,
             subject: 'Password Reset Request - Arellano University ATHLETIRANK',
             html: `
@@ -406,10 +406,7 @@ router.post('/forgot-password', async (req, res) => {
                 </body>
                 </html>
             `
-        };
-
-        // Send email
-        await transporter.sendMail(mailOptions);
+        });
 
         console.log('✅ Password reset email sent to:', user.email);
 
@@ -592,10 +589,9 @@ router.post('/reset-password', async (req, res) => {
 
         console.log('✅ User verification passed:', verifyUsers[0].email);
 
-        // Send confirmation email
+        // Send confirmation email using Resend
         try {
-            await transporter.sendMail({
-                from: `"Arellano University ATHLETIRANK" <${process.env.EMAIL_USER}>`,
+            await sendEmail({
                 to: user.email,
                 subject: 'Password Changed Successfully',
                 html: `
@@ -668,8 +664,7 @@ router.get('/test', async (req, res) => {
             database: 'Connected',
             userCount: result[0].userCount,
             jwtSecret: process.env.JWT_SECRET ? '✅ Configured' : '❌ Missing',
-            emailService: process.env.EMAIL_USER ? '✅ Configured' : '❌ Missing',
-            emailPassword: process.env.EMAIL_PASSWORD ? '✅ Configured' : '❌ Missing',
+            resendApiKey: process.env.RESEND_API_KEY ? '✅ Configured' : '❌ Missing',
             cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Missing',
             frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
             timestamp: new Date().toISOString()
