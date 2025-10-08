@@ -30,7 +30,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Test database connection
-testConnection();
+//testConnection();
 
 // API Routes
 app.use('/api/auth', authRoutes);
