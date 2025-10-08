@@ -5,8 +5,10 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const { pool } = require('../config/database');
+
+// ===== IMPORT CLOUDINARY STORAGE =====
+const { storage, cloudinary } = require('../config/cloudinary');
 
 const router = express.Router();
 
@@ -28,25 +30,10 @@ transporter.verify(function (error, success) {
     }
 });
 
-// ===== FILE UPLOAD CONFIGURATION =====
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('Created uploads directory:', uploadsDir);
-}
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadsDir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-
+// ===== FILE UPLOAD CONFIGURATION (CLOUDINARY) =====
 const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
+    storage: storage, // Uses Cloudinary storage from config/cloudinary.js
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png/;
         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -60,19 +47,33 @@ const upload = multer({
     }
 });
 
-// ===== REGISTER ROUTE =====
+// ===== REGISTER ROUTE (CLOUDINARY VERSION) =====
 router.post('/register', upload.single('universityId'), async (req, res) => {
     try {
         console.log('Registration request received:', {
             body: req.body,
-            file: req.file ? { filename: req.file.filename, size: req.file.size } : 'No file'
+            file: req.file ? { 
+                filename: req.file.filename, 
+                size: req.file.size,
+                cloudinaryUrl: req.file.path // Cloudinary URL
+            } : 'No file'
         });
 
         const { username, email, password, role } = req.body;
-        const universityIdImage = req.file ? req.file.filename : null;
+        
+        // File is now stored in Cloudinary, req.file.path contains the URL
+        const universityIdImage = req.file ? req.file.path : null;
 
         // Validation
         if (!username || !email || !password || !role) {
+            // Delete uploaded image from Cloudinary if validation fails
+            if (req.file && req.file.public_id) {
+                try {
+                    await cloudinary.uploader.destroy(req.file.public_id);
+                } catch (err) {
+                    console.error('Error deleting image from Cloudinary:', err);
+                }
+            }
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -87,6 +88,14 @@ router.post('/register', upload.single('universityId'), async (req, res) => {
         );
 
         if (existingUsers.length > 0) {
+            // Delete uploaded image from Cloudinary if user exists
+            if (req.file && req.file.public_id) {
+                try {
+                    await cloudinary.uploader.destroy(req.file.public_id);
+                } catch (err) {
+                    console.error('Error deleting image from Cloudinary:', err);
+                }
+            }
             return res.status(400).json({ message: 'User already exists' });
         }
 
@@ -107,7 +116,7 @@ router.post('/register', upload.single('universityId'), async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // Insert new user
+        // Insert new user with Cloudinary URL
         const [result] = await pool.execute(
             'INSERT INTO users (username, email, password, role, university_id_image, is_approved) VALUES (?, ?, ?, ?, ?, ?)',
             [username, email, hashedPassword, role, universityIdImage, isApproved]
@@ -116,6 +125,9 @@ router.post('/register', upload.single('universityId'), async (req, res) => {
         const message = isApproved 
             ? 'Admin account created and auto-approved! You can login now.'
             : 'User registered successfully. Pending admin approval.';
+
+        console.log('✅ User registered successfully:', username);
+        console.log('☁️ University ID stored in Cloudinary:', universityIdImage);
 
         res.status(201).json({ 
             message,
@@ -126,11 +138,13 @@ router.post('/register', upload.single('universityId'), async (req, res) => {
     } catch (error) {
         console.error('Registration error:', error);
         
-        if (req.file) {
+        // Delete uploaded image from Cloudinary on error
+        if (req.file && req.file.public_id) {
             try {
-                fs.unlinkSync(req.file.path);
-            } catch (unlinkError) {
-                console.error('Error cleaning up file:', unlinkError);
+                await cloudinary.uploader.destroy(req.file.public_id);
+                console.log('🗑️ Cleaned up Cloudinary image after error');
+            } catch (cleanupError) {
+                console.error('Error cleaning up Cloudinary image:', cleanupError);
             }
         }
         
@@ -259,6 +273,27 @@ router.post('/login', async (req, res) => {
             message: 'Authentication failed',
             errorCode: 'SERVER_ERROR'
         });
+    }
+});
+
+// ===== GET USER ID IMAGE (CLOUDINARY URL) =====
+router.get('/user/:userId/id-image', async (req, res) => {
+    try {
+        const [users] = await pool.execute(
+            'SELECT university_id_image FROM users WHERE id = ?',
+            [req.params.userId]
+        );
+
+        if (users.length === 0 || !users[0].university_id_image) {
+            return res.status(404).json({ message: 'Image not found' });
+        }
+
+        // Redirect to Cloudinary URL
+        console.log('📸 Serving image from Cloudinary:', users[0].university_id_image);
+        res.redirect(users[0].university_id_image);
+    } catch (error) {
+        console.error('Error fetching user ID image:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
@@ -440,9 +475,6 @@ router.get('/verify-reset-token', async (req, res) => {
     }
 });
 
-// ===== RESET PASSWORD =====
-// ===== RESET PASSWORD =====
-// ===== FORGOT PASSWORD - REQUEST RESET =====
 // ===== RESET PASSWORD =====
 router.post('/reset-password', async (req, res) => {
     let connection;
@@ -626,8 +658,6 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-
-
 // ===== TEST ROUTE =====
 router.get('/test', async (req, res) => {
     try {
@@ -640,6 +670,7 @@ router.get('/test', async (req, res) => {
             jwtSecret: process.env.JWT_SECRET ? '✅ Configured' : '❌ Missing',
             emailService: process.env.EMAIL_USER ? '✅ Configured' : '❌ Missing',
             emailPassword: process.env.EMAIL_PASSWORD ? '✅ Configured' : '❌ Missing',
+            cloudinary: process.env.CLOUDINARY_CLOUD_NAME ? '✅ Configured' : '❌ Missing',
             frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
             timestamp: new Date().toISOString()
         });

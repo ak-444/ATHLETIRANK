@@ -27,7 +27,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Test database connection
 //testConnection();
