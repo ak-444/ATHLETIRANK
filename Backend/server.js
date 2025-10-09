@@ -46,11 +46,21 @@ app.use('/api/matches', matchesRoutes); // Add this
 app.use('/api/awards', awardsRoutes);
 app.use('/api', statsUsersRoutes);
 
+app.use((error, req, res, next) => {
 // Test route
 app.get('/api/test', (req, res) => {
     res.json({ 
         message: 'Backend server is running!',
         timestamp: new Date().toISOString()
+    });
+});
+
+// Health check route - ADD THIS
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
     });
 });
 
