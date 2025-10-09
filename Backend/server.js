@@ -64,15 +64,19 @@ app.use((error, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+// Start server
+const server = app.listen(PORT, '0.0.0.0', () => {
+    const address = server.address();
+    console.log(`🚀 Server running on http://0.0.0.0:${address.port}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'production'}`);
-    console.log(`📊 Test your API at: http://0.0.0.0:${PORT}/api/test`);
-    console.log(`❤️ Health check at: http://0.0.0.0:${PORT}/health`);
-    console.log(`👥 Admin routes available at: http://0.0.0.0:${PORT}/api/admin/`);
-    console.log(`🏀 Teams routes available at: http://0.0.0.0:${PORT}/api/teams/`);
-    console.log(`👤 Players routes available at: http://0.0.0.0:${PORT}/api/players/`);
+    console.log(`📊 PORT from env: ${process.env.PORT}`);
+    console.log(`📊 Test your API at: http://0.0.0.0:${address.port}/api/test`);
+    console.log(`❤️ Health check at: http://0.0.0.0:${address.port}/health`);
+    console.log(`👥 Admin routes available at: http://0.0.0.0:${address.port}/api/admin/`);
+    console.log(`🏀 Teams routes available at: http://0.0.0.0:${address.port}/api/teams/`);
+    console.log(`👤 Players routes available at: http://0.0.0.0:${address.port}/api/players/`);
 });
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
 console.log('DB_HOST:', process.env.DB_HOST);
+console.log('Attempting to bind to PORT:', PORT);
