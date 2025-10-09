@@ -27,7 +27,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve uploaded files statically
-//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Test database connection
 //testConnection();
@@ -54,15 +54,6 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-// Health check route for Railway
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
-    });
-});
-
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error('Global error handler:', error);
@@ -72,17 +63,15 @@ app.use((error, req, res, next) => {
     });
 });
 
-// Start server - FIXED FOR RAILWAY
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
-
-app.listen(PORT, HOST, () => {
-    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📊 Test your API at: http://${HOST}:${PORT}/api/test`);
-    console.log(`❤️ Health check at: http://${HOST}:${PORT}/health`);
-    console.log(`👥 Admin routes available at: http://${HOST}:${PORT}/api/admin/`);
-    console.log(`🏀 Teams routes available at: http://${HOST}:${PORT}/api/teams/`);
-    console.log(`👤 Players routes available at: http://${HOST}:${PORT}/api/players/`);
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'production'}`);
+    console.log(`📊 Test your API at: http://0.0.0.0:${PORT}/api/test`);
+    console.log(`❤️ Health check at: http://0.0.0.0:${PORT}/health`);
+    console.log(`👥 Admin routes available at: http://0.0.0.0:${PORT}/api/admin/`);
+    console.log(`🏀 Teams routes available at: http://0.0.0.0:${PORT}/api/teams/`);
+    console.log(`👤 Players routes available at: http://0.0.0.0:${PORT}/api/players/`);
 });
 
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
